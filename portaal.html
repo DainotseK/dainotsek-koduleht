@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DainotseK Portaal - Ametlik Koduleht</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-blue: #4a90e2;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #f4f4f4;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        header h1 {
+            font-size: 4rem;
+            color: #fff;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        nav {
+            background: #222;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--main-blue);
+        }
+
+        .brand-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 30px;
+            border: 1px solid #333;
+            max-width: 500px; /* Piirame kaardi laiust alamlehel */
+            margin: 40px auto; /* Tsentreerime kaardi */
+        }
+
+        .brand-card h2 {
+            font-size: 1.8rem;
+            color: var(--main-blue);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .brand-card .description {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .brand-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        
+        .brand-card ul li {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--main-blue);
+            color: #fff;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #357abd;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #aaa;
+            border-top: 1px solid #333;
+            margin-top: auto;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>DainotseK</h1>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="index.html">Avaleht</a>
+            <a href="videos.html">Videos</a>
+            <a href="music.html">Music</a>
+            <a href="finance.html">Finance</a>
+            <a href="portaal.html" class="active">Portaal</a>
+            <a href="tulevik.html">Tulevik</a>
+            <a href="kontakt.html">Kontakt</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="brand-card">
+            <h2>DainotseK Portaal</h2>
+            <div class="description">
+                <p>Kogukonnapõhine ostu-müügi kuulutusteportaal Eestis. Sellel lehel saad tulevikus kirjeldada portaali reegleid, lisada linke kategooriatesse ja selgitada, kuidas kuulutusi lisada.</p>
+                <ul>
+                    <li>Autode ost-müük</li>
+                    <li>Kinnisvara (majad, korterid, maa)</li>
+                    <li>Muude asjade turg</li>
+                </ul>
+                <p><strong>Eesmärk:</strong> Anda firmadele ja eraisikutele võimalus lisada kuulutusi.</p>
+            </div>
+            <a href="#" class="btn">Sisene Portaali</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 DainotseK. Kõik õigused kaitstud.</p>
+    </footer>
+
+</body>
+</html>
