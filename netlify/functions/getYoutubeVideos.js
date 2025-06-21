@@ -11,34 +11,60 @@ function parseDuration(duration) {
 exports.handler = async function(event, context) {
     const API_KEY = process.env.YOUTUBE_API_KEY;
     const CHANNEL_ID = 'UCFiwaH41voe3jXqAZ2aqP1A';
-    const MIN_DURATION_SECONDS = 90; // 1 minut ja 30 sekundit
+    const MIN_DURATION_SECONDS = 90;
 
-    const SEARCH_URL = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=id&order=date&maxResults=20&type=video`;
+    // Päringute URL-id
+    const LATEST_VIDEOS_URL = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=id&order=date&maxResults=15&type=video`;
+    const POPULAR_VIDEO_URL = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=id&order=viewCount&maxResults=1&type=video`;
 
     try {
-        // SAMM 1: Leia viimaste videote ID-d
-        const searchResponse = await fetch(SEARCH_URL);
-        if (!searchResponse.ok) throw new Error('Youtube API error');
-        const searchData = await searchResponse.json();
+        // SAMM 1: Tee mõlemad otsingud (viimased ja popim) korraga
+        const [latestSearchResponse, popularSearchResponse] = await Promise.all([
+            fetch(LATEST_VIDEOS_URL),
+            fetch(POPULAR_VIDEO_URL)
+        ]);
+        if (!latestSearchResponse.ok || !popularSearchResponse.ok) throw new Error('Youtube API error');
+        
+        const latestSearchData = await latestSearchResponse.json();
+        const popularSearchData = await popularSearchResponse.json();
 
-        const videoIds = searchData.items.map(item => item.id.videoId).join(',');
-        if (!videoIds) return { statusCode: 200, body: JSON.stringify([]) };
+        // Kogu kokku kõik unikaalsed video ID-d
+        const videoIds = new Set();
+        latestSearchData.items.forEach(item => videoIds.add(item.id.videoId));
+        popularSearchData.items.forEach(item => videoIds.add(item.id.videoId));
+        
+        const uniqueVideoIds = Array.from(videoIds).join(',');
+        if (!uniqueVideoIds) return { statusCode: 200, body: JSON.stringify({ latestVideos: [], popularVideo: null }) };
 
-        // SAMM 2: Küsi leitud videote detailsed andmed (sh pikkus)
-        const DETAILS_URL = `https://www.googleapis.com/youtube/v3/videos?key=${API_KEY}&id=${videoIds}&part=snippet,contentDetails`;
+        // SAMM 2: Küsi kõikide leitud videote detailsed andmed (sh pikkus)
+        const DETAILS_URL = `https://www.googleapis.com/youtube/v3/videos?key=${API_KEY}&id=${uniqueVideoIds}&part=snippet,contentDetails,statistics`;
         const detailsResponse = await fetch(DETAILS_URL);
         if (!detailsResponse.ok) throw new Error('YouTube videos API error');
         const detailsData = await detailsResponse.json();
 
         // SAMM 3: Filtreeri videod pikkuse järgi
-        const filteredVideos = detailsData.items.filter(video => {
+        const fullLengthVideos = detailsData.items.filter(video => {
             const durationInSeconds = parseDuration(video.contentDetails.duration);
             return durationInSeconds >= MIN_DURATION_SECONDS;
         });
 
+        // Sorteeri videod uuesti kuupäeva järgi, et saada kätte kõige uuemad
+        fullLengthVideos.sort((a, b) => new Date(b.snippet.publishedAt) - new Date(a.snippet.publishedAt));
+        
+        // Leia kõige populaarsem video filtreeritud tulemuste seast
+        let mostPopularVideo = null;
+        if (fullLengthVideos.length > 0) {
+            mostPopularVideo = fullLengthVideos.reduce((prev, current) => {
+                return (parseInt(prev.statistics.viewCount) > parseInt(current.statistics.viewCount)) ? prev : current
+            });
+        }
+        
         return {
             statusCode: 200,
-            body: JSON.stringify(filteredVideos) // Saadame ainult filtreeritud videod
+            body: JSON.stringify({
+                latestVideos: fullLengthVideos,
+                popularVideo: mostPopularVideo
+            })
         };
     } catch (error) {
         console.error('Error in Netlify function:', error);
