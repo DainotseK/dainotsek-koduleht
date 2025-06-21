@@ -1,255 +1,45 @@
 <!DOCTYPE html>
-<html lang="et">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DainotseK - Ametlik Koduleht</title>
+    <title>DainotseK - Official Website</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --main-blue: #4a90e2; /* Sinu soovitud sinine toon */
-            --dark-bg: #121212;   /* Tausta jaoks peaaegu must */
-            --card-bg: #1e1e1e;   /* Plokkide taustavärv */
-            --text-color: #f4f4f4; /* Valge tekst */
-        }
-
-        html {
-            scroll-behavior: smooth;
-            scroll-padding-top: 80px; /* Väldib sisu jäämist naviriba alla */
-        }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--dark-bg);
-            color: var(--text-color);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        header h1 {
-            font-size: 4rem;
-            color: #fff;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-        nav {
-            background: #222;
-            color: #fff;
-            padding: 1rem 0;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            overflow-x: auto; /* Mobiilivaates keritav */
-            white-space: nowrap; /* Hoiab lingid ühel real */
-        }
-
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
-        }
-
-        /* Stiil aktiivsele lehele menüüs */
-        nav a:hover, nav a.active {
-            color: var(--main-blue);
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            padding-top: 40px;
-        }
-
-        .brand-card {
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            padding: 30px;
-            border: 1px solid #333;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .brand-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-            border-color: var(--main-blue);
-        }
-
-        .brand-card h2 {
-            font-size: 1.8rem;
-            color: var(--main-blue);
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        
-        .brand-card .description {
-            font-size: 1rem;
-            line-height: 1.6;
-            flex-grow: 1; 
-        }
-
-        .brand-card ul {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
-        }
-        
-        .brand-card ul li {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: var(--main-blue);
-            color: #fff;
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 700;
-            text-align: center;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: #357abd;
-        }
-
-        .content-section {
-            padding-top: 40px;
-            text-align: center;
-        }
-
-        .content-section h2 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-        }
-        
-        .future-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            text-align: left;
-        }
-
-        .future-item {
-            background-color: var(--card-bg);
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 30px;
-        }
-        
-        .future-item h3 {
-            color: var(--main-blue);
-            font-size: 1.5rem;
-            margin-top: 0;
-        }
-
-        .future-item p {
-            font-size: 1rem; /* MUUDATUS: Vähendasime fondi suurust */
-        }
-        
-        .content-section p {
-            font-size: 1.2rem;
-            line-height: 1.7;
-        }
-        
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            margin-top: 40px;
-            color: #aaa;
-            border-top: 1px solid #333;
-        }
-        
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2.5rem;
-            }
-            nav {
-                justify-content: flex-start; /* Alustab vasakult */
-            }
-        }
-    </style>
+    <style>:root{--main-blue:#4a90e2;--dark-bg:#121212;--card-bg:#1e1e1e;--text-color:#f4f4f4}html{scroll-behavior:smooth;scroll-padding-top:80px}body{font-family:'Montserrat',sans-serif;margin:0;padding:0;background-color:var(--dark-bg);color:var(--text-color)}.container{max-width:1200px;margin:0 auto;padding:20px}header{text-align:center;padding:60px 20px}header h1{font-size:4rem;color:#fff;margin:0;text-transform:uppercase;letter-spacing:2px}nav{background:#222;color:#fff;padding:1rem 0;text-align:center;position:sticky;top:0;z-index:1000;overflow-x:auto;white-space:nowrap}nav a{color:#fff;text-decoration:none;padding:10px 15px;font-size:1.1rem;transition:color .3s ease}nav a:hover,nav a.active{color:var(--main-blue)}.main-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;padding-top:40px}.brand-card{background-color:var(--card-bg);border-radius:10px;padding:30px;border:1px solid #333;transition:transform .3s ease,box-shadow .3s ease;display:flex;flex-direction:column}.brand-card:hover{transform:translateY(-10px);box-shadow:0 10px 20px rgba(0,0,0,.4);border-color:var(--main-blue)}.brand-card h2{font-size:1.8rem;color:var(--main-blue);margin-top:0;margin-bottom:15px}.brand-card .description{font-size:1rem;line-height:1.6;flex-grow:1}.brand-card ul{list-style:none;padding:0;margin:20px 0}.brand-card ul li{background:rgba(255,255,255,.05);padding:10px 15px;border-radius:5px;margin-bottom:8px;font-size:.9rem}.btn{display:inline-block;background-color:var(--main-blue);color:#fff;padding:12px 25px;text-decoration:none;border-radius:5px;font-weight:700;text-align:center;margin-top:20px;transition:background-color .3s ease}.btn:hover{background-color:#357abd}.content-section{padding-top:40px;text-align:center}.content-section h2{font-size:2.5rem;margin-bottom:30px}.future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:25px;text-align:left}.future-item{background-color:var(--card-bg);border:1px solid #333;border-radius:10px;padding:30px}.future-item h3{color:var(--main-blue);font-size:1.5rem;margin-top:0}.content-section p{font-size:1.2rem;line-height:1.7}footer{text-align:center;padding:40px 20px;margin-top:40px;color:#aaa;border-top:1px solid #333}@media (max-width:768px){header h1{font-size:2.5rem}nav{justify-content:flex-start}}</style>
 </head>
 <body>
-
-    <header>
-        <h1>DainotseK</h1>
-    </header>
-
-    <nav>
-        <div class="container">
-            <a href="index.html" class="active">Avaleht</a>
-            <a href="videos.html">Videos</a>
-            <a href="music.html">Music</a>
-            <a href="finance.html">Finance</a>
-            <a href="portaal.html">Portaal</a>
-            <a href="tulevik.html">Tulevik</a>
-            <a href="kontakt.html">Kontakt</a>
-        </div>
-    </nav>
-
+    <header><h1>DainotseK</h1></header>
+    <nav><div class="container">
+        <a href="index.html" class="active">Home</a>
+        <a href="videos.html">Videos</a>
+        <a href="music.html">Music</a>
+        <a href="finance.html">Finance</a>
+        <a href="portaal.html">Portal</a>
+        <a href="tulevik.html">Future Plans</a>
+        <a href="kontakt.html">Contact</a>
+    </div></nav>
     <div class="container">
         <div class="main-grid">
-             <div class="brand-card"><h2>DainotseK Videos</h2><div class="description"><p>Kvaliteetne videosisu meelelahutuseks ja inspiratsiooniks erinevatel platvormidel.</p><ul><li>Mänguvideod</li><li>Loodusvideod</li><li>Timelapse & Droonivideod</li></ul><p><strong>Platvormid:</strong> YouTube, TikTok, YT Shorts</p></div><a href="videos.html" class="btn">Vaata lähemalt</a></div>
-            <div class="brand-card"><h2>DainotseK Music</h2><div class="description"><p>Unikaalne looming, kus kohtuvad inimlik loovus ja tehisintellekti võimekus.</p><ul><li><strong>AI-põhine muusika:</strong> Minu ideede põhjal loodud heliteosed (Suno, ChatGPT, Gemini).</li><li><strong>AI-põhised muusikavideod:</strong> Minu kontseptsioonist genereeritud visuaalid (Sora, jt).</li></ul><p><strong>Platvormid:</strong> YouTube, SoundCloud, X.com, Reddit</p></div><a href="music.html" class="btn">Vaata lähemalt</a></div>
-            <div class="brand-card"><h2>DainotseK Finance</h2><div class="description"><p>Läbipaistev ja aus ülevaade minu teekonnast finantsmaailmas.</p><ul><li>Investeerimisportfelli ülevaated</li><li>Analüüsid ja tehingute logi</li><li>Blogi rahatarkusest</li></ul></div><a href="finance.html" class="btn">Vaata lähemalt</a></div>
-            <div class="brand-card"><h2>DainotseK Portaal</h2><div class="description"><p>Kogukonnapõhine ostu-müügi kuulutusteportaal Eestis.</p><ul><li>Autode ost-müük</li><li>Kinnisvara (majad, korterid, maa)</li><li>Muude asjade turg</li></ul><p><strong>Eesmärk:</strong> Anda firmadele ja eraisikutele võimalus lisada kuulutusi.</p></div><a href="portaal.html" class="btn">Vaata lähemalt</a></div>
+            <div class="brand-card"><h2>DainotseK Videos</h2><div class="description"><p>High-quality video content for entertainment and inspiration across various platforms.</p></div><a href="videos.html" class="btn">View More</a></div>
+            <div class="brand-card"><h2>DainotseK Music</h2><div class="description"><p>Unique creations where human creativity meets the capabilities of artificial intelligence.</p></div><a href="music.html" class="btn">View More</a></div>
+            <div class="brand-card"><h2>DainotseK Finance</h2><div class="description"><p>A transparent and honest overview of my journey in the world of finance.</p></div><a href="finance.html" class="btn">View More</a></div>
+            <div class="brand-card"><h2>DainotseK Portal</h2><div class="description"><p>A community-based portal for buying and selling classifieds in Estonia.</p></div><a href="portaal.html" class="btn">View More</a></div>
         </div>
-
         <section class="content-section">
-            <h2>Tulevikuplaanid</h2>
+            <h2>Future Plans</h2>
             <div class="future-grid">
-                <div class="future-item">
-                    <h3>DainotseK Market</h3>
-                    <p>Visioon on luua füüsiline jaekaubamaja, kust leiab kõik eluks vajaliku ühe katuse alt, pakkudes laia valikut tooteid ja teenuseid.</p>
-                </div>
-                <div class="future-item">
-                    <h3>DainotseK Sport</h3>
-                    <p>Ambitsioon on rajada kaasaegne spordiklubi, mis oleks koduks nii populaarsetele meeskonnaaladele kui ka mitmekülgsetele individuaalaladele. Eesmärk on luua kogukond, mis väärtustab tervislikke eluviise ja sportlikku vaimu.</p>
-                </div>
+                <div class="future-item"><h3>DainotseK Market</h3><p>The vision is to establish a physical retail store that offers everything you need for life under one roof.</p></div>
+                <div class="future-item"><h3>DainotseK Sport</h3><p>The ambition is to build a modern sports club, a home for popular team sports as well as various individual disciplines. The goal is to create a community that values a healthy lifestyle and the spirit of sportsmanship.</p></div>
             </div>
         </section>
-
         <section class="content-section">
-             <h2>Võta Ühendust</h2>
-             <p>
-                Küsimuste või koostööpakkumiste korral kirjuta mulle julgelt!
-             </p>
-             <p>
-                <strong><a href="mailto:dainotsek@gmail.com" style="color: var(--main-blue); text-decoration: none;">dainotsek@gmail.com</a></strong>
-             </p>
+            <h2>Contact</h2>
+            <p>For questions or collaboration inquiries, feel free to get in touch!</p>
+            <p><strong><a href="mailto:dainotsek@gmail.com" style="color: var(--main-blue); text-decoration: none;">dainotsek@gmail.com</a></strong></p>
         </section>
     </div>
-
-    <footer>
-        <p>© 2025 DainotseK. Kõik õigused kaitstud.</p>
-    </footer>
-
+    <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
 </body>
 </html>
