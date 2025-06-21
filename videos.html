@@ -65,7 +65,8 @@
 
     <div class="container">
         <h2 class="content-title"><a href="https://www.youtube.com/@DainotseK" target="_blank" rel="noopener noreferrer">DainotseK Videos</a></h2>
-        <p class="intro-text">Sellel lehel on minu videolooming jaotatud temaatilistesse sektsioonidesse. Gaming sektsioonist leiad mänguvideoid, Nature alt loodusvaateid, Drone kategooriast droonivideoid ning Timelapse alt aeglustatud videoklippe.</p>
+        
+        <p class="intro-text">Siit leiad minu kire videoloomingu vastu, mis on jagatud neljaks. Olgu selleks siis kaasahaaravad seiklused **Gaming**-maailmas, hingematvad hetked Eestimaa looduses (**Nature**), unikaalsed perspektiivid otse taevalaotusest (**Drone**) või aja lummav kulg kiirendatud videotes (**Timelapse**) – loodan, et leiad siit midagi, mis sind kõnetab.</p>
         
         <div id="sections-container">
             <p id="loading-message">Laen videoid...</p>
@@ -73,73 +74,3 @@
     </div>
 
     <footer><p>© 2025 DainotseK. Kõik õigused kaitstud.</p></footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sectionsContainer = document.getElementById('sections-container');
-            const loadingMessage = document.getElementById('loading-message');
-            
-            fetch('/.netlify/functions/getVlogVideos')
-                .then(response => {
-                    if (!response.ok) { throw new Error(`Network response was not ok: ${response.statusText}`); }
-                    return response.json();
-                })
-                .then(playlists => {
-                    loadingMessage.style.display = 'none';
-                    
-                    if (playlists.length === 0) {
-                        sectionsContainer.innerHTML = '<p>Sisu ei leitud.</p>';
-                        return;
-                    }
-
-                    playlists.forEach(playlist => {
-                        const sectionElement = document.createElement('div');
-                        sectionElement.className = 'playlist-section';
-
-                        let videoHTML = '';
-                        if (playlist.videos.length > 0) {
-                            playlist.videos.forEach(video => {
-                                videoHTML += createVideoHTML(video);
-                            });
-                        } else {
-                            videoHTML = '<p>Praegu ei ole siin sektsioonis uusi videoid saadaval.</p>';
-                        }
-
-                        sectionElement.innerHTML = `
-                            <h3 class="playlist-title">${playlist.title}</h3>
-                            <div class="video-grid">
-                                ${videoHTML}
-                            </div>
-                        `;
-                        sectionsContainer.appendChild(sectionElement);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching video sections:', error);
-                    loadingMessage.innerHTML = '<p>Vabandust, videote laadimisel tekkis viga.</p>';
-                });
-
-            function createVideoHTML(video) {
-                // playlistItems ressursil on video ID teise koha peal
-                const videoId = video.snippet.resourceId.videoId;
-                const title = video.snippet.title;
-                return `
-                    <div class="video-item">
-                        <iframe 
-                            src="https://www.youtube.com/embed/${videoId}" 
-                            title="${title}" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            allowfullscreen>
-                        </iframe>
-                        <div class="video-info">
-                            <h3>${title}</h3>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-    </script>
-
-</body>
-</html>
