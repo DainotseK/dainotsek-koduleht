@@ -103,7 +103,6 @@
                         return;
                     }
 
-                    // LÕPLIK PARANDATUD LOOGIKA
                     const displayedIds = new Set();
 
                     // 1. Pane paika kõige uuem video
@@ -119,9 +118,10 @@
                     }
 
                     // 3. Kogu kokku ruudustiku videod, vältides juba kuvatud videoid
+                    // MUUDATUS: Proovime võtta 7 videot 6 asemel
                     const gridVideos = latestVideos
                         .filter(video => !displayedIds.has(video.id))
-                        .slice(0, 6);
+                        .slice(0, 7);
 
                     // 4. Kuva ruudustiku videod
                     gridVideos.forEach(video => {
