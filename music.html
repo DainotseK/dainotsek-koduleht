@@ -33,11 +33,12 @@
         .content-title a:hover { color: var(--main-blue); }
         .intro-text { text-align: center; max-width: 800px; margin: 0 auto 40px auto; font-size: 1.1rem; color: #ccc; }
         
-        #featured-video-container { margin-bottom: 40px; }
+        #featured-video-container, #popular-featured-video { margin-bottom: 40px; }
         #video-grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 25px;
+            margin-bottom: 40px;
         }
         .video-item {
             background-color: var(--card-bg);
@@ -49,6 +50,7 @@
         .video-info { padding: 15px; }
         .video-info h3 { font-size: 1.2rem; margin-top: 0; margin-bottom: 10px; }
         #loading-message { text-align: center; font-size: 1.2rem; padding: 40px; }
+        .section-divider-title { text-align: center; font-size: 1.8rem; margin: 60px 0 30px 0; color: var(--main-blue); }
 
         footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px solid #333; margin-top: auto; }
         @media (max-width: 768px) { header h1 { font-size: 2.5rem; } }
@@ -71,6 +73,10 @@
         <div id="featured-video-container"></div>
         <div id="video-grid-container"></div>
         
+        <div id="popular-video-section" style="display: none;">
+            <h2 class="section-divider-title">Kõige Populaarsem Video</h2>
+            <div id="popular-featured-video"></div>
+        </div>
     </div>
 
     <footer><p>© 2025 DainotseK. Kõik õigused kaitstud.</p></footer>
@@ -79,6 +85,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const featuredContainer = document.getElementById('featured-video-container');
             const gridContainer = document.getElementById('video-grid-container');
+            const popularContainer = document.getElementById('popular-featured-video');
+            const popularSection = document.getElementById('popular-video-section');
             const loadingMessage = document.getElementById('loading-message');
             
             fetch('/.netlify/functions/getYoutubeVideos')
@@ -86,27 +94,39 @@
                     if (!response.ok) { throw new Error(`Network response was not ok: ${response.statusText}`); }
                     return response.json();
                 })
-                .then(videos => {
+                .then(data => {
                     loadingMessage.style.display = 'none';
+                    const { latestVideos, popularVideo } = data;
 
-                    if (videos.length === 0) {
+                    if (!latestVideos || latestVideos.length === 0) {
                         gridContainer.innerHTML = '<p>Sobiva pikkusega videoid ei leitud.</p>';
                         return;
                     }
 
+                    // Eemaldame kõige popima video viimaste videote nimekirjast, et vältida duplikaati
+                    const latestWithoutPopular = popularVideo 
+                        ? latestVideos.filter(v => v.id !== popularVideo.id) 
+                        : latestVideos;
+
                     // Paigutame kõige uuema video esile
-                    const newestVideo = videos[0];
+                    const newestVideo = latestWithoutPopular[0];
                     if (newestVideo) {
                         featuredContainer.innerHTML = createVideoHTML(newestVideo);
                     }
 
-                    // Paigutame järgmised videod ruudustikku
-                    const gridVideos = videos.slice(1, 7); // Näitame kuni 6 järgmist videot
+                    // Paigutame järgmised 6 videot ruudustikku
+                    const gridVideos = latestWithoutPopular.slice(1, 7);
                     gridVideos.forEach(video => {
                         const videoElement = document.createElement('div');
                         videoElement.innerHTML = createVideoHTML(video);
                         gridContainer.appendChild(videoElement);
                     });
+                    
+                    // Paigutame kõige populaarsema video lehe lõppu
+                    if (popularVideo) {
+                        popularSection.style.display = 'block';
+                        popularContainer.innerHTML = createVideoHTML(popularVideo);
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching videos:', error);
@@ -114,7 +134,6 @@
                 });
 
             function createVideoHTML(video) {
-                // Andmestruktuur on nüüd natuke teine, video ID on otse 'id' all
                 const videoId = video.id;
                 const title = video.snippet.title;
                 return `
