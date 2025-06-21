@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="et">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DainotseK Music - Ametlik Koduleht</title>
+    <title>DainotseK Music - Official Website</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
@@ -61,25 +61,25 @@
     <header><h1>DainotseK</h1></header>
 
     <nav>
-        <div class="container"><a href="index.html">Avaleht</a><a href="videos.html">Videos</a><a href="music.html" class="active">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portaal</a><a href="tulevik.html">Tulevik</a><a href="kontakt.html">Kontakt</a></div>
+        <div class="container"><a href="index.html">Home</a><a href="videos.html">Videos</a><a href="music.html" class="active">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portal</a><a href="tulevik.html">Future</a><a href="kontakt.html">Contact</a></div>
     </nav>
 
     <div class="container">
         <h2 class="content-title"><a href="https://www.youtube.com/@DainotseKMusic" target="_blank" rel="noopener noreferrer">DainotseK Music</a></h2>
-        <p class="intro-text">Sellel lehel kuuled muusikat, mis on sündinud minu ideedest ja visioonist, kuid millele on andnud vormi ja heli tehisintellekti loominguline jõud. Iga lugu on unikaalne teekond, kus inimlik loovus kohtub tehnoloogia piiritute võimalustega.</p>
+        <p class="intro-text">On this page, you'll hear music born from my ideas and vision, but shaped and sounded by the creative power of artificial intelligence. Each song is a unique journey where human creativity meets the boundless possibilities of technology.</p>
         
-        <div id="loading-message"><p>Laen videoid...</p></div>
+        <div id="loading-message"><p>Loading videos...</p></div>
         
         <div id="featured-video-container"></div>
         <div id="video-grid-container"></div>
         
         <div id="popular-video-section" style="display: none;">
-            <h2 class="section-divider-title">Kõige Populaarsem Video</h2>
+            <h2 class="section-divider-title">Most Popular Video</h2>
             <div id="popular-featured-video"></div>
         </div>
     </div>
 
-    <footer><p>© 2025 DainotseK. Kõik õigused kaitstud.</p></footer>
+    <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -99,31 +99,31 @@
                     const { latestVideos, popularVideo } = data;
 
                     if (!latestVideos || latestVideos.length === 0) {
-                        gridContainer.innerHTML = '<p>Sobiva pikkusega videoid ei leitud.</p>';
+                        gridContainer.innerHTML = '<p>No videos of suitable length found.</p>';
                         return;
                     }
 
                     const displayedIds = new Set();
 
-                    // 1. Pane paika kõige uuem video
+                    // 1. Display the newest video
                     const newestVideo = latestVideos[0];
                     featuredContainer.innerHTML = createVideoHTML(newestVideo);
                     displayedIds.add(newestVideo.id);
 
-                    // 2. Pane paika kõige populaarsem video, kui see on olemas
+                    // 2. Display the most popular video, if available
                     if (popularVideo) {
                         popularSection.style.display = 'block';
                         popularContainer.innerHTML = createVideoHTML(popularVideo);
                         displayedIds.add(popularVideo.id);
                     }
 
-                    // 3. Kogu kokku ruudustiku videod, vältides juba kuvatud videoid
-                    // MUUDATUS: Proovime võtta 7 videot 6 asemel
+                    // 3. Collect videos for the grid, avoiding already displayed videos
+                    // CHANGE: Trying to get 7 videos instead of 6
                     const gridVideos = latestVideos
                         .filter(video => !displayedIds.has(video.id))
                         .slice(0, 7);
 
-                    // 4. Kuva ruudustiku videod
+                    // 4. Display grid videos
                     gridVideos.forEach(video => {
                         const videoElement = document.createElement('div');
                         videoElement.innerHTML = createVideoHTML(video);
@@ -133,7 +133,7 @@
                 })
                 .catch(error => {
                     console.error('Error fetching videos:', error);
-                    loadingMessage.innerHTML = '<p>Vabandust, videote laadimisel tekkis viga.</p>';
+                    loadingMessage.innerHTML = '<p>Sorry, an error occurred while loading videos.</p>';
                 });
 
             function createVideoHTML(video) {
