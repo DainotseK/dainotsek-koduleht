@@ -99,29 +99,40 @@
                     loadingMessage.style.display = 'none';
                     const { latestVideos, popularVideo } = data;
 
-                    if (!latestVideos || latestVideos.length === 0) {
-                        gridContainer.innerHTML = '<p>Videoid ei leitud.</p>';
+                    // UUENDATUD FILTER
+                    const filterOutShorts = (video) => {
+                        if (!video || !video.snippet || !video.snippet.thumbnails.default) return false;
+                        const thumbnail = video.snippet.thumbnails.default;
+                        const title = video.snippet.title.toLowerCase();
+                        // Jätame alles videod, mis on horisontaalsed JA mille pealkirjas pole sõna "shorts"
+                        return thumbnail.width >= thumbnail.height && !title.includes('#shorts');
+                    };
+
+                    const fullLengthLatest = latestVideos.filter(filterOutShorts);
+
+                    if (fullLengthLatest.length === 0) {
+                        gridContainer.innerHTML = '<p>Täispikki videoid ei leitud.</p>';
                         return;
                     }
 
                     // Paigutame kõige uuema video esile
-                    const newestVideo = latestVideos[0];
+                    const newestVideo = fullLengthLatest[0];
                     if (newestVideo) {
-                        featuredContainer.innerHTML = createVideoHTML(newestVideo, true);
+                        featuredContainer.innerHTML = createVideoHTML(newestVideo);
                     }
 
                     // Paigutame järgmised 6 videot ruudustikku
-                    const gridVideos = latestVideos.slice(1, 7);
+                    const gridVideos = fullLengthLatest.slice(1, 7);
                     gridVideos.forEach(video => {
                         const videoElement = document.createElement('div');
-                        videoElement.innerHTML = createVideoHTML(video, false);
+                        videoElement.innerHTML = createVideoHTML(video);
                         gridContainer.appendChild(videoElement);
                     });
                     
-                    // Paigutame kõige populaarsema video lehe lõppu
-                    if (popularVideo) {
+                    // Paigutame kõige populaarsema video lehe lõppu (kui see pole short)
+                    if (popularVideo && filterOutShorts(popularVideo)) {
                         popularSection.style.display = 'block';
-                        popularContainer.innerHTML = createVideoHTML(popularVideo, true);
+                        popularContainer.innerHTML = createVideoHTML(popularVideo);
                     }
                 })
                 .catch(error => {
@@ -129,7 +140,7 @@
                     loadingMessage.innerHTML = '<p>Vabandust, videote laadimisel tekkis viga.</p>';
                 });
 
-            function createVideoHTML(video, isFeatured) {
+            function createVideoHTML(video) {
                 const videoId = video.id.videoId;
                 const title = video.snippet.title;
                 return `
