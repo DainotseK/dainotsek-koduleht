@@ -14,139 +14,47 @@
             --card-bg: #1e1e1e;
             --text-color: #f4f4f4;
         }
-
-        html {
-            scroll-behavior: smooth;
-            scroll-padding-top: 80px;
-        }
-
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
         body {
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--dark-bg);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background-color: var(--dark-bg);
+            color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            flex-grow: 1;
-        }
-
-        header {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        header h1 {
-            font-size: 4rem;
-            color: #fff;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; flex-grow: 1; }
+        header { text-align: center; padding: 60px 20px; }
+        header h1 { font-size: 4rem; color: #fff; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
         nav {
-            background: #222;
-            color: #fff;
-            padding: 1rem 0;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            overflow-x: auto;
-            white-space: nowrap;
+            background: #222; color: #fff; padding: 1rem 0; text-align: center;
+            position: sticky; top: 0; z-index: 1000; overflow-x: auto; white-space: nowrap;
         }
-
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
+        nav a { color: #fff; text-decoration: none; padding: 10px 15px; font-size: 1.1rem; transition: color .3s ease; }
+        nav a:hover, nav a.active { color: var(--main-blue); }
+        .content-title { text-align: center; font-size: 2.5rem; margin-bottom: 40px; }
+        #youtube-videos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
         }
-
-        nav a:hover, nav a.active {
-            color: var(--main-blue);
-        }
-
-        .brand-card {
+        .video-item {
             background-color: var(--card-bg);
             border-radius: 10px;
-            padding: 30px;
+            overflow: hidden;
             border: 1px solid #333;
-            max-width: 500px; /* Piirame kaardi laiust alamlehel */
-            margin: 40px auto; /* Tsentreerime kaardi */
         }
-
-        .brand-card h2 {
-            font-size: 1.8rem;
-            color: var(--main-blue);
-            margin-top: 0;
-            margin-bottom: 15px;
+        .video-item iframe {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: none;
         }
-        
-        .brand-card .description {
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
-        .brand-card ul {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
-        }
-        
-        .brand-card ul li {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: var(--main-blue);
-            color: #fff;
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 700;
-            text-align: center;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: #357abd;
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: #aaa;
-            border-top: 1px solid #333;
-            margin-top: auto;
-        }
-        
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2.5rem;
-            }
-        }
+        .video-info { padding: 15px; }
+        .video-info h3 { font-size: 1.2rem; margin-top: 0; margin-bottom: 10px; }
+        .video-info p { font-size: 0.9rem; color: #ccc; line-height: 1.5; }
+        footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px solid #333; margin-top: auto; }
+        @media (max-width: 768px) { header h1 { font-size: 2.5rem; } }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>DainotseK</h1>
-    </header>
+    <header><h1>DainotseK</h1></header>
 
     <nav>
         <div class="container">
@@ -161,23 +69,67 @@
     </nav>
 
     <div class="container">
-        <div class="brand-card">
-            <h2>DainotseK Music</h2>
-            <div class="description">
-                <p>Unikaalne looming, kus kohtuvad inimlik loovus ja tehisintellekti võimekus. Siia saad lisada näiteid oma lugudest, kirjeldada oma loominguprotsessi pikemalt või lisada linke otse lugude juurde.</p>
-                <ul>
-                    <li><strong>AI-põhine muusika:</strong> Minu ideede põhjal loodud heliteosed (Suno, ChatGPT, Gemini).</li>
-                    <li><strong>AI-põhised muusikavideod:</strong> Minu kontseptsioonist genereeritud visuaalid (Sora, jt).</li>
-                </ul>
-                <p><strong>Platvormid:</strong> YouTube, SoundCloud, X.com, Reddit</p>
-            </div>
-            <a href="#" class="btn">Kuula Muusikat</a>
+        <h2 class="content-title">Muusika & Videod</h2>
+        
+        <div id="youtube-videos-container">
+            <p>Laen videoid...</p>
         </div>
     </div>
 
-    <footer>
-        <p>© 2025 DainotseK. Kõik õigused kaitstud.</p>
-    </footer>
+    <footer><p>© 2025 DainotseK. Kõik õigused kaitstud.</p></footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const videoContainer = document.getElementById('youtube-videos-container');
+            
+            // Küsime andmeid meie Netlify funktsioonilt
+            fetch('/.netlify/functions/getYoutubeVideos')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(videos => {
+                    // Tühjendame "Laen videoid..." teate
+                    videoContainer.innerHTML = '';
+                    
+                    if (videos.length === 0) {
+                        videoContainer.innerHTML = '<p>Videoid ei leitud.</p>';
+                        return;
+                    }
+
+                    // Käime läbi iga video andmed ja loome HTML-i
+                    videos.forEach(video => {
+                        const videoId = video.id.videoId;
+                        const title = video.snippet.title;
+                        const description = video.snippet.description;
+                        
+                        const videoElement = document.createElement('div');
+                        videoElement.className = 'video-item';
+                        
+                        videoElement.innerHTML = `
+                            <iframe 
+                                src="https://www.youtube.com/embed/${videoId}" 
+                                title="${title}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                            <div class="video-info">
+                                <h3>${title}</h3>
+                            </div>
+                        `;
+                        
+                        videoContainer.appendChild(videoElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching videos:', error);
+                    videoContainer.innerHTML = '<p>Vabandust, videote laadimisel tekkis viga.</p>';
+                });
+        });
+    </script>
 
 </body>
 </html>
