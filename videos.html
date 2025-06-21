@@ -28,10 +28,16 @@
         }
         nav a { color: #fff; text-decoration: none; padding: 10px 15px; font-size: 1.1rem; transition: color .3s ease; }
         nav a:hover, nav a.active { color: var(--main-blue); }
-        .content-title { text-align: center; font-size: 2.5rem; margin-bottom: 40px; }
-        #video-grid-container {
+        .content-title { text-align: center; font-size: 2.5rem; margin-bottom: 20px; }
+        .content-title a { color: inherit; text-decoration: none; transition: color 0.3s ease; }
+        .content-title a:hover { color: var(--main-blue); }
+        .intro-text { text-align: center; max-width: 800px; margin: 0 auto 40px auto; font-size: 1.1rem; color: #ccc; }
+        
+        .playlist-section { margin-bottom: 60px; }
+        .playlist-title { font-size: 2rem; color: var(--main-blue); border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 30px; }
+        .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 25px;
         }
         .video-item {
@@ -40,13 +46,9 @@
             overflow: hidden;
             border: 1px solid #333;
         }
-        .video-item iframe {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            border: none;
-        }
+        .video-item iframe { width: 100%; aspect-ratio: 16 / 9; border: none; }
         .video-info { padding: 15px; }
-        .video-info h3 { font-size: 1.2rem; margin-top: 0; margin-bottom: 10px; }
+        .video-info h3 { font-size: 1.1rem; margin-top: 0; margin-bottom: 10px; height: 3.6em; overflow: hidden; } /* Mahutab umbes 3 rida teksti */
         #loading-message { text-align: center; font-size: 1.2rem; padding: 40px; }
 
         footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px solid #333; margin-top: auto; }
@@ -62,9 +64,10 @@
     </nav>
 
     <div class="container">
-        <h2 class="content-title">DainotseK Videos</h2>
+        <h2 class="content-title"><a href="https://www.youtube.com/@DainotseK" target="_blank" rel="noopener noreferrer">DainotseK Videos</a></h2>
+        <p class="intro-text">Sellel lehel on minu videolooming jaotatud temaatilistesse sektsioonidesse. Gaming sektsioonist leiad mänguvideoid, Nature alt loodusvaateid, Drone kategooriast droonivideoid ning Timelapse alt aeglustatud videoklippe.</p>
         
-        <div id="video-grid-container">
+        <div id="sections-container">
             <p id="loading-message">Laen videoid...</p>
         </div>
     </div>
@@ -73,50 +76,68 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const videoContainer = document.getElementById('video-grid-container');
+            const sectionsContainer = document.getElementById('sections-container');
             const loadingMessage = document.getElementById('loading-message');
             
-            // Küsime andmeid meie UUELT Netlify funktsioonilt
             fetch('/.netlify/functions/getVlogVideos')
                 .then(response => {
                     if (!response.ok) { throw new Error(`Network response was not ok: ${response.statusText}`); }
                     return response.json();
                 })
-                .then(videos => {
+                .then(playlists => {
                     loadingMessage.style.display = 'none';
                     
-                    if (videos.length === 0) {
-                        videoContainer.innerHTML = '<p>Videoid ei leitud.</p>';
+                    if (playlists.length === 0) {
+                        sectionsContainer.innerHTML = '<p>Sisu ei leitud.</p>';
                         return;
                     }
 
-                    videos.forEach(video => {
-                        const videoId = video.id.videoId;
-                        const title = video.snippet.title;
-                        
-                        const videoElement = document.createElement('div');
-                        videoElement.className = 'video-item';
-                        
-                        videoElement.innerHTML = `
-                            <iframe 
-                                src="https://www.youtube.com/embed/${videoId}" 
-                                title="${title}" 
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowfullscreen>
-                            </iframe>
-                            <div class="video-info">
-                                <h3>${title}</h3>
+                    playlists.forEach(playlist => {
+                        const sectionElement = document.createElement('div');
+                        sectionElement.className = 'playlist-section';
+
+                        let videoHTML = '';
+                        if (playlist.videos.length > 0) {
+                            playlist.videos.forEach(video => {
+                                videoHTML += createVideoHTML(video);
+                            });
+                        } else {
+                            videoHTML = '<p>Praegu ei ole siin sektsioonis uusi videoid saadaval.</p>';
+                        }
+
+                        sectionElement.innerHTML = `
+                            <h3 class="playlist-title">${playlist.title}</h3>
+                            <div class="video-grid">
+                                ${videoHTML}
                             </div>
                         `;
-                        
-                        videoContainer.appendChild(videoElement);
+                        sectionsContainer.appendChild(sectionElement);
                     });
                 })
                 .catch(error => {
-                    console.error('Error fetching videos:', error);
+                    console.error('Error fetching video sections:', error);
                     loadingMessage.innerHTML = '<p>Vabandust, videote laadimisel tekkis viga.</p>';
                 });
+
+            function createVideoHTML(video) {
+                // playlistItems ressursil on video ID teise koha peal
+                const videoId = video.snippet.resourceId.videoId;
+                const title = video.snippet.title;
+                return `
+                    <div class="video-item">
+                        <iframe 
+                            src="https://www.youtube.com/embed/${videoId}" 
+                            title="${title}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen>
+                        </iframe>
+                        <div class="video-info">
+                            <h3>${title}</h3>
+                        </div>
+                    </div>
+                `;
+            }
         });
     </script>
 
