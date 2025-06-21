@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="et">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DainotseK Videos - Ametlik Koduleht</title>
+    <title>DainotseK Videos - Official Website</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
@@ -48,7 +48,7 @@
         }
         .video-item iframe { width: 100%; aspect-ratio: 16 / 9; border: none; }
         .video-info { padding: 15px; }
-        .video-info h3 { font-size: 1.1rem; margin-top: 0; margin-bottom: 10px; height: 3.6em; overflow: hidden; } /* Mahutab umbes 3 rida teksti */
+        .video-info h3 { font-size: 1.1rem; margin-top: 0; margin-bottom: 10px; height: 3.6em; overflow: hidden; }
         #loading-message { text-align: center; font-size: 1.2rem; padding: 40px; }
 
         footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px solid #333; margin-top: auto; }
@@ -60,20 +60,20 @@
     <header><h1>DainotseK</h1></header>
 
     <nav>
-        <div class="container"><a href="index.html">Avaleht</a><a href="videos.html" class="active">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portaal</a><a href="tulevik.html">Tulevik</a><a href="kontakt.html">Kontakt</a></div>
+        <div class="container"><a href="index.html">Home</a><a href="videos.html" class="active">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portal</a><a href="tulevik.html">Future</a><a href="kontakt.html">Contact</a></div>
     </nav>
 
     <div class="container">
         <h2 class="content-title"><a href="https://www.youtube.com/@DainotseK" target="_blank" rel="noopener noreferrer">DainotseK Videos</a></h2>
         
-        <p class="intro-text">Avasta minu videomaailma läbi nelja erineva teema. Ükskõik, kas sind paeluvad virtuaalsed seiklused, loodus, vaated linnulennult või aja kiirendatud kulg – siit leiad midagi, mis pakub huvi ja inspiratsiooni.</p>
+        <p class="intro-text">Explore my video world across four different themes. Whether you're captivated by virtual adventures, nature, aerial views, or time-lapse — here you'll find something that sparks your interest and inspiration.</p>
         
         <div id="sections-container">
-            <p id="loading-message">Laen videoid...</p>
+            <p id="loading-message">Loading videos...</p>
         </div>
     </div>
 
-    <footer><p>© 2025 DainotseK. Kõik õigused kaitstud.</p></footer>
+    <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -89,7 +89,7 @@
                     loadingMessage.style.display = 'none';
                     
                     if (playlists.length === 0) {
-                        sectionsContainer.innerHTML = '<p>Sisu ei leitud.</p>';
+                        sectionsContainer.innerHTML = '<p>Content not found.</p>';
                         return;
                     }
 
@@ -103,7 +103,7 @@
                                 videoHTML += createVideoHTML(video);
                             });
                         } else {
-                            videoHTML = '<p>Praegu ei ole siin sektsioonis uusi videoid saadaval.</p>';
+                            videoHTML = '<p>Currently, there are no new videos available in this section.</p>';
                         }
 
                         sectionElement.innerHTML = `
@@ -117,7 +117,7 @@
                 })
                 .catch(error => {
                     console.error('Error fetching video sections:', error);
-                    loadingMessage.innerHTML = '<p>Vabandust, videote laadimisel tekkis viga.</p>';
+                    loadingMessage.innerHTML = '<p>Sorry, an error occurred while loading videos.</p>';
                 });
 
             function createVideoHTML(video) {
