@@ -103,35 +103,36 @@
                         return;
                     }
 
-                    // See on uus, targem loogika
-                    const displayedVideoIds = new Set();
-                    let gridCandidates = [...latestVideos];
+                    // See on uus, parandatud loogika
+                    const videosToDisplayInGrid = [];
+                    const displayedIds = new Set();
 
-                    // 1. Paigutame kõige uuema video esile
-                    const newestVideo = gridCandidates.shift(); // Võtame ja eemaldame esimese video nimekirjast
-                    if (newestVideo) {
-                        featuredContainer.innerHTML = createVideoHTML(newestVideo);
-                        displayedVideoIds.add(newestVideo.id);
-                    }
+                    // 1. Pane paika kõige uuem video
+                    const newestVideo = latestVideos[0];
+                    featuredContainer.innerHTML = createVideoHTML(newestVideo);
+                    displayedIds.add(newestVideo.id);
 
-                    // 2. Kui populaarne video on olemas, märgime selle ID, et vältida duplikaati ruudustikus
+                    // 2. Pane paika kõige populaarsem video (kui see on olemas)
                     if (popularVideo) {
-                        displayedVideoIds.add(popularVideo.id);
+                        popularSection.style.display = 'block';
+                        popularContainer.innerHTML = createVideoHTML(popularVideo);
+                        displayedIds.add(popularVideo.id);
                     }
 
-                    // 3. Filtreerime ruudustiku kandidaatidest välja juba kuvatud/kuvatavad videod
-                    const finalGridVideos = gridCandidates.filter(video => !displayedVideoIds.has(video.id)).slice(0, 6);
-                    finalGridVideos.forEach(video => {
+                    // 3. Kogu kokku kuni 6 videot ruudustiku jaoks
+                    for (const video of latestVideos) {
+                        if (videosToDisplayInGrid.length >= 6) break; // Lõpeta, kui 6 on koos
+                        if (!displayedIds.has(video.id)) {
+                            videosToDisplayInGrid.push(video);
+                        }
+                    }
+
+                    // 4. Kuva ruudustiku videod
+                    videosToDisplayInGrid.forEach(video => {
                         const videoElement = document.createElement('div');
                         videoElement.innerHTML = createVideoHTML(video);
                         gridContainer.appendChild(videoElement);
                     });
-                    
-                    // 4. Lõpuks kuvame kõige populaarsema video, kui see on olemas
-                    if (popularVideo) {
-                        popularSection.style.display = 'block';
-                        popularContainer.innerHTML = createVideoHTML(popularVideo);
-                    }
 
                 })
                 .catch(error => {
