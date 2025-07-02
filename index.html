@@ -8,98 +8,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <style>
-        :root {
-            --main-blue: #4a90e2;
-            --dark-bg: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #f4f4f4;
-        }
-        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
-        body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background-color: var(--dark-bg); color: var(--text-color); }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        header { text-align: center; padding: 60px 20px; }
-        header h1 { font-size: 4rem; color: #fff; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
-        
-        /* === PARANDATUD NAVIGEERIMISRIBA CSS ALGAB === */
-        nav {
-            background: #222;
-            color: #fff;
-            padding: 1rem 0;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        nav .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between; /* Lükkab lingid ja nupu teineteisest eemale */
-            align-items: center;
-        }
-        nav .nav-links {
-            overflow-x: auto; /* Kui linke on liiga palju, tekib kerimisriba */
-            white-space: nowrap; /* Hoiab lingid ühel real */
-            -ms-overflow-style: none;  /* Peidab kerimisriba IE ja Edge'is */
-            scrollbar-width: none;  /* Peidab kerimisriba Firefoxis */
-        }
-        nav .nav-links::-webkit-scrollbar {
-            display: none; /* Peidab kerimisriba Chrome, Safari ja Operas */
-        }
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
-        }
-        nav a:hover, nav a.active {
-            color: var(--main-blue);
-        }
-        #auth-status {
-            padding-left: 20px; /* Jätame nupule natuke hingamisruumi */
-        }
-        /* === PARANDATUD NAVIGEERIMISRIBA CSS LÕPPEB === */
-
-        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding-top: 40px; }
-        .brand-card { background-color: var(--card-bg); border-radius: 10px; padding: 30px; border: 1px solid #333; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
-        .brand-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); border-color: var(--main-blue); }
-        .brand-card h2 { font-size: 1.8rem; color: var(--main-blue); margin-top: 0; margin-bottom: 15px; }
-        .brand-card .description { font-size: 1rem; line-height: 1.6; flex-grow: 1; }
-        .brand-card ul { list-style: none; padding: 0; margin: 20px 0; }
-        .brand-card ul li { background: rgba(255, 255, 255, 0.05); padding: 10px 15px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9rem; }
-        .btn { display: inline-block; background-color: var(--main-blue); color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 700; text-align: center; margin-top: 20px; transition: background-color 0.3s ease; cursor: pointer; border: none; }
-        .btn:hover { background-color: #357abd; }
-        .content-section { padding-top: 40px; text-align: center; }
-        .content-section h2 { font-size: 2.5rem; margin-bottom: 30px; }
-        .content-section p { font-size: 1.2rem; line-height: 1.7; }
-        footer { text-align: center; padding: 40px 20px; margin-top: 40px; color: #aaa; border-top: 1px solid #333; }
-        @media (max-width: 960px) { nav .nav-container { justify-content: center; flex-wrap: wrap; } #auth-status { width: 100%; margin-top: 10px; padding-left: 0;} }
-    </style>
+    
+    <link rel="stylesheet" href="stiil.css">
 </head>
 <body>
     <header><h1>DainotseK</h1></header>
-
     <nav>
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="index.html" class="active">Home</a>
-                <a href="videos.html">Videos</a>
-                <a href="music.html">Music</a>
-                <a href="finance.html">Finance</a>
-                <a href="portaal.html">Portal</a>
-                <a href="tulevik.html">Future</a>
-                <a href="kontakt.html">Contact</a>
-            </div>
-            <div id="auth-status">
-                <button id="btn-login" class="btn">Log In</button>
-                <button id="btn-logout" class="btn" style="display:none;">Log Out</button>
-            </div>
-        </div>
+        <div class="nav-container"><div class="nav-links"><a href="index.html" class="active">Home</a><a href="videos.html">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portal</a><a href="tulevik.html">Future</a><a href="kontakt.html">Contact</a></div><div id="auth-status"><button id="btn-login" class="btn">Log In</button><button id="btn-logout" class="btn" style="display:none">Log Out</button></div></div>
     </nav>
-
     <div class="container">
         <div class="main-grid">
             <div class="brand-card"><h2>DainotseK Videos</h2><div class="description"><p>Quality video content for entertainment and inspiration across various platforms.</p><ul><li>Gaming Videos</li><li>Nature Videos</li><li>Timelapse & Drone Videos</li></ul><p><strong>Platforms:</strong> YouTube, TikTok, YT Shorts</p></div><a href="videos.html" class="btn">View More</a></div>
@@ -110,12 +26,8 @@
         <section class="content-section"><h2>Future Plans</h2><p style="font-size: 1.1rem; color: #ccc; margin-bottom: 1rem;">For more detailed information about future plans, please visit the page below.</p><a href="tulevik.html" class="btn">View Future Plans</a></section>
         <section class="content-section"><h2>Contact</h2><p>For questions or collaboration inquiries, feel free to get in touch!</p><p><strong><a href="mailto:dainotsek@gmail.com" style="color: var(--main-blue); text-decoration: none;">dainotsek@gmail.com</a></strong></p></section>
     </div>
-
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
-
-    <script>
-        let auth0Client = null;
-        document.addEventListener('DOMContentLoaded',async ()=>{try{const e=await fetch('/.netlify/functions/getAuthConfig');if(!e.ok)throw new Error('Could not fetch auth config.');const t=await e.json();auth0Client=await auth0.createAuth0Client({domain:t.domain,clientId:t.clientId,authorizationParams:{redirect_uri:window.location.origin}}),document.getElementById('btn-login').addEventListener('click',()=>auth0Client.loginWithRedirect()),document.getElementById('btn-logout').addEventListener('click',()=>auth0Client.logout()),location.search.includes('state=')&&location.search.includes('code=')&&(await auth0Client.handleRedirectCallback(),window.history.replaceState({},document.title,"/"))}catch(e){console.error("Auth0 initialization error",e)}finally{updateUI()}});const updateUI=async()=>{if(!auth0Client)return;try{const e=await auth0Client.isAuthenticated();document.getElementById('btn-login').style.display=e?'none':'block',document.getElementById('btn-logout').style.display=e?'block':'none'}catch(e){console.error("UI update error",e),document.getElementById('btn-login').style.display='block',document.getElementById('btn-logout').style.display='none'}};
+    <script>let auth0Client=null;document.addEventListener('DOMContentLoaded',async()=>{try{const e=await fetch('/.netlify/functions/getAuthConfig');if(!e.ok)throw new Error('Could not fetch auth config.');const t=await e.json();auth0Client=await auth0.createAuth0Client({domain:t.domain,clientId:t.clientId,authorizationParams:{redirect_uri:window.location.origin}}),document.getElementById('btn-login').addEventListener('click',()=>auth0Client.loginWithRedirect()),document.getElementById('btn-logout').addEventListener('click',()=>auth0Client.logout()),location.search.includes('state=')&&location.search.includes('code=')&&(await auth0Client.handleRedirectCallback(),window.history.replaceState({},document.title,window.location.pathname))}catch(e){console.error("Auth0 initialization error",e)}finally{updateUI()}});const updateUI=async()=>{if(!auth0Client)return;try{const e=await auth0Client.isAuthenticated();document.getElementById('btn-login').style.display=e?'none':'block',document.getElementById('btn-logout').style.display=e?'block':'none'}catch(e){console.error("UI update error",e),document.getElementById('btn-login').style.display='block',document.getElementById('btn-logout').style.display='none'}};
     </script>
 </body>
 </html>
