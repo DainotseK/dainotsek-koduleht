@@ -3,164 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DainotseK Future Plans - Official Website</title>
+    <title>Future Plans - DainotseK Official Website</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --main-blue: #4a90e2;
-            --dark-bg: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #f4f4f4;
-        }
-
-        html {
-            scroll-behavior: smooth;
-            scroll-padding-top: 80px;
-        }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--dark-bg);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            flex-grow: 1;
-        }
-
-        header {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        header h1 {
-            font-size: 4rem;
-            color: #fff;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-        nav {
-            background: #222;
-            color: #fff;
-            padding: 1rem 0;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
-        }
-
-        nav a:hover, nav a.active {
-            color: var(--main-blue);
-        }
-
-        .content-section {
-            padding-top: 40px;
-            text-align: center;
-        }
-
-        .content-section h2 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-        }
-        
-        .future-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            text-align: left;
-        }
-
-        .future-item {
-            background-color: var(--card-bg);
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 30px;
-        }
-        
-        .future-item h3 {
-            color: var(--main-blue);
-            font-size: 1.5rem;
-            margin-top: 0;
-        }
-
-        .future-item p {
-            font-size: 1rem; /* CHANGE: Reduced font size */
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: #aaa;
-            border-top: 1px solid #333;
-            margin-top: auto;
-        }
-        
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2.5rem;
-            }
-        }
-    </style>
+    <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <link rel="stylesheet" href="stiil.css">
 </head>
 <body>
-
-    <header>
-        <h1>DainotseK</h1>
-    </header>
-
+    <header><h1>DainotseK</h1></header>
     <nav>
-        <div class="container">
-            <a href="index.html">Home</a>
-            <a href="videos.html">Videos</a>
-            <a href="music.html">Music</a>
-            <a href="finance.html">Finance</a>
-            <a href="portaal.html">Portal</a>
-            <a href="tulevik.html" class="active">Future</a>
-            <a href="kontakt.html">Contact</a>
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="videos.html">Videos</a>
+                <a href="music.html">Music</a>
+                <a href="finance.html">Finance</a>
+                <a href="portaal.html">Portal</a>
+                <a href="tulevik.html" class="active">Future</a>
+                <a href="kontakt.html">Contact</a>
+            </div>
+            <div id="auth-status">
+                <button id="btn-login" class="btn">Log In</button>
+                <button id="btn-logout" class="btn" style="display:none">Log Out</button>
+            </div>
         </div>
     </nav>
 
     <div class="container">
         <section class="content-section">
             <h2>Future Plans</h2>
-            <div class="future-grid">
+            <div class="main-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
                 <div class="future-item">
                     <h3>DainotseK Market</h3>
-                    <p>The vision is to create a physical retail store where you can find everything necessary for life under one roof, offering a wide range of products and services.</p>
+                    <p>The vision is to establish a physical retail store that offers everything you need for life under one roof.</p>
                 </div>
                 <div class="future-item">
                     <h3>DainotseK Sport</h3>
-                    <p>The ambition is to establish a modern sports club that would be home to both popular team sports and diverse individual disciplines. The goal is to create a community that values healthy lifestyles and a sporting spirit.</p>
+                    <p>The ambition is to build a modern sports club, a home for popular team sports as well as various individual disciplines. The goal is to create a community that values a healthy lifestyle and the spirit of sportsmanship.</p>
                 </div>
             </div>
         </section>
     </div>
 
-    <footer>
-        <p>© 2025 DainotseK. All rights reserved.</p>
-    </footer>
+    <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
 
+    <script>
+        let auth0Client = null;
+
+        const updateUI = async () => {
+            if (!auth0Client) return;
+            try {
+                const isAuthenticated = await auth0Client.isAuthenticated();
+                document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
+                document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
+            } catch (e) {
+                console.error("UI update error", e);
+            }
+        };
+        
+        const configureClient = async () => {
+             try {
+                const response = await fetch('/.netlify/functions/getAuthConfig');
+                if (!response.ok) throw new Error('Could not fetch auth config.');
+                const config = await response.json();
+                auth0Client = await auth0.createAuth0Client({
+                    domain: config.domain,
+                    clientId: config.clientId,
+                    authorizationParams: { redirect_uri: window.location.href.split('?')[0] }
+                });
+            } catch(e) {
+                console.error("Auth0 initialization error", e);
+            }
+        };
+
+        window.onload = async () => {
+            await configureClient();
+            
+            if (location.search.includes('state=') && location.search.includes('code=')) {
+                await auth0Client.handleRedirectCallback();
+                window.history.replaceState({}, document.title, "/tulevik.html");
+            }
+
+            updateUI(); 
+
+            document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
+            document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
+        };
+    </script>
 </body>
 </html>
