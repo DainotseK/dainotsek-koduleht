@@ -140,3 +140,8 @@ footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px so
     nav .nav-container { justify-content: center; flex-wrap: wrap; }
     #auth-status { width: 100%; margin-top: 10px; padding-left: 0; }
 }
+/* --- Üksiku kaardi konteineri stiil alamlehtedel --- */
+.single-card-container {
+    max-width: 600px; /* Määrame maksimaalse laiuse */
+    margin: 40px auto; /* Tsentreerime kaardi lehe keskele */
+}
