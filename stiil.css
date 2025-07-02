@@ -4,44 +4,39 @@
     --card-bg: #1e1e1e;
     --text-color: #f4f4f4;
 }
-
-html {
-    scroll-behavior: smooth;
-    scroll-padding-top: 80px;
+html { 
+    scroll-behavior: smooth; 
+    scroll-padding-top: 80px; 
 }
-
 body {
-    font-family: 'Montserrat', sans-serif;
-    margin: 0;
-    padding: 0;
+    font-family: 'Montserrat', sans-serif; 
+    margin: 0; 
+    padding: 0; 
     background-color: var(--dark-bg);
-    color: var(--text-color);
-    display: flex;
-    flex-direction: column;
+    color: var(--text-color); 
+    display: flex; 
+    flex-direction: column; 
     min-height: 100vh;
 }
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    flex-grow: 1;
+.container { 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 20px; 
+    flex-grow: 1; 
+}
+header { 
+    text-align: center; 
+    padding: 60px 20px; 
+}
+header h1 { 
+    font-size: 4rem; 
+    color: #fff; 
+    margin: 0; 
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
 }
 
-header {
-    text-align: center;
-    padding: 60px 20px;
-}
-
-header h1 {
-    font-size: 4rem;
-    color: #fff;
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-/* --- Navigeerimisriba --- */
+/* === Navigatsiooniriba === */
 nav {
     background: #222;
     color: #fff;
@@ -51,7 +46,6 @@ nav {
     top: 0;
     z-index: 1000;
 }
-
 nav .nav-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -60,7 +54,6 @@ nav .nav-container {
     justify-content: space-between;
     align-items: center;
 }
-
 nav .nav-links {
     flex: 1 1 auto;
     overflow-x: auto;
@@ -69,11 +62,7 @@ nav .nav-links {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
-
-nav .nav-links::-webkit-scrollbar {
-    display: none;
-}
-
+nav .nav-links::-webkit-scrollbar { display: none; }
 nav a {
     color: #fff;
     text-decoration: none;
@@ -81,39 +70,22 @@ nav a {
     font-size: 1.1rem;
     transition: color 0.3s ease;
 }
+nav a:hover, nav a.active { color: var(--main-blue); }
+#auth-status { flex-shrink: 0; padding-left: 20px; }
 
-nav a:hover,
-nav a.active {
-    color: var(--main-blue);
-}
-
-#auth-status {
-    flex-shrink: 0;
-    padding-left: 20px;
-}
-
-/* --- Üldised stiilid --- */
+/* === Peamine sisu (Avaleht) === */
 .main-grid {
     display: grid;
     gap: 25px;
     padding-top: 40px;
     grid-template-columns: 1fr; /* Vaikimisi 1 veerg (mobiilidele) */
 }
-
-/* Kui ekraan on laiem kui 600px, näita kahte veergu */
 @media (min-width: 600px) {
-    .main-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .main-grid { grid-template-columns: repeat(2, 1fr); }
 }
-
-/* Kui ekraan on laiem kui 1024px, näita nelja veergu */
 @media (min-width: 1024px) {
-    .main-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+    .main-grid { grid-template-columns: repeat(4, 1fr); }
 }
-
 .brand-card {
     background-color: var(--card-bg);
     border-radius: 10px;
@@ -123,80 +95,31 @@ nav a.active {
     display: flex;
     flex-direction: column;
 }
-
 .brand-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
     border-color: var(--main-blue);
 }
+.brand-card h2 { font-size: 1.8rem; color: var(--main-blue); margin-top: 0; margin-bottom: 15px; }
+.brand-card .description { font-size: 1rem; line-height: 1.6; flex-grow: 1; }
+.brand-card ul { list-style: none; padding: 0; margin: 20px 0; }
+.brand-card ul li { background: rgba(255, 255, 255, 0.05); padding: 10px 15px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9rem; }
+.btn { display: inline-block; background-color: var(--main-blue); color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 700; text-align: center; margin-top: 20px; transition: background-color 0.3s ease; cursor: pointer; border: none; }
+.btn:hover { background-color: #357abd; }
 
-.brand-card h2 {
-    font-size: 1.8rem;
-    color: var(--main-blue);
-    margin-top: 0;
-    margin-bottom: 15px;
-}
+/* === Üldised sisustiilid === */
+.content-section { padding-top: 40px; text-align: center; }
+.content-section h2 { font-size: 2.5rem; margin-bottom: 30px; }
+.content-section p { font-size: 1.2rem; line-height: 1.7; }
+.future-item p { font-size: 1rem; }
 
-.brand-card .description {
-    font-size: 1rem;
-    line-height: 1.6;
-    flex-grow: 1;
-}
-
-.brand-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 20px 0;
-}
-
-.brand-card ul li {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 10px 15px;
-    border-radius: 5px;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-}
-
-.btn {
-    display: inline-block;
-    background-color: var(--main-blue);
-    color: #fff;
-    padding: 12px 25px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: 700;
-    text-align: center;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
-    cursor: pointer;
-    border: none;
-}
-
-.btn:hover {
-    background-color: #357abd;
-}
-
-.content-section {
-    padding-top: 40px;
-    text-align: center;
-}
-
-.content-section h2 {
-    font-size: 2.5rem;
-    margin-bottom: 30px;
-}
-
-.content-section p {
-    font-size: 1.2rem;
-    line-height: 1.7;
-}
-
-.future-item p {
-    font-size: 1rem;
-}
-
-/* --- Videote lehe stiilid --- */
+/* === PARANDUS: Alamlehtede pealkirja stiil === */
+.content-title { text-align: center; font-size: 2.5rem; margin-bottom: 20px; }
+.content-title a { color: inherit; text-decoration: none; transition: color 0.3s ease; }
+.content-title a:hover { color: var(--main-blue); }
 .intro-text { text-align: center; max-width: 800px; margin: 0 auto 40px auto; font-size: 1.1rem; color: #ccc; }
+
+/* === Dünaamiliste videote lehe stiilid === */
 .playlist-section { margin-bottom: 60px; }
 .playlist-title { font-size: 2rem; color: var(--main-blue); border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 30px; }
 .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
@@ -209,22 +132,11 @@ nav a.active {
 #video-grid-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:25px;margin-bottom:40px}
 .section-divider-title{text-align:center;font-size:1.8rem;margin:60px 0 30px 0;color:var(--main-blue)}
 
-footer {
-    text-align: center;
-    padding: 40px 20px;
-    color: #aaa;
-    border-top: 1px solid #333;
-    margin-top: auto;
-}
+/* --- Jalus --- */
+footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px solid #333; margin-top: auto; }
 
+/* --- Mobiilivaate parandused --- */
 @media (max-width: 960px) {
-    nav .nav-container {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    #auth-status {
-        width: 100%;
-        margin-top: 10px;
-        padding-left: 0;
-    }
+    nav .nav-container { justify-content: center; flex-wrap: wrap; }
+    #auth-status { width: 100%; margin-top: 10px; padding-left: 0; }
 }
