@@ -7,139 +7,35 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --main-blue: #4a90e2;
-            --dark-bg: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #f4f4f4;
-        }
-        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
-        body {
-            font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background-color: var(--dark-bg);
-            color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh;
-        }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; flex-grow: 1; }
-        header { text-align: center; padding: 60px 20px; }
-        header h1 { font-size: 4rem; color: #fff; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
-        nav {
-            background: #222; color: #fff; padding: 1rem 0; text-align: center;
-            position: sticky; top: 0; z-index: 1000; overflow-x: auto; white-space: nowrap;
-        }
-        nav a { color: #fff; text-decoration: none; padding: 10px 15px; font-size: 1.1rem; transition: color .3s ease; }
-        nav a:hover, nav a.active { color: var(--main-blue); }
-        .content-title { text-align: center; font-size: 2.5rem; margin-bottom: 20px; }
-        .content-title a { color: inherit; text-decoration: none; transition: color 0.3s ease; }
-        .content-title a:hover { color: var(--main-blue); }
-        .intro-text { text-align: center; max-width: 800px; margin: 0 auto 40px auto; font-size: 1.1rem; color: #ccc; }
-        
-        .playlist-section { margin-bottom: 60px; }
-        .playlist-title { font-size: 2rem; color: var(--main-blue); border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 30px; }
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-        }
-        .video-item {
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #333;
-        }
-        .video-item iframe { width: 100%; aspect-ratio: 16 / 9; border: none; }
-        .video-info { padding: 15px; }
-        .video-info h3 { font-size: 1.1rem; margin-top: 0; margin-bottom: 10px; height: 3.6em; overflow: hidden; }
-        #loading-message { text-align: center; font-size: 1.2rem; padding: 40px; }
-
-        footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px solid #333; margin-top: auto; }
-        @media (max-width: 768px) { header h1 { font-size: 2.5rem; } }
-    </style>
+    <style>:root{--main-blue:#4a90e2;--dark-bg:#121212;--card-bg:#1e1e1e;--text-color:#f4f4f4}html{scroll-behavior:smooth;scroll-padding-top:80px}body{font-family:'Montserrat',sans-serif;margin:0;padding:0;background-color:var(--dark-bg);color:var(--text-color);display:flex;flex-direction:column;min-height:100vh}.container{max-width:1200px;margin:0 auto;padding:20px;flex-grow:1}header{text-align:center;padding:60px 20px}header h1{font-size:4rem;color:#fff;margin:0;text-transform:uppercase;letter-spacing:2px}nav{background:#222;color:#fff;padding:1rem 0;text-align:center;position:sticky;top:0;z-index:1000}nav .nav-container{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;align-items:center}nav .nav-links{overflow-x:auto;white-space:nowrap;-ms-overflow-style:none;scrollbar-width:none}nav .nav-links::-webkit-scrollbar{display:none}nav a{color:#fff;text-decoration:none;padding:10px 15px;font-size:1.1rem;transition:color .3s ease}nav a:hover,nav a.active{color:var(--main-blue)}#auth-status{padding-left:20px}.content-title{text-align:center;font-size:2.5rem;margin-bottom:20px}.content-title a{color:inherit;text-decoration:none;transition:color .3s ease}.content-title a:hover{color:var(--main-blue)}.intro-text{text-align:center;max-width:800px;margin:0 auto 40px auto;font-size:1.1rem;color:#ccc}.playlist-section{margin-bottom:60px}.playlist-title{font-size:2rem;color:var(--main-blue);border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:30px}.video-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:25px}.video-item{background-color:var(--card-bg);border-radius:10px;overflow:hidden;border:1px solid #333}.video-item iframe{width:100%;aspect-ratio:16/9;border:none}.video-info{padding:15px}.video-info h3{font-size:1.1rem;margin-top:0;margin-bottom:10px;height:3.6em;overflow:hidden}#loading-message{text-align:center;font-size:1.2rem;padding:40px}footer{text-align:center;padding:40px 20px;color:#aaa;border-top:1px solid #333;margin-top:auto}@media (max-width:960px){nav .nav-container{justify-content:center;flex-wrap:wrap}#auth-status{width:100%;margin-top:10px;padding-left:0}}</style>
 </head>
 <body>
-
     <header><h1>DainotseK</h1></header>
-
-    <nav>
-        <div class="container"><a href="index.html">Home</a><a href="videos.html" class="active">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portal</a><a href="tulevik.html">Future</a><a href="kontakt.html">Contact</a></div>
-    </nav>
-
+    <nav><div class="nav-container"><div class="nav-links"><a href="index.html">Home</a><a href="videos.html" class="active">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portal</a><a href="tulevik.html">Future</a><a href="kontakt.html">Contact</a></div><div id="auth-status"><button id="btn-login" class="btn" style="display: block;">Log In</button><button id="btn-logout" class="btn" style="display: none;">Log Out</button></div></div></nav>
     <div class="container">
         <h2 class="content-title"><a href="https://www.youtube.com/@DainotseK" target="_blank" rel="noopener noreferrer">DainotseK Videos</a></h2>
-        
-        <p class="intro-text">Explore my video world across four different themes. Whether you're captivated by virtual adventures, nature, aerial views, or time-lapse — here you'll find something that sparks your interest and inspiration.</p>
-        
-        <div id="sections-container">
-            <p id="loading-message">Loading videos...</p>
-        </div>
+        <p class="intro-text">Discover my world of video through four different themes. Whether you're captivated by virtual adventures, nature, bird's-eye views, or the accelerated passage of time – you'll find something here to spark interest and inspiration.</p>
+        <div id="sections-container"><p id="loading-message">Loading videos...</p></div>
     </div>
-
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sectionsContainer = document.getElementById('sections-container');
-            const loadingMessage = document.getElementById('loading-message');
-            
-            fetch('/.netlify/functions/getVlogVideos')
-                .then(response => {
-                    if (!response.ok) { throw new Error(`Network response was not ok: ${response.statusText}`); }
-                    return response.json();
-                })
-                .then(playlists => {
-                    loadingMessage.style.display = 'none';
-                    
-                    if (playlists.length === 0) {
-                        sectionsContainer.innerHTML = '<p>Content not found.</p>';
-                        return;
-                    }
-
-                    playlists.forEach(playlist => {
-                        const sectionElement = document.createElement('div');
-                        sectionElement.className = 'playlist-section';
-
-                        let videoHTML = '';
-                        if (playlist.videos.length > 0) {
-                            playlist.videos.forEach(video => {
-                                videoHTML += createVideoHTML(video);
-                            });
-                        } else {
-                            videoHTML = '<p>Currently, there are no new videos available in this section.</p>';
-                        }
-
-                        sectionElement.innerHTML = `
-                            <h3 class="playlist-title">${playlist.title}</h3>
+    <script>document.addEventListener('DOMContentLoaded',()=>{const e=document.getElementById('sections-container'),t=document.getElementById('loading-message');fetch('/.netlify/functions/getVlogVideos').then(e=>{if(!e.ok)throw new Error(`Network response was not ok: ${e.statusText}`);return e.json()}).then(n=>{t.style.display='none';if(0===n.length)return void(e.innerHTML='<p>No content found.</p>');n.forEach(t=>{const n=document.createElement('div');n.className='playlist-section';let o='';t.videos.length>0?t.videos.forEach(e=>{o+=createVideoHTML(e)}):o='<p>There are currently no new videos available in this section.</p>',n.innerHTML=`
+                            <h3 class="playlist-title">${t.title}</h3>
                             <div class="video-grid">
-                                ${videoHTML}
+                                ${o}
                             </div>
-                        `;
-                        sectionsContainer.appendChild(sectionElement);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching video sections:', error);
-                    loadingMessage.innerHTML = '<p>Sorry, an error occurred while loading videos.</p>';
-                });
-
-            function createVideoHTML(video) {
-                const videoId = video.snippet.resourceId.videoId;
-                const title = video.snippet.title;
-                return `
+                        `,e.appendChild(n)})}).catch(n=>{console.error('Error fetching video sections:',n),t.innerHTML='<p>Sorry, an error occurred while loading videos.</p>'});function createVideoHTML(e){const t=e.snippet.resourceId.videoId,n=e.snippet.title;return`
                     <div class="video-item">
                         <iframe 
-                            src="https://www.youtube.com/embed/${videoId}" 
-                            title="${title}" 
+                            src="https://www.youtube.com/embed/${t}" 
+                            title="${n}" 
                             frameborder="0" 
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                             allowfullscreen>
                         </iframe>
                         <div class="video-info">
-                            <h3>${title}</h3>
+                            <h3>${n}</h3>
                         </div>
                     </div>
-                `;
-            }
-        });
-    </script>
-
+                `}})</script>
 </body>
 </html>
