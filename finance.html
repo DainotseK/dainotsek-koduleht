@@ -31,17 +31,16 @@
     </nav>
 
     <div class="container">
-        <div class="brand-card">
-            <h2>DainotseK Finance</h2>
-            <div class="description">
-                <p>A transparent and honest overview of my journey in the world of finance. This page will be updated with a dynamic blog system.</p>
-                <ul>
-                    <li>Investment Portfolio Overviews</li>
-                    <li>Analyses and Transaction Log</li>
-                    <li>Blog on Financial Literacy</li>
-                </ul>
+        <div class="single-card-container">
+            <div class="brand-card">
+                <h2>DainotseK Finance</h2>
+                <div class="description">
+                    <p>A transparent and honest overview of my journey in the world of finance. This page will be updated with a dynamic blog system.</p>
+                    <div id="blog-posts-container">
+                        </div>
+                </div>
+                <a href="/admin/" id="admin-button" class="btn" style="display: none;">New Post</a>
             </div>
-            <a href="/admin/" class="btn">Add New Post (Admin)</a>
         </div>
     </div>
 
@@ -56,6 +55,12 @@
                 const isAuthenticated = await auth0Client.isAuthenticated();
                 document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
                 document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
+                
+                // Nupu nähtavuse muutmine
+                const adminButton = document.getElementById('admin-button');
+                if (adminButton) {
+                    adminButton.style.display = isAuthenticated ? 'block' : 'none';
+                }
             } catch (e) {
                 console.error("UI update error", e);
             }
@@ -78,11 +83,14 @@
 
         window.onload = async () => {
             await configureClient();
-            updateUI();
+            
             if (location.search.includes('state=') && location.search.includes('code=')) {
                 await auth0Client.handleRedirectCallback();
                 window.history.replaceState({}, document.title, "/finance.html");
             }
+
+            updateUI(); // Uuendame UI-d kohe, kui leht laeb
+
             document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
             document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
         };
