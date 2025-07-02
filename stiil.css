@@ -120,6 +120,12 @@ nav a:hover, nav a.active { color: var(--main-blue); }
 .content-section p { font-size: 1.2rem; line-height: 1.7; }
 .future-item p { font-size: 1rem; }
 
+/* === PARANDUS: Lisatud puuduolev reegel alamlehtede jaoks === */
+.single-card-container {
+    max-width: 600px;
+    margin: 40px auto;
+}
+
 /* === Dünaamiliste lehtede pealkirjad === */
 .content-title { text-align: center; font-size: 2.5rem; margin-bottom: 20px; }
 .content-title a { color: inherit; text-decoration: none; transition: color .3s ease; }
