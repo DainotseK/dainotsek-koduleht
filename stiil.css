@@ -95,9 +95,23 @@ nav a.active {
 /* --- Üldised stiilid --- */
 .main-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* MUUDATUS: Jõuga neli veergu */
     gap: 25px;
     padding-top: 40px;
+    grid-template-columns: 1fr; /* Vaikimisi 1 veerg (mobiilidele) */
+}
+
+/* Kui ekraan on laiem kui 600px, näita kahte veergu */
+@media (min-width: 600px) {
+    .main-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Kui ekraan on laiem kui 1024px, näita nelja veergu */
+@media (min-width: 1024px) {
+    .main-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 .brand-card {
