@@ -7,21 +7,107 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <style>:root{--main-blue:#4a90e2;--dark-bg:#121212;--card-bg:#1e1e1e;--text-color:#f4f4f4}html{scroll-behavior:smooth;scroll-padding-top:80px}body{font-family:'Montserrat',sans-serif;margin:0;padding:0;background-color:var(--dark-bg);color:var(--text-color)}.container{max-width:1200px;margin:0 auto;padding:20px}header{text-align:center;padding:60px 20px}header h1{font-size:4rem;color:#fff;margin:0;text-transform:uppercase;letter-spacing:2px}nav{background:#222;color:#fff;padding:1rem 0;text-align:center;position:sticky;top:0;z-index:1000;overflow-x:auto;white-space:nowrap}nav a{color:#fff;text-decoration:none;padding:10px 15px;font-size:1.1rem;transition:color .3s ease}nav a:hover,nav a.active{color:var(--main-blue)}.main-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;padding-top:40px}.brand-card{background-color:var(--card-bg);border-radius:10px;padding:30px;border:1px solid #333;transition:transform .3s ease,box-shadow .3s ease;display:flex;flex-direction:column}.brand-card:hover{transform:translateY(-10px);box-shadow:0 10px 20px rgba(0,0,0,.4);border-color:var(--main-blue)}.brand-card h2{font-size:1.8rem;color:var(--main-blue);margin-top:0;margin-bottom:15px}.brand-card .description{font-size:1rem;line-height:1.6;flex-grow:1}.brand-card ul{list-style:none;padding:0;margin:20px 0}.brand-card ul li{background:rgba(255,255,255,.05);padding:10px 15px;border-radius:5px;margin-bottom:8px;font-size:.9rem}.btn{display:inline-block;background-color:var(--main-blue);color:#fff;padding:12px 25px;text-decoration:none;border-radius:5px;font-weight:700;text-align:center;margin-top:20px;transition:background-color .3s ease}.btn:hover{background-color:#357abd}.content-section{padding-top:40px;text-align:center}.content-section h2{font-size:2.5rem;margin-bottom:30px}.future-item p{font-size:1rem}.content-section p{font-size:1.2rem;line-height:1.7}footer{text-align:center;padding:40px 20px;margin-top:40px;color:#aaa;border-top:1px solid #333}@media (max-width:768px){header h1{font-size:2.5rem}nav{justify-content:flex-start}}</style>
+    <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <style>
+        :root {
+            --main-blue: #4a90e2;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #f4f4f4;
+        }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background-color: var(--dark-bg); color: var(--text-color); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 60px 20px; }
+        header h1 { font-size: 4rem; color: #fff; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        nav { background: #222; color: #fff; padding: 1rem 0; text-align: center; position: sticky; top: 0; z-index: 1000; overflow-x: auto; white-space: nowrap; }
+        nav .nav-container { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
+        nav a { color: #fff; text-decoration: none; padding: 10px 15px; font-size: 1.1rem; transition: color 0.3s ease; }
+        nav a:hover, nav a.active { color: var(--main-blue); }
+        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding-top: 40px; }
+        .brand-card { background-color: var(--card-bg); border-radius: 10px; padding: 30px; border: 1px solid #333; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .brand-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); border-color: var(--main-blue); }
+        .brand-card h2 { font-size: 1.8rem; color: var(--main-blue); margin-top: 0; margin-bottom: 15px; }
+        .brand-card .description { font-size: 1rem; line-height: 1.6; flex-grow: 1; }
+        .btn { display: inline-block; background-color: var(--main-blue); color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 700; text-align: center; margin-top: 20px; transition: background-color 0.3s ease; cursor: pointer; border: none; }
+        .btn:hover { background-color: #357abd; }
+        .content-section { padding-top: 40px; text-align: center; }
+        .content-section h2 { font-size: 2.5rem; margin-bottom: 30px; }
+        .content-section p { font-size: 1.2rem; line-height: 1.7; }
+        footer { text-align: center; padding: 40px 20px; margin-top: 40px; color: #aaa; border-top: 1px solid #333; }
+        #auth-status { margin-left: auto; padding-left: 20px; }
+        @media (max-width: 768px) { header h1 { font-size: 2.5rem; } nav { justify-content: flex-start; } }
+    </style>
 </head>
 <body>
     <header><h1>DainotseK</h1></header>
-    <nav><div class="container"><a href="index.html" class="active">Home</a><a href="videos.html">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portal</a><a href="tulevik.html">Future</a><a href="kontakt.html">Contact</a></div></nav>
+    <nav>
+        <div class="container nav-container">
+            <div>
+                <a href="index.html" class="active">Home</a>
+                <a href="videos.html">Videos</a>
+                <a href="music.html">Music</a>
+                <a href="finance.html">Finance</a>
+                <a href="portaal.html">Portal</a>
+                <a href="tulevik.html">Future</a>
+                <a href="kontakt.html">Contact</a>
+            </div>
+            <div id="auth-status">
+                <button id="btn-login" class="btn">Log In</button>
+                <button id="btn-logout" class="btn" style="display:none;">Log Out</button>
+            </div>
+        </div>
+    </nav>
     <div class="container">
         <div class="main-grid">
-            <div class="brand-card"><h2>DainotseK Videos</h2><div class="description"><p>Quality video content for entertainment and inspiration across various platforms.</p><ul><li>Gaming Videos</li><li>Nature Videos</li><li>Timelapse & Drone Videos</li></ul><p><strong>Platforms:</strong> YouTube, TikTok, YT Shorts</p></div><a href="videos.html" class="btn">View More</a></div>
-            <div class="brand-card"><h2>DainotseK Music</h2><div class="description"><p>Unique creations where human creativity meets the power of artificial intelligence.</p><ul><li><strong>AI-Generated Music:</strong> Sound compositions based on my ideas (Suno, ChatGPT, Gemini).</li><li><strong>AI-Generated Music Videos:</strong> Visuals generated from my concepts (Sora, etc.).</li></ul><p><strong>Platforms:</strong> YouTube, SoundCloud, X.com, Reddit</p></div><a href="music.html" class="btn">View More</a></div>
-            <div class="brand-card"><h2>DainotseK Finance</h2><div class="description"><p>Transparent and honest overview of my journey in the financial world.</p><ul><li>Investment Portfolio Overviews</li><li>Analyses and Transaction Log</li><li>Blog on Financial Literacy</li></ul></div><a href="finance.html" class="btn">View More</a></div>
-            <div class="brand-card"><h2>DainotseK Portal</h2><div class="description"><p>Community-based classifieds portal for buying and selling in Estonia.</p><ul><li>Car Buying/Selling</li><li>Real Estate (houses, apartments, land)</li><li>Marketplace for Other Items</li></ul><p><strong>Goal:</strong> To provide companies and individuals with the opportunity to post classifieds.</p></div><a href="portaal.html" class="btn">View More</a></div>
+            <div class="brand-card"><h2>DainotseK Videos</h2><div class="description"><p>High-quality video content for entertainment and inspiration across various platforms.</p></div><a href="videos.html" class="btn">View More</a></div>
+            <div class="brand-card"><h2>DainotseK Music</h2><div class="description"><p>Unique creations where human creativity meets the capabilities of artificial intelligence.</p></div><a href="music.html" class="btn">View More</a></div>
+            <div class="brand-card"><h2>DainotseK Finance</h2><div class="description"><p>A transparent and honest overview of my journey in the world of finance.</p></div><a href="finance.html" class="btn">View More</a></div>
+            <div class="brand-card"><h2>DainotseK Portal</h2><div class="description"><p>A community-based portal for buying and selling classifieds in Estonia.</p></div><a href="portaal.html" class="btn">View More</a></div>
         </div>
         <section class="content-section"><h2>Future Plans</h2><p style="font-size: 1.1rem; color: #ccc; margin-bottom: 1rem;">For more detailed information about future plans, please visit the page below.</p><a href="tulevik.html" class="btn">View Future Plans</a></section>
         <section class="content-section"><h2>Contact</h2><p>For questions or collaboration inquiries, feel free to get in touch!</p><p><strong><a href="mailto:dainotsek@gmail.com" style="color: var(--main-blue); text-decoration: none;">dainotsek@gmail.com</a></strong></p></section>
     </div>
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
+
+    <script>
+        let auth0Client = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Esmalt küsime seaded meie Netlify funktsioonilt
+            const configResponse = await fetch('/.netlify/functions/getAuthConfig');
+            const config = await configResponse.json();
+
+            // Loome Auth0 kliendi
+            auth0Client = await auth0.createAuth0Client({
+                domain: config.domain,
+                clientId: config.clientId,
+                authorizationParams: {
+                    redirect_uri: window.location.origin
+                }
+            });
+
+            const loginButton = document.getElementById('btn-login');
+            const logoutButton = document.getElementById('btn-logout');
+
+            loginButton.addEventListener('click', () => auth0Client.loginWithRedirect());
+            logoutButton.addEventListener('click', () => auth0Client.logout());
+            
+            // Käsitseme tagasisuunamist pärast sisselogimist
+            if (location.search.includes('state=') && location.search.includes('code=')) {
+                await auth0Client.handleRedirectCallback();
+                window.history.replaceState({}, document.title, "/");
+            }
+            
+            // Uuendame nuppude nähtavust
+            updateUI();
+        });
+
+        const updateUI = async () => {
+            const isAuthenticated = await auth0Client.isAuthenticated();
+            document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'inline-block';
+            document.getElementById('btn-logout').style.display = isAuthenticated ? 'inline-block' : 'none';
+        };
+    </script>
 </body>
 </html>
