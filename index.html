@@ -10,44 +10,18 @@
     <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <style>
         :root {
-            --main-blue: #4a90e2; /* Your desired blue tone */
-            --dark-bg: #121212;   /* Almost black for background */
-            --card-bg: #1e1e1e;   /* Background color for blocks */
-            --text-color: #f4f4f4; /* White text */
+            --main-blue: #4a90e2;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #f4f4f4;
         }
-
-        html {
-            scroll-behavior: smooth;
-            scroll-padding-top: 80px; /* Prevents content from being hidden under the nav bar */
-        }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--dark-bg);
-            color: var(--text-color);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        header h1 {
-            font-size: 4rem;
-            color: #fff;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background-color: var(--dark-bg); color: var(--text-color); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 60px 20px; }
+        header h1 { font-size: 4rem; color: #fff; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
         
+        /* === PARANDATUD NAVIGEERIMISRIBA CSS ALGAB === */
         nav {
             background: #222;
             color: #fff;
@@ -57,22 +31,23 @@
             top: 0;
             z-index: 1000;
         }
-
         nav .nav-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* Lükkab lingid ja nupu teineteisest eemale */
             align-items: center;
-            flex-wrap: wrap;
         }
-        
         nav .nav-links {
-            overflow-x: auto;
-            white-space: nowrap;
+            overflow-x: auto; /* Kui linke on liiga palju, tekib kerimisriba */
+            white-space: nowrap; /* Hoiab lingid ühel real */
+            -ms-overflow-style: none;  /* Peidab kerimisriba IE ja Edge'is */
+            scrollbar-width: none;  /* Peidab kerimisriba Firefoxis */
         }
-
+        nav .nav-links::-webkit-scrollbar {
+            display: none; /* Peidab kerimisriba Chrome, Safari ja Operas */
+        }
         nav a {
             color: #fff;
             text-decoration: none;
@@ -80,122 +55,31 @@
             font-size: 1.1rem;
             transition: color 0.3s ease;
         }
-
         nav a:hover, nav a.active {
             color: var(--main-blue);
         }
-        
         #auth-status {
-            padding-left: 20px;
+            padding-left: 20px; /* Jätame nupule natuke hingamisruumi */
         }
+        /* === PARANDATUD NAVIGEERIMISRIBA CSS LÕPPEB === */
 
-        .main-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            padding-top: 40px;
-        }
-
-        .brand-card {
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            padding: 30px;
-            border: 1px solid #333;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .brand-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-            border-color: var(--main-blue);
-        }
-
-        .brand-card h2 {
-            font-size: 1.8rem;
-            color: var(--main-blue);
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        
-        .brand-card .description {
-            font-size: 1rem;
-            line-height: 1.6;
-            flex-grow: 1; 
-        }
-
-        .brand-card ul {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
-        }
-        
-        .brand-card ul li {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: var(--main-blue);
-            color: #fff;
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 700;
-            text-align: center;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn:hover {
-            background-color: #357abd;
-        }
-
-        .content-section {
-            padding-top: 40px;
-            text-align: center;
-        }
-
-        .content-section h2 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-        }
-        
-        .content-section p {
-            font-size: 1.2rem;
-            line-height: 1.7;
-        }
-        
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            margin-top: 40px;
-            color: #aaa;
-            border-top: 1px solid #333;
-        }
-        
-        @media (max-width: 960px) {
-            nav .nav-container {
-                justify-content: center;
-            }
-            #auth-status {
-                margin-left: 0;
-                padding-left: 0;
-                width: 100%;
-                margin-top: 10px;
-            }
-        }
+        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding-top: 40px; }
+        .brand-card { background-color: var(--card-bg); border-radius: 10px; padding: 30px; border: 1px solid #333; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .brand-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); border-color: var(--main-blue); }
+        .brand-card h2 { font-size: 1.8rem; color: var(--main-blue); margin-top: 0; margin-bottom: 15px; }
+        .brand-card .description { font-size: 1rem; line-height: 1.6; flex-grow: 1; }
+        .brand-card ul { list-style: none; padding: 0; margin: 20px 0; }
+        .brand-card ul li { background: rgba(255, 255, 255, 0.05); padding: 10px 15px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9rem; }
+        .btn { display: inline-block; background-color: var(--main-blue); color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 700; text-align: center; margin-top: 20px; transition: background-color 0.3s ease; cursor: pointer; border: none; }
+        .btn:hover { background-color: #357abd; }
+        .content-section { padding-top: 40px; text-align: center; }
+        .content-section h2 { font-size: 2.5rem; margin-bottom: 30px; }
+        .content-section p { font-size: 1.2rem; line-height: 1.7; }
+        footer { text-align: center; padding: 40px 20px; margin-top: 40px; color: #aaa; border-top: 1px solid #333; }
+        @media (max-width: 960px) { nav .nav-container { justify-content: center; flex-wrap: wrap; } #auth-status { width: 100%; margin-top: 10px; padding-left: 0;} }
     </style>
 </head>
 <body>
-
     <header><h1>DainotseK</h1></header>
 
     <nav>
@@ -231,47 +115,7 @@
 
     <script>
         let auth0Client = null;
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const configResponse = await fetch('/.netlify/functions/getAuthConfig');
-                if (!configResponse.ok) throw new Error('Could not fetch auth config.');
-                const config = await configResponse.json();
-
-                auth0Client = await auth0.createAuth0Client({
-                    domain: config.domain,
-                    clientId: config.clientId,
-                    authorizationParams: {
-                        redirect_uri: window.location.origin
-                    }
-                });
-
-                document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
-                document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
-                
-                if (location.search.includes('state=') && location.search.includes('code=')) {
-                    await auth0Client.handleRedirectCallback();
-                    window.history.replaceState({}, document.title, "/");
-                }
-            } catch(e) {
-                console.error("Auth0 initialization error", e);
-            } finally {
-                updateUI();
-            }
-        });
-
-        const updateUI = async () => {
-            if (!auth0Client) return;
-            try {
-                const isAuthenticated = await auth0Client.isAuthenticated();
-                document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
-                document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
-            } catch(e) {
-                console.error("UI update error", e);
-                document.getElementById('btn-login').style.display = 'block';
-                document.getElementById('btn-logout').style.display = 'none';
-            }
-        };
+        document.addEventListener('DOMContentLoaded',async ()=>{try{const e=await fetch('/.netlify/functions/getAuthConfig');if(!e.ok)throw new Error('Could not fetch auth config.');const t=await e.json();auth0Client=await auth0.createAuth0Client({domain:t.domain,clientId:t.clientId,authorizationParams:{redirect_uri:window.location.origin}}),document.getElementById('btn-login').addEventListener('click',()=>auth0Client.loginWithRedirect()),document.getElementById('btn-logout').addEventListener('click',()=>auth0Client.logout()),location.search.includes('state=')&&location.search.includes('code=')&&(await auth0Client.handleRedirectCallback(),window.history.replaceState({},document.title,"/"))}catch(e){console.error("Auth0 initialization error",e)}finally{updateUI()}});const updateUI=async()=>{if(!auth0Client)return;try{const e=await auth0Client.isAuthenticated();document.getElementById('btn-login').style.display=e?'none':'block',document.getElementById('btn-logout').style.display=e?'block':'none'}catch(e){console.error("UI update error",e),document.getElementById('btn-login').style.display='block',document.getElementById('btn-logout').style.display='none'}};
     </script>
 </body>
 </html>
