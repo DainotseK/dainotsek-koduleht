@@ -61,7 +61,15 @@
     <header><h1>DainotseK</h1></header>
 
     <nav>
-        <div class="container"><a href="index.html">Home</a><a href="videos.html">Videos</a><a href="music.html" class="active">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portal</a><a href="tulevik.html">Future</a><a href="kontakt.html">Contact</a></div>
+        <div class="container">
+            <a href="index.html">Home</a>
+            <a href="videos.html">Videos</a>
+            <a href="music.html" class="active">Music</a>
+            <a href="finance.html">Finance</a>
+            <a href="portaal.html">Portal</a>
+            <a href="tulevik.html">Future Plans</a>
+            <a href="kontakt.html">Contact</a>
+        </div>
     </nav>
 
     <div class="container">
@@ -105,25 +113,25 @@
 
                     const displayedIds = new Set();
 
-                    // 1. Display the newest video
+                    // 1. Pane paika kõige uuem video
                     const newestVideo = latestVideos[0];
                     featuredContainer.innerHTML = createVideoHTML(newestVideo);
                     displayedIds.add(newestVideo.id);
 
-                    // 2. Display the most popular video, if available
+                    // 2. Pane paika kõige populaarsem video, kui see on olemas
                     if (popularVideo) {
                         popularSection.style.display = 'block';
                         popularContainer.innerHTML = createVideoHTML(popularVideo);
                         displayedIds.add(popularVideo.id);
                     }
 
-                    // 3. Collect videos for the grid, avoiding already displayed videos
-                    // CHANGE: Trying to get 7 videos instead of 6
+                    // 3. Kogu kokku ruudustiku videod, vältides juba kuvatud videoid
                     const gridVideos = latestVideos
                         .filter(video => !displayedIds.has(video.id))
-                        .slice(0, 7);
+                        .slice(0, 6); // Võtame kuni 6 videot
 
-                    // 4. Display grid videos
+                    // 4. Kuva ruudustiku videod
+                    gridContainer.innerHTML = ''; // Tühjendame igaks juhuks vana sisu
                     gridVideos.forEach(video => {
                         const videoElement = document.createElement('div');
                         videoElement.innerHTML = createVideoHTML(video);
@@ -139,6 +147,7 @@
             function createVideoHTML(video) {
                 const videoId = video.id;
                 const title = video.snippet.title;
+                // PARANDATUD RIDA: Kasutame korrektset YouTube'i embed linki
                 return `
                     <div class="video-item">
                         <iframe 
