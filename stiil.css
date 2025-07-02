@@ -68,7 +68,7 @@ nav a {
     text-decoration: none;
     padding: 10px 15px;
     font-size: 1.1rem;
-    transition: color 0.3s ease;
+    transition: color .3s ease;
 }
 nav a:hover, nav a.active { color: var(--main-blue); }
 #auth-status { flex-shrink: 0; padding-left: 20px; }
@@ -86,7 +86,9 @@ nav a:hover, nav a.active { color: var(--main-blue); }
 @media (min-width: 1024px) {
     .main-grid { grid-template-columns: repeat(4, 1fr); }
 }
-.brand-card {
+
+/* === Kaartide stiilid === */
+.brand-card, .future-item {
     background-color: var(--card-bg);
     border-radius: 10px;
     padding: 30px;
@@ -95,16 +97,21 @@ nav a:hover, nav a.active { color: var(--main-blue); }
     display: flex;
     flex-direction: column;
 }
-.brand-card:hover {
+.brand-card:hover, .future-item:hover {
     transform: translateY(-10px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
     border-color: var(--main-blue);
 }
-.brand-card h2 { font-size: 1.8rem; color: var(--main-blue); margin-top: 0; margin-bottom: 15px; }
+.brand-card h2, .future-item h3 {
+    font-size: 1.8rem;
+    color: var(--main-blue);
+    margin-top: 0;
+    margin-bottom: 15px;
+}
 .brand-card .description { font-size: 1rem; line-height: 1.6; flex-grow: 1; }
 .brand-card ul { list-style: none; padding: 0; margin: 20px 0; }
-.brand-card ul li { background: rgba(255, 255, 255, 0.05); padding: 10px 15px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9rem; }
-.btn { display: inline-block; background-color: var(--main-blue); color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 700; text-align: center; margin-top: 20px; transition: background-color 0.3s ease; cursor: pointer; border: none; }
+.brand-card ul li { background: rgba(255, 255, 255, .05); padding: 10px 15px; border-radius: 5px; margin-bottom: 8px; font-size: .9rem; }
+.btn { display: inline-block; background-color: var(--main-blue); color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 700; text-align: center; margin-top: 20px; transition: background-color .3s ease; cursor: pointer; border: none; }
 .btn:hover { background-color: #357abd; }
 
 /* === Üldised sisustiilid === */
@@ -113,9 +120,9 @@ nav a:hover, nav a.active { color: var(--main-blue); }
 .content-section p { font-size: 1.2rem; line-height: 1.7; }
 .future-item p { font-size: 1rem; }
 
-/* === PARANDUS: Alamlehtede pealkirja stiil === */
+/* === Dünaamiliste lehtede pealkirjad === */
 .content-title { text-align: center; font-size: 2.5rem; margin-bottom: 20px; }
-.content-title a { color: inherit; text-decoration: none; transition: color 0.3s ease; }
+.content-title a { color: inherit; text-decoration: none; transition: color .3s ease; }
 .content-title a:hover { color: var(--main-blue); }
 .intro-text { text-align: center; max-width: 800px; margin: 0 auto 40px auto; font-size: 1.1rem; color: #ccc; }
 
@@ -139,9 +146,4 @@ footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px so
 @media (max-width: 960px) {
     nav .nav-container { justify-content: center; flex-wrap: wrap; }
     #auth-status { width: 100%; margin-top: 10px; padding-left: 0; }
-}
-/* --- Üksiku kaardi konteineri stiil alamlehtedel --- */
-.single-card-container {
-    max-width: 600px; /* Määrame maksimaalse laiuse */
-    margin: 40px auto; /* Tsentreerime kaardi lehe keskele */
 }
