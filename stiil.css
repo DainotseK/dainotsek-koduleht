@@ -79,6 +79,7 @@ nav a:hover, nav a.active { color: var(--main-blue); }
     gap: 25px;
     padding-top: 40px;
     grid-template-columns: 1fr; /* Vaikimisi 1 veerg (mobiilidele) */
+    justify-content: center;
 }
 @media (min-width: 600px) {
     .main-grid { grid-template-columns: repeat(2, 1fr); }
