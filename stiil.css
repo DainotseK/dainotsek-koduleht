@@ -95,7 +95,7 @@ nav a.active {
 /* --- Üldised stiilid --- */
 .main-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(4, 1fr); /* MUUDATUS: Jõuga neli veergu */
     gap: 25px;
     padding-top: 40px;
 }
