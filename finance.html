@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DainotseK Finance – Official Website</title>
 
   <!-- Fonts & Base CSS -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="stiil.css"/>
+  <link rel="stylesheet" href="stiil.css" />
 
-  <!-- Auth0 SDK -->
-  <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <!-- Auth0 SDK + Auth logic (defer ensures proper load order) -->
+  <script
+    src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"
+    defer
+  ></script>
+  <script src="js/auth.js" defer></script>
 
-  <!-- Page‐specific overrides -->
+  <!-- Page-specific overrides -->
   <style>
-    /* Center the page title and match other pages */
     .content-title {
       text-align: center;
       font-size: 2.5rem;
@@ -53,9 +56,13 @@
       </div>
       <div id="auth-status">
         <button id="btn-login" class="btn">Log In</button>
-        <button id="btn-logout" class="btn" style="display:none">Log Out</button>
-        <button id="admin-button" class="btn" style="display:none"
-                onclick="location.href='admin/index.html'">
+        <button id="btn-logout" class="btn" style="display: none">Log Out</button>
+        <button
+          id="admin-button"
+          class="btn"
+          style="display: none"
+          onclick="location.href='admin/index.html'"
+        >
           Admin
         </button>
       </div>
@@ -63,25 +70,23 @@
   </nav>
 
   <div class="container">
-    <!-- Page title, styled exactly like on Videos / Music -->
     <h2 class="content-title">
       <a href="finance.html">DainotseK Finance</a>
     </h2>
 
-    <!-- Card matching the other pages -->
     <div class="single-card-container">
       <div class="brand-card">
         <h2>Financial Overview</h2>
         <div class="description">
-          <p>Transparent and honest overview of my journey in the financial world.</p>
+          <p>
+            Transparent and honest overview of my journey in the financial world.
+          </p>
           <ul>
             <li>Investment Portfolio Overviews</li>
             <li>Analyses and Transaction Log</li>
             <li>Blog on Financial Literacy</li>
           </ul>
         </div>
-        <!-- Optional “View More” button if needed -->
-        <!-- <a href="#" class="btn">View More</a> -->
       </div>
     </div>
   </div>
@@ -90,8 +95,7 @@
     <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
   </footer>
 
-  <script src="js/auth.js"></script>
+  <!-- Menu toggle script (can depend on DOM, so no defer) -->
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
-```
