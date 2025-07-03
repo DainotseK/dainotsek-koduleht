@@ -28,17 +28,18 @@
             </div>
         </div>
     </nav>
+
     <div class="container">
         <section class="content-section">
             <h2>Future Plans</h2>
-            <div class="future-page-grid">
+            <div class="three-item-grid">
                 <div class="future-item">
                     <h3>DainotseK Market</h3>
                     <p>The vision is to establish a physical retail store that offers everything you need for life under one roof.</p>
                 </div>
                 <div class="future-item">
                     <h3>DainotseK Sport</h3>
-                    <p>The ambition is to build a modern sports club, a home for popular team sports as well as various individual disciplines. The goal is to create a community that values a healthy lifestyle and the spirit of sportsmanship.</p>
+                    <p>The ambition is to build a modern sports club, a home for popular team sports as well as various individual disciplines.</p>
                 </div>
                 <div class="future-item">
                     <h3>DainotseK Portal</h3>
@@ -47,21 +48,23 @@
             </div>
         </section>
     </div>
+
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
+
     <script>
         let auth0Client = null;
+
         const updateUI = async () => {
             if (!auth0Client) return;
             try {
                 const isAuthenticated = await auth0Client.isAuthenticated();
                 document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
                 document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
-            } catch (e) {
-                console.error("UI update error", e);
-            }
+            } catch (e) { console.error("UI update error", e); }
         };
+        
         const configureClient = async () => {
-            try {
+             try {
                 const response = await fetch('/.netlify/functions/getAuthConfig');
                 if (!response.ok) throw new Error('Could not fetch auth config.');
                 const config = await response.json();
@@ -70,17 +73,19 @@
                     clientId: config.clientId,
                     authorizationParams: { redirect_uri: window.location.href.split('?')[0] }
                 });
-            } catch (e) {
-                console.error("Auth0 initialization error", e);
-            }
+            } catch(e) { console.error("Auth0 initialization error", e); }
         };
+
         window.onload = async () => {
             await configureClient();
+            
             if (location.search.includes('state=') && location.search.includes('code=')) {
                 await auth0Client.handleRedirectCallback();
                 window.history.replaceState({}, document.title, "/tulevik.html");
             }
-            updateUI();
+
+            updateUI(); 
+
             document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
             document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
         };
