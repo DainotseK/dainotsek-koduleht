@@ -315,3 +315,31 @@ footer {
 .content-title a:hover {
     color: var(--main-blue);
 }
+
+/* MOBIILIVAADE: päis ja login-nupp */
+@media (max-width: 600px) {
+    /* Päise nimi veidi väiksemaks */
+    header h1 {
+        font-size: 2.5rem;
+    }
+
+    /* Navikorraldus kolonni, et login-nupp saaks liikuda üleval paremale */
+    .nav-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Nav-linkide rida liigub allapoole */
+    .nav-links {
+        order: 2;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Login/logout nupud liiguvad ülespoole ja paremale */
+    #auth-status {
+        order: 1;
+        align-self: flex-end;
+        margin: 10px 0;
+    }
+}
