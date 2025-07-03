@@ -8,46 +8,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    
     <link rel="stylesheet" href="stiil.css">
 </head>
 <body>
     <header><h1>DainotseK</h1></header>
-
-    <nav>
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="index.html" class="active">Home</a>
-                <a href="videos.html">Videos</a>
-                <a href="music.html">Music</a>
-                <a href="finance.html">Finance</a>
-                <a href="portaal.html">Portal</a>
-                <a href="tulevik.html">Future</a>
-                <a href="kontakt.html">Contact</a>
-            </div>
-            <div id="auth-status">
-                <button id="btn-login" class="btn">Log In</button>
-                <button id="btn-logout" class="btn" style="display:none;">Log Out</button>
-            </div>
-        </div>
-    </nav>
-
+    <nav><div class="nav-container"><div class="nav-links"><a href="index.html" class="active">Home</a><a href="videos.html">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portal</a><a href="tulevik.html">Future</a><a href="kontakt.html">Contact</a></div><div id="auth-status"><button id="btn-login" class="btn">Log In</button><button id="btn-logout" class="btn" style="display:none">Log Out</button></div></div></nav>
     <div class="container">
-        <div class="main-grid">
+        <div class="grid-3-col" style="padding-top: 40px;">
             <div class="brand-card"><h2>DainotseK Videos</h2><div class="description"><p>Quality video content for entertainment and inspiration across various platforms.</p><ul><li>Gaming Videos</li><li>Nature Videos</li><li>Timelapse & Drone Videos</li></ul><p><strong>Platforms:</strong> YouTube, TikTok, YT Shorts</p></div><a href="videos.html" class="btn">View More</a></div>
             <div class="brand-card"><h2>DainotseK Music</h2><div class="description"><p>Unique creations where human creativity meets the power of artificial intelligence.</p><ul><li><strong>AI-Generated Music:</strong> Sound compositions based on my ideas (Suno, ChatGPT, Gemini).</li><li><strong>AI-Generated Music Videos:</strong> Visuals generated from my concepts (Sora, etc.).</li></ul><p><strong>Platforms:</strong> YouTube, SoundCloud, X.com, Reddit</p></div><a href="music.html" class="btn">View More</a></div>
             <div class="brand-card"><h2>DainotseK Finance</h2><div class="description"><p>Transparent and honest overview of my journey in the financial world.</p><ul><li>Investment Portfolio Overviews</li><li>Analyses and Transaction Log</li><li>Blog on Financial Literacy</li></ul></div><a href="finance.html" class="btn">View More</a></div>
-            <div class="brand-card"><h2>DainotseK Portal</h2><div class="description"><p>Community-based classifieds portal for buying and selling in Estonia.</p><ul><li>Car Buying/Selling</li><li>Real Estate (houses, apartments, land)</li><li>Marketplace for Other Items</li></ul><p><strong>Goal:</strong> To provide companies and individuals with the opportunity to post classifieds.</p></div><a href="portaal.html" class="btn">View More</a></div>
         </div>
         <section class="content-section"><h2>Future Plans</h2><p style="font-size: 1.1rem; color: #ccc; margin-bottom: 1rem;">For more detailed information about future plans, please visit the page below.</p><a href="tulevik.html" class="btn">View Future Plans</a></section>
-        <section class="content-section"><h2>Contact</h2><p>For questions or collaboration inquiries, feel free to get in touch!</p><p><strong><a href="mailto:dainotsek@gmail.com" style="color: var(--main-blue); text-decoration: none;">dainotsek@gmail.com</a></strong></p></section>
+        <section class="content-section"><h2>Contact</h2><p>For questions or partnership inquiries, feel free to get in touch!</p><p><strong><a href="mailto:dainotsek@gmail.com" style="color: var(--main-blue); text-decoration: none;">dainotsek@gmail.com</a></strong></p></section>
     </div>
-
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
-
-    <script>
-        let auth0Client = null;
-        document.addEventListener('DOMContentLoaded',async ()=>{try{const e=await fetch('/.netlify/functions/getAuthConfig');if(!e.ok)throw new Error('Could not fetch auth config.');const t=await e.json();auth0Client=await auth0.createAuth0Client({domain:t.domain,clientId:t.clientId,authorizationParams:{redirect_uri:window.location.origin}}),document.getElementById('btn-login').addEventListener('click',()=>auth0Client.loginWithRedirect()),document.getElementById('btn-logout').addEventListener('click',()=>auth0Client.logout()),location.search.includes('state=')&&location.search.includes('code=')&&(await auth0Client.handleRedirectCallback(),window.history.replaceState({},document.title,"/"))}catch(e){console.error("Auth0 initialization error",e)}finally{updateUI()}});const updateUI=async()=>{if(!auth0Client)return;try{const e=await auth0Client.isAuthenticated();document.getElementById('btn-login').style.display=e?'none':'block',document.getElementById('btn-logout').style.display=e?'block':'none'}catch(e){console.error("UI update error",e),document.getElementById('btn-login').style.display='block',document.getElementById('btn-logout').style.display='none'}};
+    <script>let auth0Client=null;document.addEventListener('DOMContentLoaded',async()=>{try{const e=await fetch('/.netlify/functions/getAuthConfig');if(!e.ok)throw new Error('Could not fetch auth config.');const t=await e.json();auth0Client=await auth0.createAuth0Client({domain:t.domain,clientId:t.clientId,authorizationParams:{redirect_uri:window.location.origin}}),document.getElementById('btn-login').addEventListener('click',()=>auth0Client.loginWithRedirect()),document.getElementById('btn-logout').addEventListener('click',()=>auth0Client.logout()),location.search.includes('state=')&&location.search.includes('code=')&&(await auth0Client.handleRedirectCallback(),window.history.replaceState({},document.title,window.location.pathname))}catch(e){console.error("Auth0 initialization error",e)}finally{updateUI()}});const updateUI=async()=>{if(!auth0Client)return;try{const e=await auth0Client.isAuthenticated();document.getElementById('btn-login').style.display=e?'none':'block',document.getElementById('btn-logout').style.display=e?'block':'none'}catch(e){console.error("UI update error",e),document.getElementById('btn-login').style.display='block',document.getElementById('btn-logout').style.display='none'}};
     </script>
 </body>
 </html>
