@@ -3,16 +3,46 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Finance – DainotseK Official Website</title>
+  <title>DainotseK Finance – Official Website</title>
 
-  <!-- Fonts & Base Styles -->
+  <!-- Fonts & Base CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" href="stiil.css"/>
 
   <!-- Auth0 SDK -->
   <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+
+  <!-- Page-specific overrides -->
+  <style>
+    /* Center and style the page title */
+    .content-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin: 40px auto 20px;
+    }
+
+    /* Box around the finance text */
+    .content-section .text-box {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: var(--card-bg);
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 30px;
+      color: var(--text-color);
+    }
+
+    /* Ensure list inside box is indented */
+    .content-section .text-box ul {
+      margin-top: 1rem;
+      padding-left: 1.2rem;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -42,15 +72,21 @@
   </nav>
 
   <div class="container">
+    <!-- Centered page title -->
     <h2 class="content-title">DainotseK Finance</h2>
 
     <section class="content-section">
-      <p>Transparent and honest overview of my journey in the financial world.</p>
-      <ul>
-        <li>Investment Portfolio Overviews</li>
-        <li>Analyses and Transaction Log</li>
-        <li>Blog on Financial Literacy</li>
-      </ul>
+      <!-- Boxed content -->
+      <div class="text-box">
+        <p>
+          Transparent and honest overview of my journey in the financial world.
+        </p>
+        <ul>
+          <li>Investment Portfolio Overviews</li>
+          <li>Analyses and Transaction Log</li>
+          <li>Blog on Financial Literacy</li>
+        </ul>
+      </div>
     </section>
   </div>
 
@@ -62,3 +98,4 @@
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
+```
