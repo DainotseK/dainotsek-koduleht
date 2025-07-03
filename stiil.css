@@ -201,7 +201,7 @@ nav {
     }
 }
 
-/* Video pages */
+/* Video pages general grid */
 .video-grid {
     display: grid;
     gap: 25px;
@@ -316,30 +316,35 @@ footer {
     color: var(--main-blue);
 }
 
-/* MOBIILIVAADE: päis ja login-nupp */
+/* MOBILE VIEW: header and nav adjustments */
 @media (max-width: 600px) {
-    /* Päise nimi veidi väiksemaks */
+    /* Smaller header title */
     header h1 {
         font-size: 2.5rem;
     }
 
-    /* Navikorraldus kolonni, et login-nupp saaks liikuda üleval paremale */
+    /* Nav container in column, centered items */
     .nav-container {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
     }
 
-    /* Nav-linkide rida liigub allapoole */
+    /* Login/logout buttons up top, right-aligned, smaller size */
+    #auth-status {
+        order: 1;
+        align-self: flex-end;
+        margin: 10px 20px 5px 0;
+    }
+    #auth-status .btn {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Nav-links below, full width, centered text */
     .nav-links {
         order: 2;
         width: 100%;
         text-align: center;
-    }
-
-    /* Login/logout nupud liiguvad ülespoole ja paremale */
-    #auth-status {
-        order: 1;
-        align-self: flex-end;
-        margin: 10px 0;
     }
 }
