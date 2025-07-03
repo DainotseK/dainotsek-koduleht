@@ -14,13 +14,6 @@
   />
   <link rel="stylesheet" href="stiil.css" />
 
-  <!-- Auth0 SDK + Auth logic (defer ensures proper load order) -->
-  <script
-    src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"
-    defer
-  ></script>
-  <script src="js/auth.js" defer></script>
-
   <!-- Page-specific overrides -->
   <style>
     .content-title {
@@ -95,7 +88,19 @@
     <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
   </footer>
 
-  <!-- Menu toggle script (can depend on DOM, so no defer) -->
+  <!-- Menu toggle script -->
   <script src="js/menu-toggle.js"></script>
+
+  <!-- Load Auth0 SDK dynamically, then load auth.js -->
+  <script>
+    const script = document.createElement("script");
+    script.src = "https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js";
+    script.onload = () => {
+      const authScript = document.createElement("script");
+      authScript.src = "js/auth.js";
+      document.body.appendChild(authScript);
+    };
+    document.body.appendChild(script);
+  </script>
 </body>
 </html>
