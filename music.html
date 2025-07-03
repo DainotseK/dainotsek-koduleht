@@ -12,156 +12,33 @@
 </head>
 <body>
     <header><h1>DainotseK</h1></header>
-    <nav>
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="videos.html">Videos</a>
-                <a href="music.html" class="active">Music</a>
-                <a href="finance.html">Finance</a>
-                
-                <a href="tulevik.html">Future</a>
-                <a href="kontakt.html">Contact</a>
-            </div>
-            <div id="auth-status">
-                <button id="btn-login" class="btn">Log In</button>
-                <button id="btn-logout" class="btn" style="display:none">Log Out</button>
-            </div>
-        </div>
-    </nav>
-
+    <nav><div class="nav-container"><div class="nav-links"><a href="index.html">Home</a><a href="videos.html">Videos</a><a href="music.html" class="active">Music</a><a href="finance.html">Finance</a><a href="tulevik.html">Future</a><a href="kontakt.html">Contact</a></div><div id="auth-status"><button id="btn-login" class="btn">Log In</button><button id="btn-logout" class="btn" style="display:none">Log Out</button></div></div></nav>
     <div class="container">
         <h2 class="content-title"><a href="https://www.youtube.com/@DainotseKMusic" target="_blank" rel="noopener noreferrer">DainotseK Music</a></h2>
         <p class="intro-text">On this page, you'll hear music born from my ideas and vision, but shaped and sounded by the creative power of artificial intelligence. Each song is a unique journey where human creativity meets the boundless possibilities of technology.</p>
-        
         <div id="loading-message"><p>Loading videos...</p></div>
-        
         <div id="featured-video-container"></div>
         <div id="video-grid-container"></div>
-        
-        <div id="popular-video-section" style="display: none;">
-            <h2 class="section-divider-title">Most Popular Video</h2>
-            <div id="popular-featured-video"></div>
-        </div>
+        <div id="popular-video-section" style="display: none;"><h2 class="section-divider-title">Most Popular Video</h2><div id="popular-featured-video"></div></div>
     </div>
-
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
-
     <script>
         let auth0Client = null;
-
-        function createVideoHTML(video) {
-            const videoId = video.id;
-            const title = video.snippet.title;
-            return `
-                <div class="video-item">
-                    <iframe 
-                        src="https://www.youtube.com/embed/${videoId}" 
-                        title="${title}" 
-                        frameborder="0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        allowfullscreen>
-                    </iframe>
-                    <div class="video-info">
-                        <h3>${title}</h3>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function updateAuthUI() {
-            if (!auth0Client) return;
-            try {
-                const isAuthenticated = await auth0Client.isAuthenticated();
-                document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
-                document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
-            } catch (e) {
-                console.error("UI update error", e);
-                document.getElementById('btn-login').style.display = 'block';
-                document.getElementById('btn-logout').style.display = 'none';
-            }
-        }
-
-        async function configureClient() {
-            try {
-                const response = await fetch('/.netlify/functions/getAuthConfig');
-                if (!response.ok) throw new Error('Could not fetch auth config.');
-                const config = await response.json();
-                auth0Client = await auth0.createAuth0Client({
-                    domain: config.domain,
-                    clientId: config.clientId,
-                    authorizationParams: { redirect_uri: window.location.origin }
-                });
-            } catch(e) {
-                console.error("Auth0 initialization error", e);
-            }
-        }
-
-        function fetchVideos() {
-            const featuredContainer = document.getElementById('featured-video-container');
-            const gridContainer = document.getElementById('video-grid-container');
-            const popularContainer = document.getElementById('popular-featured-video');
-            const popularSection = document.getElementById('popular-video-section');
-            const loadingMessage = document.getElementById('loading-message');
-
-            fetch('/.netlify/functions/getYoutubeVideos')
-                .then(response => {
-                    if (!response.ok) { throw new Error(`Network response was not ok: ${response.statusText}`); }
-                    return response.json();
-                })
-                .then(data => {
-                    loadingMessage.style.display = 'none';
-                    const { latestVideos, popularVideo } = data;
-
-                    if (!latestVideos || latestVideos.length === 0) {
-                        gridContainer.innerHTML = '<p>No videos of suitable length found.</p>';
-                        return;
-                    }
-
-                    const displayedIds = new Set();
-                    
-                    const newestVideo = latestVideos[0];
-                    if (newestVideo) {
-                        featuredContainer.innerHTML = createVideoHTML(newestVideo);
-                        displayedIds.add(newestVideo.id);
-                    }
-
-                    if (popularVideo) {
-                        popularSection.style.display = 'block';
-                        popularContainer.innerHTML = createVideoHTML(popularVideo);
-                        displayedIds.add(popularVideo.id);
-                    }
-
-                    const gridVideos = latestVideos.filter(video => !displayedIds.has(video.id)).slice(0, 6);
-                    gridContainer.innerHTML = '';
-                    gridVideos.forEach(video => {
-                        const videoElement = document.createElement('div');
-                        videoElement.innerHTML = createVideoHTML(video);
-                        gridContainer.appendChild(videoElement);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching videos:', error);
-                    loadingMessage.innerHTML = '<p>Sorry, an error occurred while loading videos.</p>';
-                });
-        }
-
-        window.onload = async () => {
+        const configureClient = async () => { try { const response = await fetch('/.netlify/functions/getAuthConfig'); if (!response.ok) throw new Error('Could not fetch auth config.'); const config = await response.json(); auth0Client = await auth0.createAuth0Client({ domain: config.domain, clientId: config.clientId, authorizationParams: { redirect_uri: window.location.href.split('?')[0] } }); } catch(e) { console.error("Auth0 initialization error", e); } };
+        const updateUI = async () => { if (!auth0Client) return; try { const isAuthenticated = await auth0Client.isAuthenticated(); document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block'; document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none'; } catch (e) { console.error("UI update error", e); } };
+        function createVideoHTML(video) { const videoId = video.id; const title = video.snippet.title; return `<div class="video-item"><iframe src="https://www.youtube.com/embed/${videoId}" title="${title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe><div class="video-info"><h3>${title}</h3></div></div>`; }
+        function fetchMusicVideos() { const featuredContainer = document.getElementById('featured-video-container'); const gridContainer = document.getElementById('video-grid-container'); const popularContainer = document.getElementById('popular-featured-video'); const popularSection = document.getElementById('popular-video-section'); const loadingMessage = document.getElementById('loading-message'); fetch('/.netlify/functions/getYoutubeVideos').then(response => { if (!response.ok) { throw new Error(`Network response was not ok: ${response.statusText}`); } return response.json(); }).then(data => { loadingMessage.style.display = 'none'; const { latestVideos, popularVideo } = data; if (!latestVideos || latestVideos.length === 0) { gridContainer.innerHTML = '<p>No videos of suitable length found.</p>'; return; } const displayedIds = new Set(); const newestVideo = latestVideos[0]; if (newestVideo) { featuredContainer.innerHTML = createVideoHTML(newestVideo); displayedIds.add(newestVideo.id); } if (popularVideo) { popularSection.style.display = 'block'; popularContainer.innerHTML = createVideoHTML(popularVideo); displayedIds.add(popularVideo.id); } const gridVideos = latestVideos.filter(video => !displayedIds.has(video.id)).slice(0, 6); gridContainer.innerHTML = ''; gridVideos.forEach(video => { const videoElement = document.createElement('div'); videoElement.innerHTML = createVideoHTML(video); gridContainer.appendChild(videoElement); }); }).catch(error => { console.error('Error fetching videos:', error); loadingMessage.innerHTML = '<p>Sorry, an error occurred while loading videos.</p>'; }); }
+        window.addEventListener('load', async () => {
             await configureClient();
-            updateAuthUI();
-            
             if (location.search.includes('state=') && location.search.includes('code=')) {
                 await auth0Client.handleRedirectCallback();
                 window.history.replaceState({}, document.title, "/music.html");
-                // Pärast sisselogimist laeme videod uuesti, et tagada õige seis
-                fetchVideos();
-            } else {
-                fetchVideos();
             }
-
-            document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
-            document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
-        };
+            updateUI();
+            document.getElementById('btn-login').addEventListener('click', () => { if (auth0Client) auth0Client.loginWithRedirect(); });
+            document.getElementById('btn-logout').addEventListener('click', () => { if (auth0Client) auth0Client.logout(); });
+            fetchMusicVideos();
+        });
     </script>
 </body>
 </html>
