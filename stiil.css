@@ -79,7 +79,6 @@ nav a:hover, nav a.active { color: var(--main-blue); }
     gap: 25px;
     padding-top: 40px;
     grid-template-columns: 1fr; /* Vaikimisi 1 veerg (mobiilidele) */
-    justify-content: center;
 }
 @media (min-width: 600px) {
     .main-grid { grid-template-columns: repeat(2, 1fr); }
@@ -153,4 +152,19 @@ footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px so
 @media (max-width: 960px) {
     nav .nav-container { justify-content: center; flex-wrap: wrap; }
     #auth-status { width: 100%; margin-top: 10px; padding-left: 0; }
+}
+/* --- Tulevikuplaanide lehe spetsiifiline paigutus --- */
+.future-page-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Mobiilis on kastid üksteise all */
+    gap: 25px;
+    max-width: 900px; /* Määrame maksimaalse laiuse, et see ei veniks liiga laiaks */
+    margin: 0 auto; /* Tsentreerime terve ruudustiku */
+}
+
+/* Laiemal ekraanil paneme kastid kõrvuti */
+@media (min-width: 768px) {
+    .future-page-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
