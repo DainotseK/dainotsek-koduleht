@@ -2,41 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Auth Test</title>
-    <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <title>Login Test</title>
 </head>
 <body>
     <h1>Testing Login...</h1>
-    <p>You should be redirected to the Auth0 login page shortly.</p>
+    <p>If this page is working, you will be redirected to the Auth0 login page automatically.</p>
+    <p>If you see an error, please check the browser console (F12).</p>
 
-    <script>
-        // See skript käivitub kohe, kui leht on laetud
-        window.addEventListener('load', async () => {
-            let auth0Client = null;
-
-            try {
-                // 1. Küsime seaded Netlify funktsioonilt
-                const configResponse = await fetch('/.netlify/functions/getAuthConfig');
-                const config = await configResponse.json();
-
-                // 2. Loome Auth0 kliendi
-                auth0Client = await auth0.createAuth0Client({
-                    domain: config.domain,
-                    clientId: config.clientId,
-                    authorizationParams: {
-                        // Pärast sisselogimist suunatakse tagasi avalehele
-                        redirect_uri: window.location.origin 
-                    }
-                });
-
-                // 3. Käivitame kohe sisselogimise
-                await auth0Client.loginWithRedirect();
-
-            } catch (e) {
-                console.error("Auth0 test page error:", e);
-                document.body.innerHTML = '<h1>Error during login test. Check the console.</h1>';
-            }
-        });
-    </script>
+    <script src="/js/auth0.js"></script>
+    <script src="/js/auth.js"></script>
 </body>
 </html>
