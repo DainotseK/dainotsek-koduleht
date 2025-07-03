@@ -60,7 +60,7 @@ nav {
     align-items: center;
 }
 
-/* Menu-button, vaikimisi peidetud */
+/* Menu toggle button (hidden by default) */
 .menu-btn {
     display: none;
     background: none;
@@ -72,16 +72,8 @@ nav {
 }
 
 .nav-links {
-    flex: 1 1 auto;
+    flex: 1;
     text-align: center;
-    white-space: nowrap;
-    overflow-x: auto;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-.nav-links::-webkit-scrollbar {
-    display: none;
 }
 
 .nav-links a {
@@ -100,31 +92,26 @@ nav {
 
 #auth-status {
     display: flex;
-    flex-shrink: 0;
-    padding-left: 20px;
+    align-items: center;
 }
 
-/* Buttons */
 .btn {
-    display: inline-block;
     background-color: var(--main-blue);
     color: #fff;
     padding: 12px 25px;
     border: none;
     border-radius: 5px;
-    text-decoration: none;
     font-weight: 700;
-    text-align: center;
-    margin: 0 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-left: 10px;
 }
 
 .btn:hover {
     background-color: #357abd;
 }
 
-/* Three-item grid for homepage & future page */
+/* Homepage & Future three-item grid */
 .three-item-grid {
     display: grid;
     gap: 25px;
@@ -144,7 +131,7 @@ nav {
     }
 }
 
-/* Reusable card styles */
+/* Card styles */
 .brand-card,
 .future-item {
     background-color: var(--card-bg);
@@ -176,7 +163,7 @@ nav {
 }
 
 .brand-card ul li {
-    font-size: .9rem;
+    font-size: 0.9rem;
     padding: 10px 15px;
     margin-bottom: 8px;
     border-radius: 5px;
@@ -199,68 +186,18 @@ nav {
     line-height: 1.7;
 }
 
-/* Video grids */
-.video-grid {
-    display: grid;
-    gap: 25px;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-}
-
-.video-item {
-    background-color: var(--card-bg);
-    border: 1px solid #333;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.video-item iframe {
-    width: 100%;
-    aspect-ratio: 16/9;
-}
-
-.video-info {
-    padding: 15px;
-}
-
-.video-info h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.1rem;
-    height: 3.6em;
-    overflow: hidden;
-}
-
-/* Loading messages */
-#loading-message {
+/* Footer styling */
+footer {
     text-align: center;
-    font-size: 1.2rem;
-    padding: 40px;
+    padding: 40px 20px;
+    border-top: 1px solid #333;
+    margin-top: auto;
 }
 
-/* Playlist sections on Videos page */
-.playlist-section {
-    margin-bottom: 60px;
-}
-
-.playlist-title {
-    font-size: 2rem;
-    color: var(--main-blue);
-    border-bottom: 2px solid #333;
-    padding-bottom: 10px;
-    margin-bottom: 30px;
-}
-
-/* Divider */
-.section-divider-title {
+.footer-text {
+    margin: 0 auto;
     text-align: center;
-    font-size: 1.8rem;
-    margin: 60px 0 30px;
-    color: var(--main-blue);
-}
-
-/* Single card container */
-.single-card-container {
-    max-width: 600px;
-    margin: 40px auto;
+    color: #aaa;
 }
 
 /* Helper classes */
@@ -275,42 +212,25 @@ nav {
     text-decoration: none;
 }
 
-/* Centered page titles with link */
-.content-title {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 30px;
-}
-
-.content-title a {
-    color: inherit;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.content-title a:hover {
-    color: var(--main-blue);
-}
-
 /* ---------- MOBILE LAYOUT ---------- */
 @media (max-width: 600px) {
-    /* Pealkiri mobiilis väiksemaks */
+    /* Smaller header title */
     header h1 {
         font-size: 2.5rem;
     }
 
-    /* Näita Menu-nuppu */
+    /* Show menu toggle */
     .menu-btn {
         display: block;
     }
 
-    /* Peida vaikimisi navilinkid ja auth-status */
+    /* Hide nav links & auth by default */
     .nav-links,
     #auth-status {
         display: none;
     }
 
-    /* Kui .nav-container saab .open, näita neid */
+    /* Show when nav-container has .open */
     .nav-container.open .nav-links,
     .nav-container.open #auth-status {
         display: flex;
@@ -319,16 +239,18 @@ nav {
         text-align: center;
     }
 
-    /* Mobile nav links vertikaalselt */
+    /* Stack nav links */
     .nav-links a {
         display: block;
         padding: 10px 0;
+        margin: 0;
     }
 
-    /* Login/logout mobiilinupud kitsamaks */
+    /* Compact login/logout buttons */
     #auth-status .btn {
         padding: 8px 12px;
         font-size: 0.9rem;
-        margin: 5px 0;
+        margin: 8px 0;
     }
 }
+```
