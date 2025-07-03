@@ -13,6 +13,31 @@
 
   <!-- Auth0 SDK -->
   <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+
+  <!-- Page-specific overrides -->
+  <style>
+    /* piirame intro-teksti laius ja keskele joondus */
+    .intro-text {
+      max-width: 800px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
+
+    /* suurim video keskele fikseeritud laiusega */
+    #featured-video-container,
+    #popular-featured-video {
+      max-width: 800px;
+      margin: 0 auto 40px;
+    }
+
+    /* kahe veeru grid väikestele videotele */
+    .small-video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -45,15 +70,21 @@
     </h2>
 
     <p class="intro-text">
-      On this page, you'll hear music born from my ideas and vision,
-      shaped by the creative power of artificial intelligence.
-      Each song is a unique journey where human creativity meets technology.
+      On this page, you'll hear music born from my ideas and vision, shaped by
+      the creative power of artificial intelligence. Each song is a unique
+      journey where human creativity meets technology.
     </p>
 
     <div id="loading-message">Loading videos...</div>
+
+    <!-- 1) Kõige uuem suur video -->
     <div id="featured-video-container"></div>
+
+    <!-- 2) Kuus väikest videot (2 × 3) -->
     <div id="video-grid-container" class="small-video-grid"></div>
-    <div id="popular-video-section" style="display:none; margin-top:40px; text-align:center;">
+
+    <!-- 3) Kõige populaarsem suur video -->
+    <div id="popular-video-section" style="display:none;">
       <h2 class="section-divider-title">Most Popular Video</h2>
       <div id="popular-featured-video"></div>
     </div>
@@ -75,7 +106,8 @@
             src="https://www.youtube.com/embed/${id}"
             title="${title}"
             frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allow="accelerometer; autoplay; clipboard-write;
+                   encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen>
           </iframe>
           <div class="video-info"><h3>${title}</h3></div>
@@ -84,41 +116,41 @@
     }
 
     async function fetchMusicVideos() {
-      const loading = document.getElementById('loading-message');
-      const featured = document.getElementById('featured-video-container');
-      const grid = document.getElementById('video-grid-container');
-      const popSect = document.getElementById('popular-video-section');
-      const popFeat = document.getElementById('popular-featured-video');
+      const loadingEl = document.getElementById('loading-message');
+      const featEl    = document.getElementById('featured-video-container');
+      const gridEl    = document.getElementById('video-grid-container');
+      const popSect   = document.getElementById('popular-video-section');
+      const popFeat   = document.getElementById('popular-featured-video');
 
       try {
         const res = await fetch('/.netlify/functions/getYoutubeVideos');
         if (!res.ok) throw new Error(res.statusText);
         const { latestVideos, popularVideo } = await res.json();
 
-        loading.style.display = 'none';
+        loadingEl.style.display = 'none';
 
-        // Newest large video
+        // uusim suur video
         if (latestVideos[0]) {
-          featured.innerHTML = createVideoHTML(latestVideos[0]);
+          featEl.innerHTML = createVideoHTML(latestVideos[0]);
         }
 
-        // Six small videos
-        const used = new Set([latestVideos[0]?.id]);
+        // kuus väikest videot
+        const used  = new Set([latestVideos[0]?.id]);
         const smalls = latestVideos.filter(v => !used.has(v.id)).slice(0, 6);
-        grid.innerHTML = '';
+        gridEl.innerHTML = '';
         smalls.forEach(v => {
-          grid.insertAdjacentHTML('beforeend', createVideoHTML(v));
+          gridEl.insertAdjacentHTML('beforeend', createVideoHTML(v));
           used.add(v.id);
         });
 
-        // Most popular
+        // kõige populaarsem
         if (popularVideo && !used.has(popularVideo.id)) {
           popSect.style.display = 'block';
           popFeat.innerHTML = createVideoHTML(popularVideo);
         }
       } catch (err) {
         console.error('Error loading music videos:', err);
-        loading.textContent = 'Sorry, an error occurred while loading videos.';
+        loadingEl.textContent = 'Sorry, an error occurred while loading videos.';
       }
     }
 
@@ -126,3 +158,4 @@
   </script>
 </body>
 </html>
+```
