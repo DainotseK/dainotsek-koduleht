@@ -13,6 +13,36 @@
 
   <!-- Auth0 SDK -->
   <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+
+  <!-- Page-specific overrides -->
+  <style>
+    /* piirame intro-teksti laius ja keskele joondus */
+    .intro-text {
+      max-width: 800px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
+
+    /* kogu sektsioonide konteineri maksimaalne laius ja keskele joondus */
+    #sections-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* iga playlist-sektsioon */
+    .playlist-section {
+      margin-bottom: 60px;
+    }
+
+    .playlist-title {
+      font-size: 2rem;
+      color: var(--main-blue);
+      border-bottom: 2px solid #333;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -45,9 +75,9 @@
     </h2>
 
     <p class="intro-text">
-      Discover my world of video through four different themes.
-      Whether you're captivated by virtual adventures, nature, bird’s-eye views,
-      or the accelerated passage of time – you'll find something here.
+      Discover my world of video through four different themes. Whether you're
+      captivated by virtual adventures, nature, bird’s-eye views, or the
+      accelerated passage of time – you'll find something here to spark inspiration.
     </p>
 
     <div id="loading-message">Loading videos...</div>
@@ -61,7 +91,6 @@
   <script src="js/auth.js"></script>
   <script src="js/menu-toggle.js"></script>
   <script>
-    // Helper to build each video card
     function createVideoHTML(video) {
       const id = video.snippet.resourceId.videoId;
       const title = video.snippet.title;
@@ -71,7 +100,8 @@
             src="https://www.youtube.com/embed/${id}"
             title="${title}"
             frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allow="accelerometer; autoplay; clipboard-write;
+                   encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen>
           </iframe>
           <div class="video-info"><h3>${title}</h3></div>
@@ -79,7 +109,6 @@
       `;
     }
 
-    // Fetch and render playlists
     async function fetchVlogVideos() {
       const loadingEl = document.getElementById('loading-message');
       const container = document.getElementById('sections-container');
@@ -95,9 +124,9 @@
         playlists.forEach(pl => {
           const section = document.createElement('div');
           section.className = 'playlist-section';
-          let videosHTML = pl.videos.length
+          const videosHTML = pl.videos.length
             ? pl.videos.map(v => createVideoHTML(v)).join('')
-            : '<p>No videos available in this section.</p>';
+            : '<p>No videos in this section.</p>';
 
           section.innerHTML = `
             <h3 class="playlist-title">${pl.title}</h3>
