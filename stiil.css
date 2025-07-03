@@ -168,3 +168,16 @@ footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px so
         grid-template-columns: repeat(2, 1fr);
     }
 }
+/* --- Uus 3-veerulise ruudustiku stiil --- */
+.grid-3-col {
+    display: grid;
+    gap: 25px;
+    grid-template-columns: 1fr; /* Vaikimisi 1 veerg (mobiilidele) */
+}
+
+/* Laiemal ekraanil paneme kastid kõrvuti kolmes veerus */
+@media (min-width: 960px) {
+    .grid-3-col {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
