@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DainotseK Future Plans - Official Website</title>
+    <title>Future Plans - DainotseK Official Website</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
@@ -29,33 +29,39 @@
             </div>
         </div>
     </nav>
+
     <div class="container">
         <section class="content-section">
             <h2>Future Plans</h2>
-            <div class="future-grid">
+            <div class="main-grid">
                 <div class="future-item">
                     <h3>DainotseK Market</h3>
-                    <p>The vision is to create a physical retail store that offers everything you need for life under one roof, offering a wide range of products and services.</p>
+                    <p>The vision is to establish a physical retail store that offers everything you need for life under one roof.</p>
                 </div>
                 <div class="future-item">
                     <h3>DainotseK Sport</h3>
-                    <p>The ambition is to establish a modern sports club that would be home to both popular team sports and diverse individual disciplines. The goal is to create a community that values healthy lifestyles and a sporting spirit.</p>
+                    <p>The ambition is to build a modern sports club, a home for popular team sports as well as various individual disciplines. The goal is to create a community that values a healthy lifestyle and the spirit of sportsmanship.</p>
                 </div>
             </div>
         </section>
     </div>
+
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
 
     <script>
         let auth0Client = null;
+
         const updateUI = async () => {
             if (!auth0Client) return;
             try {
                 const isAuthenticated = await auth0Client.isAuthenticated();
                 document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
                 document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
-            } catch (e) { console.error("UI update error", e); }
+            } catch (e) {
+                console.error("UI update error", e);
+            }
         };
+        
         const configureClient = async () => {
              try {
                 const response = await fetch('/.netlify/functions/getAuthConfig');
@@ -66,15 +72,21 @@
                     clientId: config.clientId,
                     authorizationParams: { redirect_uri: window.location.href.split('?')[0] }
                 });
-            } catch(e) { console.error("Auth0 initialization error", e); }
+            } catch(e) {
+                console.error("Auth0 initialization error", e);
+            }
         };
+
         window.onload = async () => {
             await configureClient();
+            
             if (location.search.includes('state=') && location.search.includes('code=')) {
                 await auth0Client.handleRedirectCallback();
                 window.history.replaceState({}, document.title, "/tulevik.html");
             }
+
             updateUI(); 
+
             document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
             document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
         };
