@@ -95,7 +95,9 @@ nav {
     align-items: center;
 }
 
+/* Buttons & Links Styled as Buttons */
 .btn {
+    display: inline-block;
     background-color: var(--main-blue);
     color: #fff;
     padding: 12px 25px;
@@ -105,10 +107,12 @@ nav {
     cursor: pointer;
     transition: background-color 0.3s ease;
     margin-left: 10px;
+    text-decoration: none;      /* remove underline */
 }
 
 .btn:hover {
     background-color: #357abd;
+    text-decoration: none;      /* ensure no underline on hover */
 }
 
 /* Homepage & Future three-item grid */
@@ -212,6 +216,70 @@ footer {
     text-decoration: none;
 }
 
+/* Video grids */
+.video-grid {
+    display: grid;
+    gap: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.video-item {
+    background-color: var(--card-bg);
+    border: 1px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.video-item iframe {
+    width: 100%;
+    aspect-ratio: 16/9;
+}
+
+.video-info {
+    padding: 15px;
+}
+
+.video-info h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    height: 3.6em;
+    overflow: hidden;
+}
+
+/* Loading message */
+#loading-message {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 40px;
+}
+
+/* Playlist sections */
+.playlist-section {
+    margin-bottom: 60px;
+}
+
+.playlist-title {
+    font-size: 2rem;
+    color: var(--main-blue);
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+
+/* Divider */
+.section-divider-title {
+    text-align: center;
+    font-size: 1.8rem;
+    margin: 60px 0 30px;
+    color: var(--main-blue);
+}
+
+/* Single card container */
+.single-card-container {
+    max-width: 600px;
+    margin: 40px auto;
+}
+
 /* ---------- MOBILE LAYOUT ---------- */
 @media (max-width: 600px) {
     /* Smaller header title */
@@ -230,7 +298,7 @@ footer {
         display: none;
     }
 
-    /* Show when nav-container has .open */
+    /* Show when toggled */
     .nav-container.open .nav-links,
     .nav-container.open #auth-status {
         display: flex;
@@ -253,4 +321,3 @@ footer {
         margin: 8px 0;
     }
 }
-```
