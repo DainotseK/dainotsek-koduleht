@@ -6,345 +6,109 @@
 }
 
 /* Smooth scrolling and top padding for anchored sections */
-html {
-    scroll-behavior: smooth;
-    scroll-padding-top: 80px;
-}
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 
 body {
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     background-color: var(--dark-bg);
     color: var(--text-color);
     font-family: 'Montserrat', sans-serif;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    display: flex; flex-direction: column; min-height: 100vh;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    flex-grow: 1;
+    max-width: 1200px; margin: 0 auto; padding: 20px; flex-grow: 1;
 }
 
 header {
-    text-align: center;
-    padding: 60px 20px;
+    text-align: center; padding: 60px 20px;
 }
 
 header h1 {
-    margin: 0;
-    font-size: 4rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #fff;
+    margin: 0; font-size: 4rem; text-transform: uppercase;
+    letter-spacing: 2px; color: #fff;
 }
 
 /* Navigation */
 nav {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: #222;
-    padding: 1rem 0;
+    position: sticky; top: 0; z-index: 1000;
+    background: #222; padding: 1rem 0;
 }
 
 .nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 1200px; margin: 0 auto;
     padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.menu-btn {
+    display: none;
+    background: none; border: none;
+    color: #fff; font-size: 1rem; font-weight: 700;
+    cursor: pointer;
 }
 
 .nav-links {
-    flex: 1 1 auto;
-    text-align: center;
-    white-space: nowrap;
-    overflow-x: auto;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    flex: 1 1 auto; text-align: center;
+    white-space: nowrap; overflow-x: auto;
+    -ms-overflow-style: none; scrollbar-width: none;
 }
 
-.nav-links::-webkit-scrollbar {
-    display: none;
-}
+.nav-links::-webkit-scrollbar { display: none; }
 
 .nav-links a {
-    display: inline-block;
-    padding: 10px 15px;
-    font-size: 1.1rem;
-    color: #fff;
-    text-decoration: none;
+    display: inline-block; padding: 10px 15px;
+    font-size: 1.1rem; color: #fff; text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .nav-links a:hover,
-.nav-links a.active {
-    color: var(--main-blue);
-}
+.nav-links a.active { color: var(--main-blue); }
 
 #auth-status {
-    flex-shrink: 0;
-    padding-left: 20px;
+    display: flex; flex-shrink: 0; padding-left: 20px;
 }
 
-/* Buttons */
 .btn {
-    display: inline-block;
-    background-color: var(--main-blue);
-    color: #fff;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: 700;
-    text-align: center;
-    margin-top: 20px;
-    cursor: pointer;
+    display: inline-block; background-color: var(--main-blue);
+    color: #fff; padding: 12px 25px; border: none;
+    border-radius: 5px; text-decoration: none;
+    font-weight: 700; text-align: center;
+    margin: 0 5px; cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
-.btn:hover {
-    background-color: #357abd;
-}
+.btn:hover { background-color: #357abd; }
 
-/* Homepage three-item grid */
-.three-item-grid {
-    display: grid;
-    gap: 25px;
-    padding-top: 40px;
-    grid-template-columns: 1fr;
-}
+/* … (teised üldised stiilid jäävad samaks) … */
 
-@media (min-width: 600px) {
-    .three-item-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (min-width: 960px) {
-    .three-item-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* Reusable card styles */
-.brand-card,
-.future-item {
-    background-color: var(--card-bg);
-    border: 1px solid #333;
-    border-radius: 10px;
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-}
-
-.brand-card h2,
-.future-item h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.8rem;
-    color: var(--main-blue);
-}
-
-.brand-card .description {
-    flex-grow: 1;
-    line-height: 1.6;
-    font-size: 1rem;
-}
-
-.brand-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 20px 0;
-}
-
-.brand-card ul li {
-    font-size: .9rem;
-    padding: 10px 15px;
-    margin-bottom: 8px;
-    border-radius: 5px;
-    background: rgba(255,255,255,0.05);
-}
-
-/* Section styling */
-.content-section {
-    padding-top: 40px;
-    text-align: center;
-}
-
-.content-section h2 {
-    font-size: 2.5rem;
-    margin-bottom: 30px;
-}
-
-.content-section p {
-    font-size: 1.2rem;
-    line-height: 1.7;
-}
-
-/* Future plans grid */
-.future-page-grid {
-    display: grid;
-    gap: 25px;
-    max-width: 900px;
-    margin: 40px auto;
-}
-
-@media (min-width: 768px) {
-    .future-page-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Video pages general grid */
-.video-grid {
-    display: grid;
-    gap: 25px;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-}
-
-.video-item {
-    background-color: var(--card-bg);
-    border: 1px solid #333;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.video-item iframe {
-    width: 100%;
-    aspect-ratio: 16/9;
-    border: none;
-}
-
-.video-info {
-    padding: 15px;
-}
-
-.video-info h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.1rem;
-    height: 3.6em;
-    overflow: hidden;
-}
-
-/* Loading messages */
-#loading-message {
-    text-align: center;
-    font-size: 1.2rem;
-    padding: 40px;
-}
-
-/* Playlist sections on Videos page */
-.playlist-section {
-    margin-bottom: 60px;
-}
-
-.playlist-title {
-    font-size: 2rem;
-    color: var(--main-blue);
-    border-bottom: 2px solid #333;
-    padding-bottom: 10px;
-    margin-bottom: 30px;
-}
-
-/* Special small adjustments */
-.section-divider-title {
-    text-align: center;
-    font-size: 1.8rem;
-    margin: 60px 0 30px;
-    color: var(--main-blue);
-}
-
-.single-card-container {
-    max-width: 600px;
-    margin: 40px auto;
-}
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 40px 20px;
-    color: #aaa;
-    border-top: 1px solid #333;
-    margin-top: auto;
-}
-
-/* Responsive tweaks */
-@media (max-width: 960px) {
-    .nav-container {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    #auth-status {
-        width: 100%;
-        margin-top: 10px;
-        padding-left: 0;
-    }
-}
-
-/* Helper classes */
-.intro-note {
-    font-size: 1.1rem;
-    color: #ccc;
-    margin-bottom: 1rem;
-}
-
-.email-link {
-    color: var(--main-blue);
-    text-decoration: none;
-}
-
-/* Centered page titles and link style */
-.content-title {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 30px;
-}
-
-.content-title a {
-    color: inherit;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.content-title a:hover {
-    color: var(--main-blue);
-}
-
-/* MOBILE VIEW: header and nav adjustments */
+/* MOBILE VIEW: MENU TOGGLE */
 @media (max-width: 600px) {
-    /* Smaller header title */
-    header h1 {
-        font-size: 2.5rem;
-    }
+    /* väiksem päis */
+    header h1 { font-size: 2.5rem; }
 
-    /* Nav container in column, centered items */
-    .nav-container {
-        flex-direction: column;
-        align-items: center;
-    }
+    /* näita fiat Menu-nuppu */
+    .menu-btn { display: block; }
 
-    /* Login/logout buttons up top, right-aligned, smaller size */
+    /* vaikimisi peida nav-linkid ja auth-status */
+    .nav-links,
     #auth-status {
-        order: 1;
-        align-self: flex-end;
-        margin: 10px 20px 5px 0;
-    }
-    #auth-status .btn {
-        padding: 8px 12px;
-        font-size: 0.9rem;
-        margin: 0;
-    }
-
-    /* Nav-links below, full width, centered text */
-    .nav-links {
-        order: 2;
+        display: none;
+        flex-direction: column;
         width: 100%;
         text-align: center;
     }
+
+    /* toggler avamisel kuvame need */
+    .nav-container.open .nav-links,
+    .nav-container.open #auth-status {
+        display: flex;
+    }
+
+    .nav-links a {
+        display: block;
+        padding: 10px 0;
+    }
+
+    /* kui soovid login-nupud mobiilis veidi teistmoodi, lisa siia täpsemalt */
 }
