@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DainotseK Music – Official Website</title>
 
-  <!-- Fonts & Base Styles -->
+  <!-- Fonts & Base CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" href="stiil.css"/>
 
   <!-- Auth0 SDK -->
@@ -16,21 +19,36 @@
 
   <!-- Page-specific overrides -->
   <style>
-    /* piirame intro-teksti laius ja keskele joondus */
+    /* center the page title and reset its link color */
+    .content-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+    }
+    .content-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .content-title a:hover {
+      color: var(--main-blue);
+    }
+
+    /* intro text width */
     .intro-text {
       max-width: 800px;
       margin: 0 auto 30px;
       line-height: 1.6;
     }
 
-    /* suurim video keskele fikseeritud laiusega */
+    /* featured & popular videos centered */
     #featured-video-container,
     #popular-featured-video {
       max-width: 800px;
       margin: 0 auto 40px;
     }
 
-    /* kahe veeru grid väikestele videotele */
+    /* small videos 2-column grid */
     .small-video-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -40,9 +58,7 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>DainotseK</h1>
-  </header>
+  <header><h1>DainotseK</h1></header>
 
   <nav>
     <div class="nav-container">
@@ -64,7 +80,7 @@
 
   <div class="container">
     <h2 class="content-title">
-      <a href="https://www.youtube.com/@DainotseKMusic" target="_blank" rel="noopener noreferrer">
+      <a href="https://www.youtube.com/@DainotseKMusic" target="_blank" rel="noopener">
         DainotseK Music
       </a>
     </h2>
@@ -77,14 +93,17 @@
 
     <div id="loading-message">Loading videos...</div>
 
-    <!-- 1) Kõige uuem suur video -->
+    <!-- 1) newest large video -->
     <div id="featured-video-container"></div>
 
-    <!-- 2) Kuus väikest videot (2 × 3) -->
+    <!-- 2) six small videos -->
     <div id="video-grid-container" class="small-video-grid"></div>
 
-    <!-- 3) Kõige populaarsem suur video -->
-    <div id="popular-video-section" style="display:none;">
+    <!-- 3) most popular large video -->
+    <div
+      id="popular-video-section"
+      style="display:none; margin-top:40px; text-align:center;"
+    >
       <h2 class="section-divider-title">Most Popular Video</h2>
       <div id="popular-featured-video"></div>
     </div>
@@ -116,26 +135,26 @@
     }
 
     async function fetchMusicVideos() {
-      const loadingEl = document.getElementById('loading-message');
-      const featEl    = document.getElementById('featured-video-container');
-      const gridEl    = document.getElementById('video-grid-container');
-      const popSect   = document.getElementById('popular-video-section');
-      const popFeat   = document.getElementById('popular-featured-video');
+      const loadEl = document.getElementById('loading-message');
+      const featEl = document.getElementById('featured-video-container');
+      const gridEl = document.getElementById('video-grid-container');
+      const popSect = document.getElementById('popular-video-section');
+      const popFeat = document.getElementById('popular-featured-video');
 
       try {
         const res = await fetch('/.netlify/functions/getYoutubeVideos');
         if (!res.ok) throw new Error(res.statusText);
         const { latestVideos, popularVideo } = await res.json();
 
-        loadingEl.style.display = 'none';
+        loadEl.style.display = 'none';
 
-        // uusim suur video
+        // newest video
         if (latestVideos[0]) {
           featEl.innerHTML = createVideoHTML(latestVideos[0]);
         }
 
-        // kuus väikest videot
-        const used  = new Set([latestVideos[0]?.id]);
+        // six small videos
+        const used = new Set([latestVideos[0]?.id]);
         const smalls = latestVideos.filter(v => !used.has(v.id)).slice(0, 6);
         gridEl.innerHTML = '';
         smalls.forEach(v => {
@@ -143,14 +162,14 @@
           used.add(v.id);
         });
 
-        // kõige populaarsem
+        // most popular video
         if (popularVideo && !used.has(popularVideo.id)) {
           popSect.style.display = 'block';
           popFeat.innerHTML = createVideoHTML(popularVideo);
         }
       } catch (err) {
         console.error('Error loading music videos:', err);
-        loadingEl.textContent = 'Sorry, an error occurred while loading videos.';
+        loadEl.textContent = 'Sorry, an error occurred while loading videos.';
       }
     }
 
