@@ -1,43 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Future Plans - DainotseK Official Website</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <link rel="stylesheet" href="stiil.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Future Plans – DainotseK Official Website</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="stiil.css"/>
+  <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
 </head>
 <body>
-    <header><h1>DainotseK</h1></header>
-    <nav><div class="nav-container"><div class="nav-links"><a href="index.html">Home</a><a href="videos.html">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="tulevik.html" class="active">Future</a><a href="kontakt.html">Contact</a></div><div id="auth-status"><button id="btn-login" class="btn">Log In</button><button id="btn-logout" class="btn" style="display:none">Log Out</button></div></div></nav>
-    <div class="container">
-        <section class="content-section">
-            <h2>Future Plans</h2>
-            <div class="three-item-grid">
-                <div class="future-item"><h3>DainotseK Market</h3><p>The vision is to establish a physical retail store that offers everything you need for life under one roof.</p></div>
-                <div class="future-item"><h3>DainotseK Sport</h3><p>The ambition is to build a modern sports club, a home for popular team sports as well as various individual disciplines.</p></div>
-                <div class="future-item"><h3>DainotseK Portal</h3><p>A community-based portal for buying and selling classifieds in Estonia.</p></div>
-            </div>
-        </section>
+  <header>
+    <h1>DainotseK</h1>
+  </header>
+
+  <nav>
+    <div class="nav-container">
+      <button id="mobile-menu-toggle" class="menu-btn">Menu</button>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="videos.html">Videos</a>
+        <a href="music.html">Music</a>
+        <a href="finance.html">Finance</a>
+        <a href="tulevik.html" class="active">Future</a>
+        <a href="kontakt.html">Contact</a>
+      </div>
+      <div id="auth-status">
+        <button id="btn-login" class="btn">Log In</button>
+        <button id="btn-logout" class="btn" style="display:none">Log Out</button>
+      </div>
     </div>
-    <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
-    <script>
-        let auth0Client = null;
-        const configureClient = async () => { try { const response = await fetch('/.netlify/functions/getAuthConfig'); if (!response.ok) throw new Error('Could not fetch auth config.'); const config = await response.json(); auth0Client = await auth0.createAuth0Client({ domain: config.domain, clientId: config.clientId, authorizationParams: { redirect_uri: window.location.href.split('?')[0] } }); } catch(e) { console.error("Auth0 initialization error", e); } };
-        const updateUI = async () => { if (!auth0Client) return; try { const isAuthenticated = await auth0Client.isAuthenticated(); document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block'; document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none'; } catch (e) { console.error("UI update error", e); } };
-        window.addEventListener('load', async () => {
-            await configureClient();
-            if (location.search.includes('state=') && location.search.includes('code=')) {
-                await auth0Client.handleRedirectCallback();
-                window.history.replaceState({}, document.title, "/tulevik.html");
-            }
-            updateUI();
-            document.getElementById('btn-login').addEventListener('click', () => { if (auth0Client) auth0Client.loginWithRedirect(); });
-            document.getElementById('btn-logout').addEventListener('click', () => { if (auth0Client) auth0Client.logout(); });
-        });
-    </script>
+  </nav>
+
+  <div class="container">
+    <section class="content-section">
+      <h2>Future Plans</h2>
+      <div class="three-item-grid">
+        <div class="future-item">
+          <h3>DainotseK Market</h3>
+          <p>The vision is to establish a physical retail store that offers everything you need for life under one roof.</p>
+        </div>
+        <div class="future-item">
+          <h3>DainotseK Sport</h3>
+          <p>The ambition is to build a modern sports club, a home for popular team sports as well as various individual disciplines.</p>
+        </div>
+        <div class="future-item">
+          <h3>DainotseK Portal</h3>
+          <p>A community-based portal for buying and selling classifieds in Estonia.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>© 2025 DainotseK. All rights reserved.</p>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/menu-toggle.js"></script>
 </body>
 </html>
