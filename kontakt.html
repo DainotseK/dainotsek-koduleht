@@ -12,78 +12,30 @@
 </head>
 <body>
     <header><h1>DainotseK</h1></header>
-    <nav>
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="videos.html">Videos</a>
-                <a href="music.html">Music</a>
-                <a href="finance.html">Finance</a>
-                <a href="tulevik.html">Future</a>
-                <a href="kontakt.html" class="active">Contact</a>
-            </div>
-            <div id="auth-status">
-                <button id="btn-login" class="btn">Log In</button>
-                <button id="btn-logout" class="btn" style="display:none">Log Out</button>
-            </div>
-        </div>
-    </nav>
-
+    <nav><div class="nav-container"><div class="nav-links"><a href="index.html">Home</a><a href="videos.html">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="tulevik.html">Future</a><a href="kontakt.html" class="active">Contact</a></div><div id="auth-status"><button id="btn-login" class="btn">Log In</button><button id="btn-logout" class="btn" style="display:none">Log Out</button></div></div></nav>
     <div class="container">
         <section class="content-section">
             <h2>Contact</h2>
             <p>For questions or partnership inquiries, feel free to get in touch!</p>
             <p>The best way to reach me is by email:</p>
-            <p>
-                <strong><a href="mailto:dainotsek@gmail.com" style="color: var(--main-blue); text-decoration: none;">dainotsek@gmail.com</a></strong>
-            </p>
+            <p><strong><a href="mailto:dainotsek@gmail.com" style="color: var(--main-blue); text-decoration: none;">dainotsek@gmail.com</a></strong></p>
         </section>
     </div>
-
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
-
     <script>
         let auth0Client = null;
-
-        const updateUI = async () => {
-            if (!auth0Client) return;
-            try {
-                const isAuthenticated = await auth0Client.isAuthenticated();
-                document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
-                document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
-            } catch (e) {
-                console.error("UI update error", e);
-            }
-        };
-        
-        const configureClient = async () => {
-             try {
-                const response = await fetch('/.netlify/functions/getAuthConfig');
-                if (!response.ok) throw new Error('Could not fetch auth config.');
-                const config = await response.json();
-                auth0Client = await auth0.createAuth0Client({
-                    domain: config.domain,
-                    clientId: config.clientId,
-                    authorizationParams: { redirect_uri: window.location.href.split('?')[0] }
-                });
-            } catch(e) {
-                console.error("Auth0 initialization error", e);
-            }
-        };
-
-        window.onload = async () => {
+        const configureClient = async () => { try { const response = await fetch('/.netlify/functions/getAuthConfig'); if (!response.ok) throw new Error('Could not fetch auth config.'); const config = await response.json(); auth0Client = await auth0.createAuth0Client({ domain: config.domain, clientId: config.clientId, authorizationParams: { redirect_uri: window.location.href.split('?')[0] } }); } catch(e) { console.error("Auth0 initialization error", e); } };
+        const updateUI = async () => { if (!auth0Client) return; try { const isAuthenticated = await auth0Client.isAuthenticated(); document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block'; document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none'; } catch (e) { console.error("UI update error", e); } };
+        window.addEventListener('load', async () => {
             await configureClient();
-            
             if (location.search.includes('state=') && location.search.includes('code=')) {
                 await auth0Client.handleRedirectCallback();
                 window.history.replaceState({}, document.title, "/kontakt.html");
             }
-
-            updateUI(); 
-
-            document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
-            document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
-        };
+            updateUI();
+            document.getElementById('btn-login').addEventListener('click', () => { if (auth0Client) auth0Client.loginWithRedirect(); });
+            document.getElementById('btn-logout').addEventListener('click', () => { if (auth0Client) auth0Client.logout(); });
+        });
     </script>
 </body>
 </html>
