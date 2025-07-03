@@ -16,9 +16,29 @@
 
   <!-- Auth0 SDK -->
   <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+
+  <!-- Page‐specific overrides -->
+  <style>
+    /* Center the page title and match other pages */
+    .content-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin: 40px auto 20px;
+    }
+    .content-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .content-title a:hover {
+      color: var(--main-blue);
+    }
+  </style>
 </head>
 <body>
-  <header><h1>DainotseK</h1></header>
+  <header>
+    <h1>DainotseK</h1>
+  </header>
 
   <nav>
     <div class="nav-container">
@@ -43,10 +63,12 @@
   </nav>
 
   <div class="container">
-    <!-- Keskendatud pealkiri -->
-    <h2 class="content-title">DainotseK Finance</h2>
+    <!-- Page title, styled exactly like on Videos / Music -->
+    <h2 class="content-title">
+      <a href="finance.html">DainotseK Finance</a>
+    </h2>
 
-    <!-- Täpselt samamoodi stiliseeritud kaart nagu avalehel ja tulevikuplaanidel -->
+    <!-- Card matching the other pages -->
     <div class="single-card-container">
       <div class="brand-card">
         <h2>Financial Overview</h2>
@@ -58,8 +80,8 @@
             <li>Blog on Financial Literacy</li>
           </ul>
         </div>
-        <!-- Kui sa ei soovi “View more” nuppu, võid selle rea eemaldada -->
-        <!-- <a href="#" class="btn">View Details</a> -->
+        <!-- Optional “View More” button if needed -->
+        <!-- <a href="#" class="btn">View More</a> -->
       </div>
     </div>
   </div>
@@ -72,3 +94,4 @@
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
+```
