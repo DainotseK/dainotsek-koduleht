@@ -112,7 +112,7 @@ nav {
     background-color: #357abd;
 }
 
-/* Grid for three main cards on homepage */
+/* Homepage three-item grid */
 .three-item-grid {
     display: grid;
     gap: 25px;
@@ -287,7 +287,7 @@ footer {
     }
 }
 
-/* New helper classes to replace inline styles */
+/* Helper classes */
 .intro-note {
     font-size: 1.1rem;
     color: #ccc;
@@ -297,4 +297,21 @@ footer {
 .email-link {
     color: var(--main-blue);
     text-decoration: none;
+}
+
+/* Centered page titles and link style */
+.content-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+}
+
+.content-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.content-title a:hover {
+    color: var(--main-blue);
 }
