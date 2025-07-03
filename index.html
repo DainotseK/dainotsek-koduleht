@@ -39,50 +39,8 @@
     </div>
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
 
-    <script>
-        let auth0Client = null;
-
-        const configureClient = async () => {
-            try {
-                const response = await fetch('/.netlify/functions/getAuthConfig');
-                const config = await response.json();
-                auth0Client = await auth0.createAuth0Client({
-                    domain: config.domain,
-                    clientId: config.clientId,
-                    authorizationParams: {
-                        redirect_uri: window.location.origin
-                    }
-                });
-            } catch (e) {
-                console.error("Error configuring Auth0 client:", e);
-            }
-        };
-
-        const updateUI = async () => {
-            if (!auth0Client) return;
-            const isAuthenticated = await auth0Client.isAuthenticated();
-            document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
-            document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
-        };
-        
-        window.onload = async () => {
-            await configureClient();
-            
-            const query = window.location.search;
-            if (query.includes("code=") && query.includes("state=")) {
-                await auth0Client.handleRedirectCallback();
-                window.history.replaceState({}, document.title, "/");
-            }
-            
-            await updateUI();
-            
-            document.getElementById('btn-login').addEventListener('click', () => {
-                if (auth0Client) auth0Client.loginWithRedirect();
-            });
-            document.getElementById('btn-logout').addEventListener('click', () => {
-                if (auth0Client) auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
-            });
-        };
-    </script>
+    <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script src="js/auth.js"></script>
+    
 </body>
 </html>
