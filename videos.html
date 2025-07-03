@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DainotseK Videos – Official Website</title>
 
-  <!-- Fonts & Base Styles -->
+  <!-- Fonts & Base CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" href="stiil.css"/>
 
   <!-- Auth0 SDK -->
@@ -16,38 +19,49 @@
 
   <!-- Page-specific overrides -->
   <style>
-    /* piirame intro-teksti laius ja keskele joondus */
+    /* center the page title and reset its link color */
+    .content-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+    }
+    .content-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .content-title a:hover {
+      color: var(--main-blue);
+    }
+
+    /* intro text width */
     .intro-text {
       max-width: 800px;
       margin: 0 auto 30px;
       line-height: 1.6;
     }
 
-    /* kogu sektsioonide konteineri maksimaalne laius ja keskele joondus */
+    /* container for playlists */
     #sections-container {
       max-width: 800px;
       margin: 0 auto;
     }
 
-    /* iga playlist-sektsioon */
     .playlist-section {
       margin-bottom: 60px;
     }
-
     .playlist-title {
+      text-align: center;
       font-size: 2rem;
       color: var(--main-blue);
       border-bottom: 2px solid #333;
       padding-bottom: 10px;
       margin-bottom: 30px;
-      text-align: center;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>DainotseK</h1>
-  </header>
+  <header><h1>DainotseK</h1></header>
 
   <nav>
     <div class="nav-container">
@@ -69,7 +83,7 @@
 
   <div class="container">
     <h2 class="content-title">
-      <a href="https://www.youtube.com/@DainotseK" target="_blank" rel="noopener noreferrer">
+      <a href="https://www.youtube.com/@DainotseK" target="_blank" rel="noopener">
         DainotseK Videos
       </a>
     </h2>
@@ -110,7 +124,7 @@
     }
 
     async function fetchVlogVideos() {
-      const loadingEl = document.getElementById('loading-message');
+      const loading = document.getElementById('loading-message');
       const container = document.getElementById('sections-container');
 
       try {
@@ -118,7 +132,7 @@
         if (!res.ok) throw new Error(res.statusText);
         const playlists = await res.json();
 
-        loadingEl.style.display = 'none';
+        loading.style.display = 'none';
         container.innerHTML = '';
 
         playlists.forEach(pl => {
@@ -136,7 +150,7 @@
         });
       } catch (err) {
         console.error('Error loading videos:', err);
-        loadingEl.textContent = 'Sorry, an error occurred while loading videos.';
+        loading.textContent = 'Sorry, an error occurred while loading videos.';
       }
     }
 
