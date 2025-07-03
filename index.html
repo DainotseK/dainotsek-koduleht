@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stiil.css">
-    </head>
+</head>
 <body>
     <header><h1>DainotseK</h1></header>
     <nav>
@@ -38,11 +38,54 @@
     </div>
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
 
-   <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
+    <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let auth0Client = null;
 
-    <script src="/js/auth0.js"></script>
-    <script src="/js/auth.js"></script>
-</body>
-</html>
+            const configureClient = async () => {
+                const configResponse = await fetch('/.netlify/functions/getAuthConfig');
+                const config = await configResponse.json();
+                
+                auth0Client = await auth0.createAuth0Client({
+                    domain: config.domain,
+                    clientId: config.clientId,
+                    authorizationParams: {
+                        redirect_uri: window.location.origin
+                    }
+                });
+            };
+
+            const updateUI = async () => {
+                const isAuthenticated = await auth0Client.isAuthenticated();
+                document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
+                document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
+            };
+            
+            const handleAuth = async () => {
+                await configureClient();
+
+                document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
+                document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
+
+                if (location.search.includes('state=') && location.search.includes('code=')) {
+                    await auth0Client.handleRedirectCallback();
+                    window.history.replaceState({}, document.title, "/");
+                }
+
+                await updateUI();
+            };
+
+            // See on kõige olulisem osa. Me ootame, kuni Auth0 skript on täielikult laetud
+            // ja alles siis käivitame oma loogika.
+            const auth0Script = document.querySelector('script[src*="auth0-spa-js"]');
+            if (window.auth0) {
+                 handleAuth();
+            } else {
+                 auth0Script.addEventListener('load', handleAuth);
+            }
+        });
+    </script>
 </body>
 </html>
