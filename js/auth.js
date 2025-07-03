@@ -1,73 +1,61 @@
 // js/auth.js
-
 let auth0Client = null;
 
-// Laeb Auth0 konfiguratsiooni Netlify funktsioonist ja inicialiseerib kliendi
-const configureClient = async () => {
-    try {
-        const response = await fetch('/.netlify/functions/getAuthConfig');
-        if (!response.ok) throw new Error('Could not fetch auth config.');
-        const config = await response.json();
+// Konfigureeri Auth0 klient
+async function configureClient() {
+  auth0Client = await createAuth0Client({
+    domain: "YOUR_AUTH0_DOMAIN",
+    client_id: "YOUR_AUTH0_CLIENT_ID",
+    redirect_uri: window.location.origin
+  });
+}
 
-        auth0Client = await auth0.createAuth0Client({
-            domain: config.domain,
-            clientId: config.clientId,
-            authorizationParams: {
-                redirect_uri: window.location.href.split('?')[0]
-            }
-        });
-    } catch (e) {
-        console.error('Auth0 initialization error', e);
+// Uuenda UI vastavalt sisselogimise olekule
+async function updateUI() {
+  const isAuthenticated = await auth0Client.isAuthenticated();
+
+  const loginBtn = document.getElementById("btn-login");
+  const logoutBtn = document.getElementById("btn-logout");
+  const adminBtn = document.getElementById("admin-button");
+
+  if (loginBtn) loginBtn.style.display = isAuthenticated ? "none" : "inline-block";
+  if (logoutBtn) logoutBtn.style.display = isAuthenticated ? "inline-block" : "none";
+  if (adminBtn) adminBtn.style.display = isAuthenticated ? "inline-block" : "none";
+
+  // Kui oled admin-lehel ja pole sisse logitud → suuna ära
+  if (window.location.pathname.includes("admin") && !isAuthenticated) {
+    window.location.href = "/";
+  }
+
+  // Kui oled finance-lehel ja pole sisse logitud → peida sisu
+  if (window.location.pathname.includes("finance") && !isAuthenticated) {
+    const container = document.querySelector(".single-card-container");
+    if (container) {
+      container.innerHTML = `
+        <div class="brand-card">
+          <h2>Restricted</h2>
+          <div class="description">
+            <p>This content is only available to logged-in users.</p>
+          </div>
+        </div>
+      `;
     }
-};
+  }
+}
 
-// Uuendab sisselogimise ja väljalogimise nuppude nähtavust
-const updateUI = async () => {
-    if (!auth0Client) return;
-    try {
-        const isAuthenticated = await auth0Client.isAuthenticated();
-        document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
-        document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
+// Käivita sisselogimise kontroll
+window.onload = async () => {
+  await configureClient();
 
-        // finance.html admin nupp
-        const adminButton = document.getElementById('admin-button');
-        if (adminButton) {
-            adminButton.style.display = isAuthenticated ? 'block' : 'none';
-        }
-    } catch (e) {
-        console.error('UI update error', e);
-    }
-};
+  // Kui URL-is on Auth0 callback parameetrid
+  const query = window.location.search;
+  if (query.includes("code=") && query.includes("state=")) {
+    await auth0Client.handleRedirectCallback();
+    window.history.replaceState({}, document.title, "/");
+  }
 
-// Peamine funktsioon
-const main = async () => {
-    await configureClient();
+  await updateUI();
 
-    // Auth0 callback käsitlemine
-    if (location.search.includes('state=') && location.search.includes('code=')) {
-        try {
-            await auth0Client.handleRedirectCallback();
-        } catch (e) {
-            console.error('Redirect callback error', e);
-        }
-        // Eemaldame URL-ist parameetrid
-        const cleanUrl = window.location.href.split('?')[0];
-        window.history.replaceState({}, document.title, cleanUrl);
-    }
-
-    // Uuendame UI vastavalt auth-seisule
-    await updateUI();
-
-    // Lisa sündmuste kuulajad
-    const loginBtn = document.getElementById('btn-login');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', () => auth0Client && auth0Client.loginWithRedirect());
-    }
-    const logoutBtn = document.getElementById('btn-logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => auth0Client && auth0Client.logout({ logoutParams: { returnTo: window.location.origin } }));
-    }
-};
-
-// Käivitame
-window.addEventListener('load', main);
+  // Nuppude sündmused
+  const loginBtn = document.getElementById("btn-login");
+  const logoutBtn
