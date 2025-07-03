@@ -12,84 +12,19 @@
 </head>
 <body>
     <header><h1>DainotseK</h1></header>
-    <nav>
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="videos.html">Videos</a>
-                <a href="music.html">Music</a>
-                <a href="finance.html">Finance</a>
-                <a href="portaal.html">Portal</a>
-                <a href="tulevik.html" class="active">Future</a>
-                <a href="kontakt.html">Contact</a>
-            </div>
-            <div id="auth-status">
-                <button id="btn-login" class="btn">Log In</button>
-                <button id="btn-logout" class="btn" style="display:none">Log Out</button>
-            </div>
-        </div>
-    </nav>
-
+    <nav><div class="nav-container"><div class="nav-links"><a href="index.html">Home</a><a href="videos.html">Videos</a><a href="music.html">Music</a><a href="finance.html">Finance</a><a href="portaal.html">Portal</a><a href="tulevik.html" class="active">Future</a><a href="kontakt.html">Contact</a></div><div id="auth-status"><button id="btn-login" class="btn">Log In</button><button id="btn-logout" class="btn" style="display:none">Log Out</button></div></div></nav>
     <div class="container">
         <section class="content-section">
             <h2>Future Plans</h2>
-            <div class="future-page-grid">
-                <div class="future-item">
-                    <h3>DainotseK Market</h3>
-                    <p>The vision is to establish a physical retail store that offers everything you need for life under one roof.</p>
-                </div>
-                <div class="future-item">
-                    <h3>DainotseK Sport</h3>
-                    <p>The ambition is to build a modern sports club, a home for popular team sports as well as various individual disciplines. The goal is to create a community that values a healthy lifestyle and the spirit of sportsmanship.</p>
-                </div>
+            <div class="grid-3-col">
+                <div class="future-item"><h3>DainotseK Market</h3><p>The vision is to establish a physical retail store that offers everything you need for life under one roof.</p></div>
+                <div class="future-item"><h3>DainotseK Sport</h3><p>The ambition is to build a modern sports club, a home for popular team sports as well as various individual disciplines. The goal is to create a community that values a healthy lifestyle and the spirit of sportsmanship.</p></div>
+                <div class="future-item"><h3>DainotseK Portal</h3><p>A community-based portal for buying and selling classifieds in Estonia.</p></div>
             </div>
         </section>
     </div>
-
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
-
-    <script>
-        let auth0Client = null;
-
-        const updateUI = async () => {
-            if (!auth0Client) return;
-            try {
-                const isAuthenticated = await auth0Client.isAuthenticated();
-                document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
-                document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
-            } catch (e) {
-                console.error("UI update error", e);
-            }
-        };
-        
-        const configureClient = async () => {
-             try {
-                const response = await fetch('/.netlify/functions/getAuthConfig');
-                if (!response.ok) throw new Error('Could not fetch auth config.');
-                const config = await response.json();
-                auth0Client = await auth0.createAuth0Client({
-                    domain: config.domain,
-                    clientId: config.clientId,
-                    authorizationParams: { redirect_uri: window.location.href.split('?')[0] }
-                });
-            } catch(e) {
-                console.error("Auth0 initialization error", e);
-            }
-        };
-
-        window.onload = async () => {
-            await configureClient();
-            
-            if (location.search.includes('state=') && location.search.includes('code=')) {
-                await auth0Client.handleRedirectCallback();
-                window.history.replaceState({}, document.title, "/tulevik.html");
-            }
-
-            updateUI(); 
-
-            document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
-            document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
-        };
+    <script>let auth0Client=null;const updateUI=async()=>{if(!auth0Client)return;try{const e=await auth0Client.isAuthenticated();document.getElementById('btn-login').style.display=e?'none':'block',document.getElementById('btn-logout').style.display=e?'block':'none'}catch(e){console.error("UI update error",e)}},configureClient=async()=>{try{const e=await fetch('/.netlify/functions/getAuthConfig');if(!e.ok)throw new Error('Could not fetch auth config.');const t=await e.json();auth0Client=await auth0.createAuth0Client({domain:t.domain,clientId:t.clientId,authorizationParams:{redirect_uri:window.location.href.split('?')[0]}})}catch(e){console.error("Auth0 initialization error",e)}};window.onload=async()=>{await configureClient(),location.search.includes('state=')&&location.search.includes('code=')&&(await auth0Client.handleRedirectCallback(),window.history.replaceState({},document.title,"/tulevik.html")),updateUI(),document.getElementById('btn-login').addEventListener('click',()=>auth0Client.loginWithRedirect()),document.getElementById('btn-logout').addEventListener('click',()=>auth0Client.logout())};
     </script>
 </body>
 </html>
