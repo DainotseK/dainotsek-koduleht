@@ -168,16 +168,18 @@ footer { text-align: center; padding: 40px 20px; color: #aaa; border-top: 1px so
         grid-template-columns: repeat(2, 1fr);
     }
 }
-/* --- Uus 3-veerulise ruudustiku stiil --- */
-.grid-3-col {
+/* --- Tulevikuplaanide ja sarnaste lehtede 3-veeruline paigutus --- */
+.three-item-grid {
     display: grid;
+    grid-template-columns: 1fr; /* Mobiilis vaikimisi üks veerg */
     gap: 25px;
-    grid-template-columns: 1fr; /* Vaikimisi 1 veerg (mobiilidele) */
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* Laiemal ekraanil paneme kastid kõrvuti kolmes veerus */
+/* Laiemal ekraanil kui 960px, kuva kolm veergu */
 @media (min-width: 960px) {
-    .grid-3-col {
+    .three-item-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
