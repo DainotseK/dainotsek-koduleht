@@ -1,6 +1,6 @@
 let auth0Client = null;
 
-// Funktsioon, mis seadistab Auth0 kliendi
+// Funktsioon, mis seadistab Auth0 kliendi. See käivitatakse alles siis, kui kõik on valmis.
 const configureClient = async () => {
     try {
         const response = await fetch('/.netlify/functions/getAuthConfig');
@@ -11,7 +11,8 @@ const configureClient = async () => {
             domain: config.domain,
             clientId: config.clientId,
             authorizationParams: {
-                redirect_uri: window.location.origin
+                // Kasutame window.location.pathname, et see töötaks igal lehel korrektselt
+                redirect_uri: window.location.origin + window.location.pathname
             }
         });
     } catch(e) {
@@ -19,7 +20,7 @@ const configureClient = async () => {
     }
 };
 
-// Funktsioon, mis uuendab nuppude välimust vastavalt sisselogimise staatusele
+// Funktsioon, mis uuendab nuppude nähtavust
 const updateUI = async () => {
     if (!auth0Client) return;
     try {
@@ -31,25 +32,28 @@ const updateUI = async () => {
     }
 };
 
-// See funktsioon käivitub, kui leht on täielikult laetud
-window.onload = async () => {
+// Peamine funktsioon, mis käivitub pärast lehe laadimist
+const main = async () => {
     await configureClient();
-    
-    // Käsitseme tagasisuunamist pärast sisselogimist
-    if (location.search.includes('state=') && location.search.includes('code=')) {
-        await auth0Client.handleRedirectCallback();
-        // Puhastame URL-i ja suuname avalehele, et vältida vigu
-        window.history.replaceState({}, document.title, "/");
-    }
 
-    updateUI();
+    const loginButton = document.getElementById('btn-login');
+    const logoutButton = document.getElementById('btn-logout');
 
-    // Seome nupud tegevustega
-    document.getElementById('btn-login').addEventListener('click', () => {
+    loginButton.addEventListener('click', () => {
         if (auth0Client) auth0Client.loginWithRedirect();
     });
 
-    document.getElementById('btn-logout').addEventListener('click', () => {
+    logoutButton.addEventListener('click', () => {
         if (auth0Client) auth0Client.logout();
     });
+
+    if (location.search.includes('state=') && location.search.includes('code=')) {
+        await auth0Client.handleRedirectCallback();
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    updateUI();
 };
+
+// Ootame, kuni terve leht on laetud, ja alles siis käivitame oma loogika
+window.addEventListener('load', main);
