@@ -4,11 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DainotseK Music – Official Website</title>
+
+  <!-- font & base styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="stiil.css"/>
+
+  <!-- Auth0 SDK -->
   <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+
+  <!-- Page-specific overrides -->
+  <style>
+    /* piirame intro-teksti laius ja keskel joondus */
+    .intro-text {
+      max-width: 800px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
+
+    /* kahe veeru grid väikestele videotele */
+    .small-video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    /* suurim videopaneel keskele */
+    #featured-video-container,
+    #popular-featured-video {
+      max-width: 800px;
+      margin: 0 auto 40px;
+    }
+  </style>
 </head>
 <body>
   <header><h1>DainotseK</h1></header>
@@ -31,26 +60,31 @@
 
   <div class="container">
     <h2 class="content-title">
-      <a href="https://www.youtube.com/@DainotseKMusic" target="_blank" rel="noopener noreferrer">
+      <a href="https://www.youtube.com/@DainotseKMusic"
+         target="_blank"
+         rel="noopener noreferrer">
         DainotseK Music
       </a>
     </h2>
+
     <p class="intro-text">
-      On this page, you'll hear music born from my ideas and vision, but shaped and
-      sounded by the creative power of artificial intelligence. Each song is a unique
-      journey where human creativity meets the boundless possibilities of technology.
+      On this page, you'll hear music born from my ideas and vision,
+      but shaped and sounded by the creative power of artificial intelligence.
+      Each song is a unique journey where human creativity meets
+      the boundless possibilities of technology.
     </p>
 
+    <!-- laadimise teade -->
     <div id="loading-message"><p>Loading videos...</p></div>
 
-    <!-- Suurim (kõige uuem) video -->
-    <div id="featured-video-container" class="single-card-container"></div>
+    <!-- 1) Suurim (kõige uuem video) -->
+    <div id="featured-video-container"></div>
 
-    <!-- Kuus väikest videot (2 veergu × 3 rida) -->
-    <div id="video-grid-container" class="video-grid"></div>
+    <!-- 2) Kuus väikest videot (2 × 3) -->
+    <div id="video-grid-container" class="small-video-grid"></div>
 
-    <!-- Suurim (kõige populaarsem) video lõpus -->
-    <div id="popular-video-section" style="display:none; text-align:center; margin-top:40px;">
+    <!-- 3) Suurim (kõige populaarsem video) -->
+    <div id="popular-video-section" style="display:none;">
       <h2 class="section-divider-title">Most Popular Video</h2>
       <div id="popular-featured-video"></div>
     </div>
@@ -58,77 +92,71 @@
 
   <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
 
+  <!-- auth & video-loading logic -->
   <script src="js/auth.js"></script>
   <script>
-    // Ühiskasutatav funktsioon iframe + title loomiseks
     function createVideoHTML(video) {
-      const videoId = video.id;
+      const id    = video.id;
       const title = video.snippet.title;
       return `
         <div class="video-item">
           <iframe
-            src="https://www.youtube.com/embed/${videoId}"
+            src="https://www.youtube.com/embed/${id}"
             title="${title}"
             frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media;
-                   gyroscope; picture-in-picture; web-share"
+            allow="accelerometer; autoplay; clipboard-write;
+                   encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen>
           </iframe>
-          <div class="video-info">
-            <h3>${title}</h3>
-          </div>
+          <div class="video-info"><h3>${title}</h3></div>
         </div>
       `;
     }
 
     async function fetchMusicVideos() {
-      const loadingMessage = document.getElementById('loading-message');
-      const featuredContainer = document.getElementById('featured-video-container');
-      const gridContainer = document.getElementById('video-grid-container');
-      const popularSection = document.getElementById('popular-video-section');
-      const popularContainer = document.getElementById('popular-featured-video');
+      const loadingEl  = document.getElementById('loading-message');
+      const featEl     = document.getElementById('featured-video-container');
+      const gridEl     = document.getElementById('video-grid-container');
+      const popSect    = document.getElementById('popular-video-section');
+      const popFeatEl  = document.getElementById('popular-featured-video');
 
       try {
         const res = await fetch('/.netlify/functions/getYoutubeVideos');
         if (!res.ok) throw new Error(res.statusText);
         const { latestVideos, popularVideo } = await res.json();
 
-        loadingMessage.style.display = 'none';
+        loadingEl.style.display = 'none';
 
-        // 1) Kõige uuem video suurena
-        if (latestVideos.length > 0) {
-          const newest = latestVideos[0];
-          featuredContainer.innerHTML = createVideoHTML(newest);
+        // 1) kõige uuem video
+        if (latestVideos[0]) {
+          featEl.innerHTML = createVideoHTML(latestVideos[0]);
         }
 
-        // 2) Kuus väikest videot
-        const displayed = new Set([ latestVideos[0]?.id ]);
-        const gridVideos = latestVideos
-          .filter(v => !displayed.has(v.id))
+        // 2) kuus väikest videot
+        const used = new Set([latestVideos[0]?.id]);
+        const smalls = latestVideos
+          .filter(v => !used.has(v.id))
           .slice(0, 6);
 
-        gridContainer.innerHTML = '';
-        gridVideos.forEach(v => {
-          gridContainer.insertAdjacentHTML('beforeend', createVideoHTML(v));
-          displayed.add(v.id);
+        gridEl.innerHTML = '';
+        smalls.forEach(v => {
+          gridEl.insertAdjacentHTML('beforeend', createVideoHTML(v));
+          used.add(v.id);
         });
 
-        // 3) Kõige populaarsem video lõpus
-        if (popularVideo && !displayed.has(popularVideo.id)) {
-          popularSection.style.display = 'block';
-          popularContainer.innerHTML = createVideoHTML(popularVideo);
+        // 3) kõige populaarsem video
+        if (popularVideo && !used.has(popularVideo.id)) {
+          popSect.style.display = 'block';
+          popFeatEl.innerHTML = createVideoHTML(popularVideo);
         }
-
       } catch (err) {
-        console.error('Error loading music videos:', err);
-        loadingMessage.innerHTML = '<p>Sorry, an error occurred while loading videos.</p>';
+        console.error('Could not load videos', err);
+        loadingEl.innerHTML =
+          '<p>Sorry, an error occurred while loading videos.</p>';
       }
     }
 
-    window.addEventListener('load', async () => {
-      await fetchMusicVideos();
-    });
+    window.addEventListener('load', fetchMusicVideos);
   </script>
 </body>
 </html>
-```
