@@ -4,14 +4,21 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DainotseK Videos – Official Website</title>
+
+  <!-- Fonts & Base Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="stiil.css"/>
+
+  <!-- Auth0 SDK -->
   <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
 </head>
 <body>
-  <header><h1>DainotseK</h1></header>
+  <header>
+    <h1>DainotseK</h1>
+  </header>
+
   <nav>
     <div class="nav-container">
       <button id="mobile-menu-toggle" class="menu-btn">Menu</button>
@@ -31,12 +38,80 @@
   </nav>
 
   <div class="container">
-    <!-- Videos page sisu… -->
+    <h2 class="content-title">
+      <a href="https://www.youtube.com/@DainotseK" target="_blank" rel="noopener noreferrer">
+        DainotseK Videos
+      </a>
+    </h2>
+
+    <p class="intro-text">
+      Discover my world of video through four different themes.
+      Whether you're captivated by virtual adventures, nature, bird’s-eye views,
+      or the accelerated passage of time – you'll find something here.
+    </p>
+
+    <div id="loading-message">Loading videos...</div>
+    <div id="sections-container"></div>
   </div>
 
-  <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
+  <footer>
+    <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
+  </footer>
 
   <script src="js/auth.js"></script>
   <script src="js/menu-toggle.js"></script>
+  <script>
+    // Helper to build each video card
+    function createVideoHTML(video) {
+      const id = video.snippet.resourceId.videoId;
+      const title = video.snippet.title;
+      return `
+        <div class="video-item">
+          <iframe
+            src="https://www.youtube.com/embed/${id}"
+            title="${title}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen>
+          </iframe>
+          <div class="video-info"><h3>${title}</h3></div>
+        </div>
+      `;
+    }
+
+    // Fetch and render playlists
+    async function fetchVlogVideos() {
+      const loadingEl = document.getElementById('loading-message');
+      const container = document.getElementById('sections-container');
+
+      try {
+        const res = await fetch('/.netlify/functions/getVlogVideos');
+        if (!res.ok) throw new Error(res.statusText);
+        const playlists = await res.json();
+
+        loadingEl.style.display = 'none';
+        container.innerHTML = '';
+
+        playlists.forEach(pl => {
+          const section = document.createElement('div');
+          section.className = 'playlist-section';
+          let videosHTML = pl.videos.length
+            ? pl.videos.map(v => createVideoHTML(v)).join('')
+            : '<p>No videos available in this section.</p>';
+
+          section.innerHTML = `
+            <h3 class="playlist-title">${pl.title}</h3>
+            <div class="video-grid">${videosHTML}</div>
+          `;
+          container.appendChild(section);
+        });
+      } catch (err) {
+        console.error('Error loading videos:', err);
+        loadingEl.textContent = 'Sorry, an error occurred while loading videos.';
+      }
+    }
+
+    window.addEventListener('load', fetchVlogVideos);
+  </script>
 </body>
 </html>
