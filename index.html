@@ -8,10 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="stiil.css">
-    
     <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <script src="auth.js" defer></script>
-
 </head>
 <body>
     <header><h1>DainotseK</h1></header>
@@ -41,5 +38,51 @@
         <section class="content-section"><h2>Contact</h2><p>For questions or partnership inquiries, feel free to get in touch!</p><p><strong><a href="mailto:dainotsek@gmail.com" style="color: var(--main-blue); text-decoration: none;">dainotsek@gmail.com</a></strong></p></section>
     </div>
     <footer><p>© 2025 DainotseK. All rights reserved.</p></footer>
-    </body>
+
+    <script>
+        // See skript käivitub alles siis, kui kogu leht on laetud
+        window.addEventListener('load', async () => {
+            let auth0Client = null;
+
+            // Kontrollime, kas Auth0 skript on laetud, enne kui midagi teeme
+            if (typeof auth0 === 'undefined') {
+                console.error('Auth0 library not loaded!');
+                return;
+            }
+
+            try {
+                // Küsime seaded
+                const configResponse = await fetch('/.netlify/functions/getAuthConfig');
+                const config = await configResponse.json();
+
+                // Loome Auth0 kliendi
+                auth0Client = await auth0.createAuth0Client({
+                    domain: config.domain,
+                    clientId: config.clientId,
+                    authorizationParams: {
+                        redirect_uri: window.location.origin
+                    }
+                });
+
+                // Seome nupud tegevustega
+                document.getElementById('btn-login').addEventListener('click', () => auth0Client.loginWithRedirect());
+                document.getElementById('btn-logout').addEventListener('click', () => auth0Client.logout());
+                
+                // Käsitseme tagasisuunamist pärast sisselogimist
+                if (location.search.includes('state=') && location.search.includes('code=')) {
+                    await auth0Client.handleRedirectCallback();
+                    window.history.replaceState({}, document.title, "/");
+                }
+                
+                // Uuendame nuppude nähtavust
+                const isAuthenticated = await auth0Client.isAuthenticated();
+                document.getElementById('btn-login').style.display = isAuthenticated ? 'none' : 'block';
+                document.getElementById('btn-logout').style.display = isAuthenticated ? 'block' : 'none';
+
+            } catch (e) {
+                console.error("Auth0 Error:", e);
+            }
+        });
+    </script>
+</body>
 </html>
