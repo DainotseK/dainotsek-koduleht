@@ -1,17 +1,13 @@
-// js/auth.js
-
 let auth0Client = null;
 
-// Fetch our Auth0 config from the Netlify Function
+// 1) Lae Auth0 config
 async function fetchAuthConfig() {
   const res = await fetch("/.netlify/functions/getAuthConfig");
-  if (!res.ok) {
-    throw new Error("Failed to load Auth0 config");
-  }
+  if (!res.ok) throw new Error("Failed to load Auth0 config");
   return res.json();
 }
 
-// Initialize the Auth0 client
+// 2) Initsialiseeri Auth0 klient
 async function configureClient() {
   const { domain, clientId } = await fetchAuthConfig();
   auth0Client = await createAuth0Client({
@@ -21,69 +17,66 @@ async function configureClient() {
   });
 }
 
-// Show or hide buttons & protect pages
+// 3) Kuvab/peidab nupud ja sisu
 async function updateUI() {
   const isAuthenticated = await auth0Client.isAuthenticated();
+  document.getElementById("btn-login") .style.display = isAuthenticated ? "none" : "inline-block";
+  document.getElementById("btn-signup").style.display = isAuthenticated ? "none" : "inline-block";
+  document.getElementById("btn-logout").style.display = isAuthenticated ? "inline-block" : "none";
+  document.getElementById("admin-button").style.display = isAuthenticated ? "inline-block" : "none";
 
-  const loginBtn  = document.getElementById("btn-login");
-  const signupBtn = document.getElementById("btn-signup");
-  const logoutBtn = document.getElementById("btn-logout");
-  const adminBtn  = document.getElementById("admin-button");
-
-  if (loginBtn)  loginBtn.style.display  = isAuthenticated ? "none" : "inline-block";
-  if (signupBtn) signupBtn.style.display = isAuthenticated ? "none" : "inline-block";
-  if (logoutBtn) logoutBtn.style.display = isAuthenticated ? "inline-block" : "none";
-  if (adminBtn)  adminBtn.style.display  = isAuthenticated ? "inline-block" : "none";
-
-  // Protect /admin
-  if (location.pathname.includes("admin") && !isAuthenticated) {
-    location.href = "/";
-  }
-
-  // Protect /finance
-  if (location.pathname.includes("finance") && !isAuthenticated) {
+  // Kaitse finance-lehte – kuva sisu ainult siis, kui sisse logitud
+  if (location.pathname.includes("finance")) {
     const container = document.querySelector(".single-card-container");
-    if (container) {
+    if (!isAuthenticated && container) {
       container.innerHTML = `
-      <div class="brand-card">
-        <h2>Restricted</h2>
-        <div class="description">
-          <p>This content is only available to logged-in users.</p>
-        </div>
-      </div>`;
+        <div class="brand-card">
+          <h2>Restricted</h2>
+          <div class="description">
+            <p>This content is only available to logged-in users.</p>
+          </div>
+        </div>`;
     }
   }
 }
 
-// Wire up everything when page loads
+// 4) Käivitus peale laadimist
 window.onload = async () => {
   try {
     await configureClient();
 
-    // Handle the redirect back from Auth0
+    // Kui tulime Auth0-lt tagasi, käitle tagasisuunamise info
     const query = window.location.search;
     if (query.includes("code=") && query.includes("state=")) {
-      await auth0Client.handleRedirectCallback();
-      history.replaceState({}, document.title, "/");
+      // handleRedirectCallback annab appState-objekti
+      const { appState } = await auth0Client.handleRedirectCallback();
+      // aseta URL tagasi sinna, kust kasutaja saabus
+      const target = appState && appState.target ? appState.target : "/";
+      window.history.replaceState({}, document.title, target);
     }
 
-    // Update UI based on auth state
+    // Nüüd kuva uuendatud UI
     await updateUI();
 
-    // Register click handlers
-    document.getElementById("btn-login")?.addEventListener("click", () =>
-      auth0Client.loginWithRedirect()
-    );
+    // Nupu sündmused
+    document.getElementById("btn-login")?.addEventListener("click", () => {
+      auth0Client.loginWithRedirect({
+        appState: { target: window.location.pathname }
+      });
+    });
 
-    document.getElementById("btn-signup")?.addEventListener("click", () =>
-      auth0Client.loginWithRedirect({ screen_hint: "signup" })
-    );
+    document.getElementById("btn-signup")?.addEventListener("click", () => {
+      auth0Client.loginWithRedirect({
+        screen_hint: "signup",
+        appState: { target: window.location.pathname }
+      });
+    });
 
-    document.getElementById("btn-logout")?.addEventListener("click", () =>
-      auth0Client.logout({ returnTo: window.location.origin })
-    );
+    document.getElementById("btn-logout")?.addEventListener("click", () => {
+      auth0Client.logout({ returnTo: window.location.origin });
+    });
 
   } catch (err) {
-    console.error("Auth error:", err);
+    console.error("Auth init error:", err);
   }
 };
