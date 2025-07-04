@@ -1,4 +1,5 @@
-// Hoidnud samaks – lubab CORS’i ja tagastab Auth0 seaded
+// netlify/functions/getAuthConfig.js
+
 exports.handler = async function(event, context) {
   return {
     statusCode: 200,
