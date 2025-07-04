@@ -14,12 +14,8 @@
   />
   <link rel="stylesheet" href="stiil.css"/>
 
-  <!-- Auth0 SDK -->
-  <script src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-
   <!-- Page-specific overrides -->
   <style>
-    /* center the page title and reset its link color */
     .content-title {
       text-align: center;
       font-size: 2.5rem;
@@ -30,25 +26,20 @@
       text-decoration: none;
       transition: color 0.3s ease;
     }
-    .content-title a:hover {
-      color: var(--main-blue);
-    }
+    .content-title a:hover { color: var(--main-blue); }
 
-    /* intro text width */
     .intro-text {
       max-width: 800px;
       margin: 0 auto 30px;
       line-height: 1.6;
     }
 
-    /* featured & popular videos centered */
     #featured-video-container,
     #popular-featured-video {
       max-width: 800px;
       margin: 0 auto 40px;
     }
 
-    /* small videos 2-column grid */
     .small-video-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -58,7 +49,9 @@
   </style>
 </head>
 <body>
-  <header><h1>DainotseK</h1></header>
+  <header>
+    <h1>DainotseK</h1>
+  </header>
 
   <nav>
     <div class="nav-container">
@@ -70,10 +63,6 @@
         <a href="finance.html">Finance</a>
         <a href="tulevik.html">Future</a>
         <a href="kontakt.html">Contact</a>
-      </div>
-      <div id="auth-status">
-        <button id="btn-login" class="btn">Log In</button>
-        <button id="btn-logout" class="btn" style="display:none">Log Out</button>
       </div>
     </div>
   </nav>
@@ -113,7 +102,6 @@
     <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
   </footer>
 
-  <script src="js/auth.js"></script>
   <script src="js/menu-toggle.js"></script>
   <script>
     function createVideoHTML(video) {
@@ -148,12 +136,10 @@
 
         loadEl.style.display = 'none';
 
-        // newest video
         if (latestVideos[0]) {
           featEl.innerHTML = createVideoHTML(latestVideos[0]);
         }
 
-        // six small videos
         const used = new Set([latestVideos[0]?.id]);
         const smalls = latestVideos.filter(v => !used.has(v.id)).slice(0, 6);
         gridEl.innerHTML = '';
@@ -162,7 +148,6 @@
           used.add(v.id);
         });
 
-        // most popular video
         if (popularVideo && !used.has(popularVideo.id)) {
           popSect.style.display = 'block';
           popFeat.innerHTML = createVideoHTML(popularVideo);
