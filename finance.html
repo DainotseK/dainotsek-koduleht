@@ -14,7 +14,14 @@
   />
   <link rel="stylesheet" href="stiil.css" />
 
-  <!-- Page-specific overrides -->
+  <!-- Auth0 SDK ja sinu auth.js (defer tagab korrektse laadimise) -->
+  <script
+    src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"
+    defer
+  ></script>
+  <script src="js/auth.js" defer></script>
+
+  <!-- Lehe-spetsiifiline stiil -->
   <style>
     .content-title {
       text-align: center;
@@ -71,9 +78,7 @@
       <div class="brand-card">
         <h2>Financial Overview</h2>
         <div class="description">
-          <p>
-            Transparent and honest overview of my journey in the financial world.
-          </p>
+          <p>Transparent and honest overview of my journey in the financial world.</p>
           <ul>
             <li>Investment Portfolio Overviews</li>
             <li>Analyses and Transaction Log</li>
@@ -88,19 +93,8 @@
     <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
   </footer>
 
-  <!-- Menu toggle script -->
+  <!-- Menu-toggle script (järgneb DOM-laadimisele) -->
   <script src="js/menu-toggle.js"></script>
-
-  <!-- Load Auth0 SDK dynamically, then load auth.js -->
-  <script>
-    const script = document.createElement("script");
-    script.src = "https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js";
-    script.onload = () => {
-      const authScript = document.createElement("script");
-      authScript.src = "js/auth.js";
-      document.body.appendChild(authScript);
-    };
-    document.body.appendChild(script);
-  </script>
 </body>
 </html>
+```
