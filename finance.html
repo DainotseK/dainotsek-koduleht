@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DainotseK Finance – Official Website</title>
 
-  <!-- Base styling -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
-        rel="stylesheet"/>
-  <link rel="stylesheet" href="stiil.css"/>
+  <!-- Fonts & stiil -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="stiil.css" />
 
-  <!-- Auth0 UMD SDK + auth.js (defer tagab õige järjekorra) -->
+  <!-- Auth0 SDK (UMD-build) + auth.js -->
   <script
     src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@latest/dist/auth0-spa-js.production.js"
     defer
@@ -20,9 +22,19 @@
   <script src="js/auth.js" defer></script>
 
   <style>
-    .content-title { text-align: center; font-size: 2.5rem; margin: 40px auto 20px; }
-    .content-title a { color: inherit; text-decoration: none; transition: color 0.3s ease; }
-    .content-title a:hover { color: var(--main-blue); }
+    .content-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin: 40px auto 20px;
+    }
+    .content-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .content-title a:hover {
+      color: var(--main-blue);
+    }
   </style>
 </head>
 <body>
@@ -43,8 +55,12 @@
         <button id="btn-login"  class="btn">Log In</button>
         <button id="btn-signup" class="btn">Sign Up</button>
         <button id="btn-logout" class="btn" style="display:none">Log Out</button>
-        <button id="admin-button" class="btn" style="display:none"
-                onclick="location.href='admin/index.html'">Admin</button>
+        <button
+          id="admin-button"
+          class="btn"
+          style="display:none"
+          onclick="location.href='admin/index.html'"
+        >Admin</button>
       </div>
     </div>
   </nav>
@@ -52,23 +68,13 @@
   <div class="container">
     <h2 class="content-title"><a href="finance.html">DainotseK Finance</a></h2>
     <div class="single-card-container">
-      <div class="brand-card">
-        <h2>Financial Overview</h2>
-        <div class="description">
-          <p>Transparent and honest overview of my journey in the financial world.</p>
-          <ul>
-            <li>Investment Portfolio Overviews</li>
-            <li>Analyses and Transaction Log</li>
-            <li>Blog on Financial Literacy</li>
-          </ul>
-        </div>
-      </div>
+      <!-- Siia sisu paigutab js/auth.js -->
     </div>
   </div>
 
   <footer><p class="footer-text">© 2025 DainotseK. All rights reserved.</p></footer>
 
-  <!-- Menu toggle (järgneb DOM–laadimisele) -->
+  <!-- Menüükirje -->
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
