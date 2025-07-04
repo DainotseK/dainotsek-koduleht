@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DainotseK Finance – Official Website</title>
 
-  <!-- Fonts + Base CSS -->
+  <!-- Fonts & Base CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -14,15 +14,27 @@
   />
   <link rel="stylesheet" href="stiil.css" />
 
-  <!-- Page overrides -->
+  <!-- Page-specific styles -->
   <style>
-    .content-title { text-align:center; font-size:2.5rem; margin:40px auto 20px; }
-    .content-title a { color:inherit; text-decoration:none; transition:color 0.3s; }
-    .content-title a:hover { color: var(--main-blue); }
+    .content-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin: 40px auto 20px;
+    }
+    .content-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .content-title a:hover {
+      color: var(--main-blue);
+    }
   </style>
 </head>
 <body>
-  <header><h1>DainotseK</h1></header>
+  <header>
+    <h1>DainotseK</h1>
+  </header>
 
   <nav>
     <div class="nav-container">
@@ -50,9 +62,11 @@
   </nav>
 
   <div class="container">
-    <h2 class="content-title"><a href="finance.html">DainotseK Finance</a></h2>
+    <h2 class="content-title">
+      <a href="finance.html">DainotseK Finance</a>
+    </h2>
 
-    <!-- Kui kasutaja pole auth’d -->
+    <!-- Näitame seda seni, kuni kasutaja pole sisse logitud -->
     <div id="restricted-container">
       <div class="brand-card">
         <h2>Restricted</h2>
@@ -62,7 +76,7 @@
       </div>
     </div>
 
-    <!-- Kui kasutaja on auth’d -->
+    <!-- Siia sisu jõuab ainult peale autentimist -->
     <div class="single-card-container" id="finance-content" style="display:none">
       <div class="brand-card">
         <h2>Financial Overview</h2>
@@ -78,11 +92,14 @@
     </div>
   </div>
 
-  <footer><p class="footer-text">© 2025 DainotseK. All rights reserved.</p></footer>
+  <footer>
+    <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
+  </footer>
 
-  <!-- ÄRA kasuta defer—paiguta siia otse all -->
-  <script src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@1.23.0/dist/auth0-spa-js.production.js"></script>
+  <!-- Auth0 UMD SDK (õige path!) + meie auth.js + menu-toggle.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@latest/dist/auth0-spa-js.production.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
+```
