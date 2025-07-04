@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DainotseK Finance – Official Website</title>
 
-  <!-- Fonts & Base CSS -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <!-- Base CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="stiil.css"/>
+  <link rel="stylesheet" href="stiil.css" />
 
   <!-- Auth0 UMD SDK + auth.js -->
   <script
@@ -21,7 +21,6 @@
   ></script>
   <script src="js/auth.js" defer></script>
 
-  <!-- Page-specific styles -->
   <style>
     .content-title {
       text-align: center;
@@ -39,9 +38,7 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>DainotseK</h1>
-  </header>
+  <header><h1>DainotseK</h1></header>
 
   <nav>
     <div class="nav-container">
@@ -58,22 +55,16 @@
         <button id="btn-login"  class="btn">Log In</button>
         <button id="btn-signup" class="btn">Sign Up</button>
         <button id="btn-logout" class="btn" style="display:none">Log Out</button>
-        <button
-          id="admin-button"
-          class="btn"
-          style="display:none"
-          onclick="location.href='admin/index.html'"
-        >Admin</button>
+        <button id="admin-button" class="btn" style="display:none"
+                onclick="location.href='admin/index.html'">Admin</button>
       </div>
     </div>
   </nav>
 
   <div class="container">
-    <h2 class="content-title">
-      <a href="finance.html">DainotseK Finance</a>
-    </h2>
+    <h2 class="content-title"><a href="finance.html">DainotseK Finance</a></h2>
 
-    <!-- Kui kasutaja ei ole sisse logitud -->
+    <!-- Piiratud sisu (kuvatakse enne sisselogimist) -->
     <div id="restricted-container">
       <div class="brand-card">
         <h2>Restricted</h2>
@@ -83,7 +74,7 @@
       </div>
     </div>
 
-    <!-- Kui kasutaja on sisse logitud -->
+    <!-- Tegelik sisu (kuvatakse peale sisselogimist) -->
     <div class="single-card-container" id="finance-content" style="display:none">
       <div class="brand-card">
         <h2>Financial Overview</h2>
@@ -99,11 +90,8 @@
     </div>
   </div>
 
-  <footer>
-    <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
-  </footer>
+  <footer><p class="footer-text">© 2025 DainotseK. All rights reserved.</p></footer>
 
-  <!-- Menu toggle script (järgneb DOM-laadimisele) -->
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
