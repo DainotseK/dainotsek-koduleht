@@ -14,14 +14,14 @@
   />
   <link rel="stylesheet" href="stiil.css" />
 
-  <!-- Auth0 SDK ja sinu auth.js (defer tagab korrektse laadimise) -->
+  <!-- Õige Auth0 SPA JS CDN (jsDelivr, uusim versioon) ja auth.js -->
   <script
-    src="https://cdn.auth0.com/auth0-spa-js/2.0/auth0-spa-js.production.js"
+    src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@latest/dist/auth0-spa-js.production.js"
     defer
   ></script>
   <script src="js/auth.js" defer></script>
 
-  <!-- Lehe-spetsiifiline stiil -->
+  <!-- Page-specific overrides -->
   <style>
     .content-title {
       text-align: center;
@@ -39,9 +39,7 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>DainotseK</h1>
-  </header>
+  <header><h1>DainotseK</h1></header>
 
   <nav>
     <div class="nav-container">
@@ -56,11 +54,11 @@
       </div>
       <div id="auth-status">
         <button id="btn-login" class="btn">Log In</button>
-        <button id="btn-logout" class="btn" style="display: none">Log Out</button>
+        <button id="btn-logout" class="btn" style="display:none">Log Out</button>
         <button
           id="admin-button"
           class="btn"
-          style="display: none"
+          style="display:none"
           onclick="location.href='admin/index.html'"
         >
           Admin
@@ -93,8 +91,7 @@
     <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
   </footer>
 
-  <!-- Menu-toggle script (järgneb DOM-laadimisele) -->
+  <!-- menu-toggle script (järgneb DOM-laadimisele) -->
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
-```
