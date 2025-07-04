@@ -1,4 +1,4 @@
-// Lase brauseril kätte ainult domain ja clientId, koos CORS-päistega
+// Hoidnud samaks – lubab CORS’i ja tagastab Auth0 seaded
 exports.handler = async function(event, context) {
   return {
     statusCode: 200,
