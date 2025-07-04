@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>DainotseK Finance – Official Website</title>
 
-  <!-- Base CSS -->
+  <!-- Fonts + Base CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -14,27 +14,11 @@
   />
   <link rel="stylesheet" href="stiil.css" />
 
-  <!-- Auth0 UMD SDK + auth.js -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@latest/dist/auth0-spa-js.production.js"
-    defer
-  ></script>
-  <script src="js/auth.js" defer></script>
-
+  <!-- Page overrides -->
   <style>
-    .content-title {
-      text-align: center;
-      font-size: 2.5rem;
-      margin: 40px auto 20px;
-    }
-    .content-title a {
-      color: inherit;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-    .content-title a:hover {
-      color: var(--main-blue);
-    }
+    .content-title { text-align:center; font-size:2.5rem; margin:40px auto 20px; }
+    .content-title a { color:inherit; text-decoration:none; transition:color 0.3s; }
+    .content-title a:hover { color: var(--main-blue); }
   </style>
 </head>
 <body>
@@ -55,8 +39,12 @@
         <button id="btn-login"  class="btn">Log In</button>
         <button id="btn-signup" class="btn">Sign Up</button>
         <button id="btn-logout" class="btn" style="display:none">Log Out</button>
-        <button id="admin-button" class="btn" style="display:none"
-                onclick="location.href='admin/index.html'">Admin</button>
+        <button
+          id="admin-button"
+          class="btn"
+          style="display:none"
+          onclick="location.href='admin/index.html'"
+        >Admin</button>
       </div>
     </div>
   </nav>
@@ -64,7 +52,7 @@
   <div class="container">
     <h2 class="content-title"><a href="finance.html">DainotseK Finance</a></h2>
 
-    <!-- Piiratud sisu (kuvatakse enne sisselogimist) -->
+    <!-- Kui kasutaja pole auth’d -->
     <div id="restricted-container">
       <div class="brand-card">
         <h2>Restricted</h2>
@@ -74,7 +62,7 @@
       </div>
     </div>
 
-    <!-- Tegelik sisu (kuvatakse peale sisselogimist) -->
+    <!-- Kui kasutaja on auth’d -->
     <div class="single-card-container" id="finance-content" style="display:none">
       <div class="brand-card">
         <h2>Financial Overview</h2>
@@ -92,6 +80,9 @@
 
   <footer><p class="footer-text">© 2025 DainotseK. All rights reserved.</p></footer>
 
+  <!-- ÄRA kasuta defer—paiguta siia otse all -->
+  <script src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@1.23.0/dist/auth0-spa-js.production.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
