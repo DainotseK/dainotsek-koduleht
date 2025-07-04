@@ -47,17 +47,6 @@
         <a href="tulevik.html">Future</a>
         <a href="kontakt.html">Contact</a>
       </div>
-      <div id="auth-status">
-        <button id="btn-login"  class="btn">Log In</button>
-        <button id="btn-signup" class="btn">Sign Up</button>
-        <button id="btn-logout" class="btn" style="display:none">Log Out</button>
-        <button
-          id="admin-button"
-          class="btn"
-          style="display:none"
-          onclick="location.href='admin/index.html'"
-        >Admin</button>
-      </div>
     </div>
   </nav>
 
@@ -66,18 +55,7 @@
       <a href="finance.html">DainotseK Finance</a>
     </h2>
 
-    <!-- Näitame seda seni, kuni kasutaja pole sisse logitud -->
-    <div id="restricted-container">
-      <div class="brand-card">
-        <h2>Restricted</h2>
-        <div class="description">
-          <p>This content is only available to logged-in users.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Siia sisu jõuab ainult peale autentimist -->
-    <div class="single-card-container" id="finance-content" style="display:none">
+    <div class="single-card-container">
       <div class="brand-card">
         <h2>Financial Overview</h2>
         <div class="description">
@@ -96,10 +74,7 @@
     <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
   </footer>
 
-  <!-- Auth0 UMD SDK (õige path!) + meie auth.js + menu-toggle.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@latest/dist/auth0-spa-js.production.js"></script>
-  <script src="js/auth.js"></script>
+  <!-- Menu toggle script -->
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
-```
