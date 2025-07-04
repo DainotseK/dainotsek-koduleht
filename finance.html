@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DainotseK Finance – Official Website</title>
 
-  <!-- Fonts & stiil -->
+  <!-- Fonts & Base CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -14,16 +14,14 @@
   />
   <link rel="stylesheet" href="stiil.css" />
 
-  <!-- Õige UMD-build Auth0 SDK (näide jsDelivr) -->
+  <!-- Auth0 SDK ja auth.js (defer tagab õige laadimise) -->
   <script
-    src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@1.19.0/dist/auth0-spa-js.production.js"
+    src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@latest/dist/auth0-spa-js.production.js"
     defer
   ></script>
-
-  <!-- Sinu auth.js -->
   <script src="js/auth.js" defer></script>
 
-  <!-- Lehe spetsiifiline stiil -->
+  <!-- Page-specific overrides -->
   <style>
     .content-title {
       text-align: center;
@@ -41,7 +39,9 @@
   </style>
 </head>
 <body>
-  <header><h1>DainotseK</h1></header>
+  <header>
+    <h1>DainotseK</h1>
+  </header>
 
   <nav>
     <div class="nav-container">
@@ -56,19 +56,24 @@
       </div>
       <div id="auth-status">
         <button id="btn-login" class="btn">Log In</button>
-        <button id="btn-logout" class="btn" style="display:none">Log Out</button>
+        <button id="btn-signup" class="btn">Sign Up</button>
+        <button id="btn-logout" class="btn" style="display: none">Log Out</button>
         <button
           id="admin-button"
           class="btn"
-          style="display:none"
+          style="display: none"
           onclick="location.href='admin/index.html'"
-        >Admin</button>
+        >
+          Admin
+        </button>
       </div>
     </div>
   </nav>
 
   <div class="container">
-    <h2 class="content-title"><a href="finance.html">DainotseK Finance</a></h2>
+    <h2 class="content-title">
+      <a href="finance.html">DainotseK Finance</a>
+    </h2>
 
     <div class="single-card-container">
       <div class="brand-card">
@@ -87,9 +92,12 @@
     </div>
   </div>
 
-  <footer><p class="footer-text">© 2025 DainotseK. All rights reserved.</p></footer>
+  <footer>
+    <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
+  </footer>
 
-  <!-- Menüükirje (järgneb DOM laadimisele) -->
+  <!-- Menu-toggle script (järgneb DOM-laadimisele) -->
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
+```
