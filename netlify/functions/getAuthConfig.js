@@ -1,4 +1,5 @@
-// See funktsioon tagastab Auth0 seadistuse koos CORS-päistega
+// netlify/functions/getAuthConfig.js
+
 exports.handler = async function(event, context) {
   return {
     statusCode: 200,
