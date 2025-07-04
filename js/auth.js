@@ -1,41 +1,41 @@
 // js/auth.js
 let auth0Client = null;
 
-// Lae Auth0 konfiguratsioon Netlify Functions kaudu
+// Laeme Auth0 seadistuse Netlify Functionist
 async function fetchAuthConfig() {
   const res = await fetch("/.netlify/functions/getAuthConfig");
   if (!res.ok) throw new Error("Failed to load Auth0 config");
-  return await res.json();
+  return res.json();
 }
 
-// Loo Auth0 klient
+// Loon Auth0 kliendi
 async function configureClient() {
-  const config = await fetchAuthConfig();
+  const { domain, clientId } = await fetchAuthConfig();
   auth0Client = await createAuth0Client({
-    domain: config.domain,
-    client_id: config.clientId,
+    domain,
+    client_id: clientId,
     redirect_uri: window.location.origin
   });
 }
 
-// Uuenda UI vastavalt sisselogimise olekule
+// Uuendab Log In / Log Out / Admin nuppe ning kaitseb lehti
 async function updateUI() {
   const isAuthenticated = await auth0Client.isAuthenticated();
 
-  const loginBtn = document.getElementById("btn-login");
+  const loginBtn  = document.getElementById("btn-login");
   const logoutBtn = document.getElementById("btn-logout");
-  const adminBtn = document.getElementById("admin-button");
+  const adminBtn  = document.getElementById("admin-button");
 
-  if (loginBtn) loginBtn.style.display = isAuthenticated ? "none" : "inline-block";
+  if (loginBtn)  loginBtn.style.display  = isAuthenticated ? "none" : "inline-block";
   if (logoutBtn) logoutBtn.style.display = isAuthenticated ? "inline-block" : "none";
-  if (adminBtn) adminBtn.style.display = isAuthenticated ? "inline-block" : "none";
+  if (adminBtn)  adminBtn.style.display  = isAuthenticated ? "inline-block" : "none";
 
-  // Kaitse admin-lehte
+  // Admin-paneelilt eemalda niisama pääs
   if (window.location.pathname.includes("admin") && !isAuthenticated) {
     window.location.href = "/";
   }
 
-  // Peida finance sisu kui pole sisse logitud
+  // Finance-lehel peida sisu, kui ei ole sisse logitud
   if (window.location.pathname.includes("finance") && !isAuthenticated) {
     const container = document.querySelector(".single-card-container");
     if (container) {
@@ -51,12 +51,11 @@ async function updateUI() {
   }
 }
 
-// Käivita sisselogimise kontroll
 window.onload = async () => {
   try {
     await configureClient();
 
-    // Kui URL-is on Auth0 callback parameetrid
+    // Kui URL sisaldab Auth0 callback parameetreid
     const query = window.location.search;
     if (query.includes("code=") && query.includes("state=")) {
       await auth0Client.handleRedirectCallback();
@@ -65,22 +64,18 @@ window.onload = async () => {
 
     await updateUI();
 
-    // Nuppude sündmused
-    const loginBtn = document.getElementById("btn-login");
+    const loginBtn  = document.getElementById("btn-login");
     const logoutBtn = document.getElementById("btn-logout");
 
     if (loginBtn) {
-      loginBtn.addEventListener("click", () => {
-        auth0Client.loginWithRedirect();
-      });
+      loginBtn.addEventListener("click", () => auth0Client.loginWithRedirect());
     }
-
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", () => {
-        auth0Client.logout({ returnTo: window.location.origin });
-      });
+      logoutBtn.addEventListener("click", () =>
+        auth0Client.logout({ returnTo: window.location.origin })
+      );
     }
-  } catch (err) {
-    console.error("Auth0 init error:", err);
+  } catch (e) {
+    console.error("Auth init error:", e);
   }
 };
