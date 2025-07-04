@@ -14,14 +14,14 @@
   />
   <link rel="stylesheet" href="stiil.css" />
 
-  <!-- Auth0 SDK ja auth.js (defer tagab õige laadimise) -->
+  <!-- Auth0 UMD SDK + our auth.js -->
   <script
-    src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@latest/dist/auth0-spa-js.production.js"
+    src="https://cdn.jsdelivr.net/npm/@auth0/auth0-spa-js@1.19.0/dist/auth0-spa-js.production.js"
     defer
   ></script>
   <script src="js/auth.js" defer></script>
 
-  <!-- Page-specific overrides -->
+  <!-- Page-specific styles -->
   <style>
     .content-title {
       text-align: center;
@@ -39,9 +39,7 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>DainotseK</h1>
-  </header>
+  <header><h1>DainotseK</h1></header>
 
   <nav>
     <div class="nav-container">
@@ -55,15 +53,11 @@
         <a href="kontakt.html">Contact</a>
       </div>
       <div id="auth-status">
-        <button id="btn-login" class="btn">Log In</button>
+        <button id="btn-login"  class="btn">Log In</button>
         <button id="btn-signup" class="btn">Sign Up</button>
-        <button id="btn-logout" class="btn" style="display: none">Log Out</button>
-        <button
-          id="admin-button"
-          class="btn"
-          style="display: none"
-          onclick="location.href='admin/index.html'"
-        >
+        <button id="btn-logout" class="btn" style="display:none">Log Out</button>
+        <button id="admin-button" class="btn" style="display:none"
+                onclick="location.href='admin/index.html'">
           Admin
         </button>
       </div>
@@ -71,17 +65,12 @@
   </nav>
 
   <div class="container">
-    <h2 class="content-title">
-      <a href="finance.html">DainotseK Finance</a>
-    </h2>
-
+    <h2 class="content-title"><a href="finance.html">DainotseK Finance</a></h2>
     <div class="single-card-container">
       <div class="brand-card">
         <h2>Financial Overview</h2>
         <div class="description">
-          <p>
-            Transparent and honest overview of my journey in the financial world.
-          </p>
+          <p>Transparent and honest overview of my journey in the financial world.</p>
           <ul>
             <li>Investment Portfolio Overviews</li>
             <li>Analyses and Transaction Log</li>
@@ -92,12 +81,9 @@
     </div>
   </div>
 
-  <footer>
-    <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
-  </footer>
+  <footer><p class="footer-text">© 2025 DainotseK. All rights reserved.</p></footer>
 
-  <!-- Menu-toggle script (järgneb DOM-laadimisele) -->
+  <!-- Menu toggle script -->
   <script src="js/menu-toggle.js"></script>
 </body>
 </html>
-```
