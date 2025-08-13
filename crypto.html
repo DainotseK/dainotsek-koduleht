@@ -1,54 +1,45 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
-diff --git a/crypto.html b/crypto.html
-index 8b137891791fe96927ad78e64b0aad7bded08bdc..250c25fc9733902fa3ebaf24e8244849cd2d330c 100644
---- a/crypto.html
-+++ b/crypto.html
-@@ -1 +1,45 @@
-+<!DOCTYPE html>
-+<html lang="en">
-+<head>
-+  <meta charset="UTF-8"/>
-+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-+  <title>Crypto Dashboard – DainotseK Official Website</title>
- 
-+  <!-- Fonts & Base Styles -->
-+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
-+  <link rel="stylesheet" href="stiil.css"/>
-+</head>
-+<body>
-+  <header>
-+    <h1>DainotseK</h1>
-+  </header>
-+
-+  <nav>
-+    <div class="nav-container">
-+      <button id="mobile-menu-toggle" class="menu-btn">Menu</button>
-+      <div class="nav-links">
-+        <a href="index.html">Home</a>
-+        <a href="videos.html">Videos</a>
-+        <a href="music.html">Music</a>
-+        <a href="finance.html">Finance</a>
-+        <a href="tulevik.html">Future</a>
-+        <a href="kontakt.html">Contact</a>
-+      </div>
-+    </div>
-+  </nav>
-+
-+  <div class="container">
-+    <h2 class="content-title">Crypto Dashboard</h2>
-+    <div id="crypto-dashboard"></div>
-+  </div>
-+
-+  <footer>
-+    <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
-+  </footer>
-+
-+  <script src="js/menu-toggle.js"></script>
-+  <script src="js/crypto-dashboard.js"></script>
-+</body>
-+</html>
- 
-EOF
-)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crypto Dashboard – DainotseK Official Website</title>
+
+  <!-- Fonts & Base Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="stiil.css"/>
+</head>
+<body>
+  <header>
+    <h1>DainotseK</h1>
+  </header>
+
+  <nav>
+    <div class="nav-container">
+      <button id="mobile-menu-toggle" class="menu-btn">Menu</button>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="videos.html">Videos</a>
+        <a href="music.html">Music</a>
+        <a href="finance.html">Finance</a>
+        <a href="tulevik.html">Future</a>
+        <a href="kontakt.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h2 class="content-title">Crypto Dashboard</h2>
+    <div id="crypto-dashboard"></div>
+  </div>
+
+  <footer>
+    <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
+  </footer>
+
+  <script src="js/menu-toggle.js"></script>
+  <script src="js/crypto-dashboard.js"></script>
+</body>
+</html>
