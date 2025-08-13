@@ -2,11 +2,12 @@
 <html lang="et">
 <head>
   <meta charset="utf-8" />
-  <title>Krüptoturu analüüs (Top 50, tasuta API)</title>
+  <title>Krüptoturu analüüs (Top 50 + Tõusjad/Langejad, tasuta API)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:24px;color:#eaeaea;background:#121212}
     h1,h2{margin:12px 0}.muted{color:#aaa}.small{font-size:12px}
+    .grid{display:grid;gap:16px}
     .card{background:#1c1c1c;border-radius:14px;padding:16px;box-shadow:0 2px 16px rgba(0,0,0,.3)}
     table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
     th,td{padding:8px 10px;border-bottom:1px solid #2a2a2a}
@@ -20,13 +21,23 @@
   </style>
 </head>
 <body>
-  <h1>Krüptoturu analüüs — Top 50 <span id="ts" class="muted small"></span></h1>
+  <h1>Krüptoturu analüüs <span id="ts" class="muted small"></span></h1>
 
-  <div class="card">
-    <div class="small muted">
-      Andmeallikas: CoinGecko (tasuta, võtmeta). Leht värskendab end automaatselt iga 30 minuti järel.
+  <div class="grid">
+    <!-- TOP 50 -->
+    <div class="card">
+      <h2>Top 50 krüpto</h2>
+      <div class="small muted">
+        Andmeallikas: CoinGecko (tasuta, võtmeta). Leht värskendab end automaatselt iga 30 minuti järel.
+      </div>
+      <div id="top50">Laen andmeid…</div>
     </div>
-    <div id="top50">Laen andmeid…</div>
+
+    <!-- TÕUSJAD / LANGEJAD -->
+    <div class="card">
+      <h2>Top 10 tõusjat &amp; Top 10 langejat (24h, Top‑50 seast)</h2>
+      <div id="movers">Laen andmeid…</div>
+    </div>
   </div>
 
   <script>
@@ -81,6 +92,8 @@
       (rsi!=null && rsi>=70 && (ch24??0)<0) ? 'negatiivne' :
       ((ch7??0)>0 && (rsi??50)<70) ? 'positiivne' : 'neutraalne';
 
+    let LAST_ROWS = []; // hoiame viimast Top‑50 komplekti
+
     async function loadTop50(){
       // USD andmed + sparkline RSI jaoks
       const usd = await jget('/coins/markets', {
@@ -103,6 +116,7 @@
         const sent = classify(rsi, c.price_change_percentage_7d_in_currency, c.price_change_percentage_24h_in_currency);
         const act = actionFromRSI(rsi);
         return {
+          id: c.id,
           rank: idx+1,
           name: c.name,
           symbol: (c.symbol||'').toUpperCase(),
@@ -121,7 +135,9 @@
         };
       });
 
+      LAST_ROWS = rows;
       renderTop50(rows);
+      renderMovers(rows);
       document.getElementById('ts').textContent = '• värskendatud: ' + new Date().toLocaleString();
     }
 
@@ -155,8 +171,50 @@
       makeSortable(document.getElementById('cryptoTable'));
     }
 
+    function renderMovers(rows){
+      // filtreeri stabiilid välja
+      const stableIds = new Set(['tether','usd-coin','dai','binance-usd','true-usd','first-digital-usd']);
+      const flt = rows.filter(r => !stableIds.has(r.id) && typeof r.ch24 === 'number');
+
+      const gainers = [...flt].sort((a,b)=> (b.ch24 ?? -Infinity) - (a.ch24 ?? -Infinity)).slice(0,10);
+      const losers  = [...flt].sort((a,b)=> (a.ch24 ?? Infinity) - (b.ch24 ?? Infinity)).slice(0,10);
+
+      const table = (id, title, data) => {
+        const head = `
+          <div class="small muted" style="margin-top:8px">${title}</div>
+          <table id="${id}"><thead><tr>
+            <th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th>
+            <th>1h %</th><th>24h %</th><th>Vol 24h $</th><th>RSI(14)</th>
+          </tr></thead><tbody>`;
+        const body = data.map(r=>`
+          <tr>
+            <td>${r.name}</td>
+            <td class="mono">${r.symbol}</td>
+            <td class="mono">${fmtPriceTooltip('$', r.price_usd)}</td>
+            <td class="mono">${fmtPriceTooltip('€', r.price_eur)}</td>
+            <td>${r.ch1==null?'':fmtPct(r.ch1)}</td>
+            <td>${r.ch24==null?'':fmtPct(r.ch24)}</td>
+            <td class="mono">${fmtInt(r.vol)}</td>
+            <td>${r.rsi??''}</td>
+          </tr>`).join('');
+        const foot = '</tbody></table>';
+        return head + body + foot;
+      };
+
+      const html = table('tblGainers', 'TOP 10 TÕUSJAT (24h, Top‑50 seast)', gainers)
+                 + table('tblLosers',  'TOP 10 LANGEJAT (24h, Top‑50 seast)', losers);
+
+      const wrap = document.getElementById('movers');
+      wrap.innerHTML = html;
+
+      // Muudame ka need tabelid sorteeritavaks
+      makeSortable(document.getElementById('tblGainers'));
+      makeSortable(document.getElementById('tblLosers'));
+    }
+
     // Üldine sorteerimisfunktsioon (kõikidele veergudele)
     function makeSortable(table) {
+      if (!table) return;
       const headers = table.querySelectorAll('th');
       let lastSorted = { idx: -1, asc: true };
 
@@ -183,7 +241,6 @@
             let B = b.cells[idx]?.innerText?.trim() ?? '';
 
             if (isNumeric) {
-              // eemaldame valuutasümbolid, %, tühikud jne
               A = parseFloat(A.replace(/[^\d\.\-]/g, '')) || 0;
               B = parseFloat(B.replace(/[^\d\.\-]/g, '')) || 0;
               return asc ? (A - B) : (B - A);
@@ -202,6 +259,8 @@
     loadTop50().catch(err=>{
       document.getElementById('top50').innerHTML =
         '<div class="small">Viga andmete laadimisel: '+(err?.message||err)+'</div>';
+      document.getElementById('movers').innerHTML =
+        '<div class="small">Viga andmete laadimisel.</div>';
     });
     setInterval(loadTop50, 30*60*1000);
   </script>
