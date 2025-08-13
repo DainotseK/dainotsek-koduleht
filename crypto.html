@@ -46,11 +46,25 @@
     // Suured numbrid (mcap, maht)
     const fmtInt = n => n==null ? '' : n.toLocaleString('en-US');
 
-    // Protsendid
-    const fmtPct = p => {
+    // Protsendid (lihtne)
+    const basePct = p => {
       if (p==null) return '';
       const s = p.toFixed(2) + '%';
       return p>0 ? `<span class="pos">+${s}</span>` : p<0 ? `<span class="neg">${s}</span>` : s;
+    };
+
+    // Protsendid + USD hinnainfo tooltipis (kuni 10 kohta)
+    const fmtPctWithUsdTooltip = (pctVal, usdPrice) => {
+      if (pctVal==null) return '';
+      const pctText = (pctVal>0 ? `+${pctVal.toFixed(2)}%` : `${pctVal.toFixed(2)}%`);
+      if (usdPrice==null) {
+        // kui hinda pole, tagasta ilma tooltipita
+        return pctVal>0 ? `<span class="pos">${pctText}</span>` :
+               pctVal<0 ? `<span class="neg">${pctText}</span>` : pctText;
+      }
+      const fullUsd = Number(usdPrice).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 });
+      const cl = pctVal>0 ? 'pos' : (pctVal<0 ? 'neg' : '');
+      return `<span class="${cl}" title="$ ${fullUsd}">${pctText}</span>`;
     };
 
     // Hinna kuvamine: 5 kohta ekraanil, 10 kohta tooltipis
@@ -155,10 +169,10 @@
           <td class="mono">${r.symbol}</td>
           <td class="mono">${fmtPriceTooltip('$', r.price_usd)}</td>
           <td class="mono">${fmtPriceTooltip('€', r.price_eur)}</td>
-          <td>${r.ch1==null?'':fmtPct(r.ch1)}</td>
-          <td>${r.ch24==null?'':fmtPct(r.ch24)}</td>
-          <td>${r.ch7==null?'':fmtPct(r.ch7)}</td>
-          <td>${r.ch30==null?'':fmtPct(r.ch30)}</td>
+          <td>${fmtPctWithUsdTooltip(r.ch1, r.price_usd)}</td>
+          <td>${fmtPctWithUsdTooltip(r.ch24, r.price_usd)}</td>
+          <td>${fmtPctWithUsdTooltip(r.ch7, r.price_usd)}</td>
+          <td>${fmtPctWithUsdTooltip(r.ch30, r.price_usd)}</td>
           <td class="mono">${fmtInt(r.mcap)}</td>
           <td class="mono">${fmtInt(r.vol)}</td>
           <td>${r.dom??''}</td>
@@ -192,8 +206,8 @@
             <td class="mono">${r.symbol}</td>
             <td class="mono">${fmtPriceTooltip('$', r.price_usd)}</td>
             <td class="mono">${fmtPriceTooltip('€', r.price_eur)}</td>
-            <td>${r.ch1==null?'':fmtPct(r.ch1)}</td>
-            <td>${r.ch24==null?'':fmtPct(r.ch24)}</td>
+            <td>${fmtPctWithUsdTooltip(r.ch1, r.price_usd)}</td>
+            <td>${fmtPctWithUsdTooltip(r.ch24, r.price_usd)}</td>
             <td class="mono">${fmtInt(r.vol)}</td>
             <td>${r.rsi??''}</td>
           </tr>`).join('');
