@@ -31,8 +31,25 @@
 
   <script>
     const API = 'https://api.coingecko.com/api/v3';
-    const fmt = n => n==null ? '' : n.toLocaleString('en-US');
-    const pct = p => p==null ? '' : (p>0?`<span class="pos">+${p.toFixed(2)}%</span>`:p<0?`<span class="neg">${p.toFixed(2)}%</span>`:`${p.toFixed(2)}%`);
+
+    // Suured numbrid (mcap, maht)
+    const fmtInt = n => n==null ? '' : n.toLocaleString('en-US');
+
+    // Protsendid
+    const fmtPct = p => {
+      if (p==null) return '';
+      const s = p.toFixed(2) + '%';
+      return p>0 ? `<span class="pos">+${s}</span>` : p<0 ? `<span class="neg">${s}</span>` : s;
+    };
+
+    // Hinna kuvamine: 5 kohta ekraanil, 10 kohta tooltipis
+    const fmtPriceTooltip = (symbol, n) => {
+      if (n==null) return '';
+      const display = Number(n).toLocaleString('en-US', { minimumFractionDigits: 5, maximumFractionDigits: 5 });
+      const full = Number(n).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 });
+      return `<span title="${symbol} ${full}">${symbol} ${display}</span>`;
+    };
+
     const badge = s => `<span class="badge ${s==='Osta'?'buy':s==='Müü'?'sell':'hold'}">${s}</span>`;
 
     async function jget(path, params={}) {
@@ -43,6 +60,7 @@
       return res.json();
     }
 
+    // RSI(14) 7 päeva sparkline'ist (tunnisamm)
     function computeRSI14(series){
       const period=14;
       if(!Array.isArray(series)||series.length<period+1) return null;
@@ -64,18 +82,18 @@
       ((ch7??0)>0 && (rsi??50)<70) ? 'positiivne' : 'neutraalne';
 
     async function loadTop50(){
-      // 1) USD andmed + sparkline RSI jaoks
+      // USD andmed + sparkline RSI jaoks
       const usd = await jget('/coins/markets', {
         vs_currency:'usd', order:'market_cap_desc', per_page:50, page:1,
         sparkline:true, price_change_percentage:'1h,24h,7d,30d'
       });
-      // 2) EUR hinnad
+      // EUR hinnad (ilma sparklineta)
       const eur = await jget('/coins/markets', {
         vs_currency:'eur', order:'market_cap_desc', per_page:50, page:1,
         sparkline:false, price_change_percentage:'1h,24h,7d,30d'
       });
       const eurMap = new Map(eur.map(c=>[c.id, c.current_price]));
-      // 3) Globaalne mcap dominance arvutuseks
+      // Globaalne mcap dominance arvutuseks (USD)
       const global = await jget('/global');
       const totalMcap = global?.data?.total_market_cap?.usd ?? null;
 
@@ -119,14 +137,14 @@
           <td>${r.rank}</td>
           <td>${r.name}</td>
           <td class="mono">${r.symbol}</td>
-          <td class="mono">${fmt(r.price_usd)}</td>
-          <td class="mono">${fmt(r.price_eur)}</td>
-          <td>${r.ch1==null?'':pct(r.ch1)}</td>
-          <td>${r.ch24==null?'':pct(r.ch24)}</td>
-          <td>${r.ch7==null?'':pct(r.ch7)}</td>
-          <td>${r.ch30==null?'':pct(r.ch30)}</td>
-          <td class="mono">${fmt(r.mcap)}</td>
-          <td class="mono">${fmt(r.vol)}</td>
+          <td class="mono">${fmtPriceTooltip('$', r.price_usd)}</td>
+          <td class="mono">${fmtPriceTooltip('€', r.price_eur)}</td>
+          <td>${r.ch1==null?'':fmtPct(r.ch1)}</td>
+          <td>${r.ch24==null?'':fmtPct(r.ch24)}</td>
+          <td>${r.ch7==null?'':fmtPct(r.ch7)}</td>
+          <td>${r.ch30==null?'':fmtPct(r.ch30)}</td>
+          <td class="mono">${fmtInt(r.mcap)}</td>
+          <td class="mono">${fmtInt(r.vol)}</td>
           <td>${r.dom??''}</td>
           <td>${r.rsi??''}</td>
           <td>${r.sentiment}</td>
@@ -134,7 +152,6 @@
         </tr>`).join('');
       const foot = '</tbody></table>';
       document.getElementById('top50').innerHTML = head + body + foot;
-
       makeSortable(document.getElementById('cryptoTable'));
     }
 
@@ -147,18 +164,16 @@
         th.addEventListener('click', () => {
           const tbody = table.tBodies[0];
           const rows = Array.from(tbody.querySelectorAll('tr'));
-
-          // Eemalda eelmine suunanool
           headers.forEach(h => h.classList.remove('sort-asc','sort-desc'));
 
-          // Tuvasta, kas veerg on numbriline (enamus ridu peab parsitama)
+          // >=60% ridadest peab olema parsitav numbriks, muidu käsitleme tekstina
           const isNumeric = rows.filter(row => row.cells[idx])
             .map(row => row.cells[idx].innerText.replace(/[^\d\.\-]/g, ''))
             .filter(txt => txt !== '')
             .map(txt => !isNaN(parseFloat(txt)))
             .filter(Boolean).length >= Math.max(1, Math.floor(rows.length * 0.6));
 
-          // Suuna toggeldus: kui sama veerg, keera vastupidi
+          // Suuna toggeldus
           let asc = true;
           if (lastSorted.idx === idx) asc = !lastSorted.asc;
           lastSorted = { idx, asc };
@@ -168,6 +183,7 @@
             let B = b.cells[idx]?.innerText?.trim() ?? '';
 
             if (isNumeric) {
+              // eemaldame valuutasümbolid, %, tühikud jne
               A = parseFloat(A.replace(/[^\d\.\-]/g, '')) || 0;
               B = parseFloat(B.replace(/[^\d\.\-]/g, '')) || 0;
               return asc ? (A - B) : (B - A);
@@ -182,7 +198,7 @@
       });
     }
 
-    // Lae kohe ja värskenda iga 30 minuti järel
+    // Esmane laadimine + 30-min refresh
     loadTop50().catch(err=>{
       document.getElementById('top50').innerHTML =
         '<div class="small">Viga andmete laadimisel: '+(err?.message||err)+'</div>';
