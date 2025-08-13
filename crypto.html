@@ -2,7 +2,7 @@
 <html lang="et">
 <head>
   <meta charset="utf-8" />
-  <title>Krüptoturu analüüs (Top 50 + Tõusjad/Langejad, tasuta API)</title>
+  <title>Krüptoturu analüüs (Top 50 + globaalsed Tõusjad/Langejad)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -29,7 +29,7 @@
     .buy{background:#0b5}.sell{background:#b00}.hold{background:#444}
     .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
 
-    /* Raha kujundus: valuuta + täiseurod + sendid */
+    /* Raha toonid */
     .money{white-space:nowrap}
     .money-cur{opacity:.9;margin-right:4px}
     .money-int{color:var(--money-int)}
@@ -37,7 +37,7 @@
     .money:hover .money-int{color:var(--money-int-hover)}
     .money:hover .money-frac{color:var(--money-frac-hover)}
 
-    /* Kohandatud tooltip (et saaksime samuti kahetooniliselt) */
+    /* Kohandatud tooltip */
     .tt{position:relative;display:inline-block}
     .tt::after{
       content:attr(data-full);
@@ -63,25 +63,20 @@
       <div id="top50">Laen andmeid…</div>
     </div>
 
-    <!-- TÕUSJAD / LANGEJAD -->
+    <!-- GLOBAALSED TÕUSJAD / LANGEJAD -->
     <div class="card">
-      <h2>Top 10 tõusjat &amp; Top 10 langejat (24h, Top‑50 seast)</h2>
+      <h2>Top 10 tõusjat &amp; Top 10 langejat (24h, kogu turg – CMC kuni 5000)</h2>
+      <div class="small muted">Allikas: CoinMarketCap (serverifunktsioon, API võti peidetud)</div>
       <div id="movers">Laen andmeid…</div>
     </div>
   </div>
 
   <script>
-    const API = 'https://api.coingecko.com/api/v3';
+    const API_CG = 'https://api.coingecko.com/api/v3';
+    const API_MOVERS = '/.netlify/functions/cmc-movers';
 
     // Suured numbrid (mcap, maht)
     const fmtInt = n => n==null ? '' : n.toLocaleString('en-US');
-
-    // Protsendid (lihtne värviga)
-    const basePct = p => {
-      if (p==null) return '';
-      const s = p.toFixed(2) + '%';
-      return p>0 ? `<span class="pos">+${s}</span>` : p<0 ? `<span class="neg">${s}</span>` : s;
-    };
 
     // Protsendid + varasem USD hind tooltipis ("≈ $ x.xxxxxxxxxx • periood")
     function fmtPctWithPastUsdTooltip(pctVal, currentUsdPrice, label){
@@ -102,11 +97,9 @@
       if (val==null) return '';
       const fixedDisp = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimalsDisplay, maximumFractionDigits: decimalsDisplay });
       const fixedFull = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimalsFull, maximumFractionDigits: decimalsFull });
-      // eralda täis- ja murdosa punktiga; kasutame US formaati (.)
       const [intPart, fracPart='0'.repeat(decimalsDisplay)] = fixedDisp.split('.');
       const [fullInt, fullFrac='0'.repeat(decimalsFull)] = fixedFull.split('.');
-      const tooltipContent =
-` ${symbol} ${fullInt}.${fullFrac}`;
+      const tooltipContent = ` ${symbol} ${fullInt}.${fullFrac}`;
       return `
         <span class="money tt" data-full="${tooltipContent}">
           <span class="money-cur">${symbol}</span>
@@ -118,7 +111,7 @@
     const badge = s => `<span class="badge ${s==='Osta'?'buy':s==='Müü'?'sell':'hold'}">${s}</span>`;
 
     async function jget(path, params={}) {
-      const url = new URL(API + path);
+      const url = new URL(API_CG + path);
       Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,String(v)));
       const res = await fetch(url, {headers:{'Accept':'application/json'}});
       if(!res.ok) throw new Error('HTTP '+res.status+' '+res.statusText);
@@ -146,7 +139,7 @@
       (rsi!=null && rsi>=70 && (ch24??0)<0) ? 'negatiivne' :
       ((ch7??0)>0 && (rsi??50)<70) ? 'positiivne' : 'neutraalne';
 
-    let LAST_ROWS = []; // hoiame viimast Top‑50 komplekti
+    let LAST_ROWS = []; // Top-50 (CoinGecko) hoiustamine
 
     async function loadTop50(){
       // USD andmed + sparkline RSI jaoks
@@ -191,8 +184,17 @@
 
       LAST_ROWS = rows;
       renderTop50(rows);
-      renderMovers(rows);
       document.getElementById('ts').textContent = '• värskendatud: ' + new Date().toLocaleString();
+    }
+
+    async function loadMovers() {
+      const res = await fetch(API_MOVERS, { cache: 'no-store' });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error('Movers API error: ' + txt);
+      }
+      const data = await res.json();
+      renderMoversFromCMC(data);
     }
 
     function renderTop50(rows){
@@ -225,13 +227,10 @@
       makeSortable(document.getElementById('cryptoTable'));
     }
 
-    function renderMovers(rows){
-      // filtreeri stabiilid välja
-      const stableIds = new Set(['tether','usd-coin','dai','binance-usd','true-usd','first-digital-usd']);
-      const flt = rows.filter(r => !stableIds.has(r.id) && typeof r.ch24 === 'number');
-
-      const gainers = [...flt].sort((a,b)=> (b.ch24 ?? -Infinity) - (a.ch24 ?? -Infinity)).slice(0,10);
-      const losers  = [...flt].sort((a,b)=> (a.ch24 ?? Infinity) - (b.ch24 ?? Infinity)).slice(0,10);
+    // CMC movers: kasutame funktsiooni tagastatud struktuuri
+    function renderMoversFromCMC(payload){
+      const gainers = payload?.top_gainers_24h ?? [];
+      const losers  = payload?.top_losers_24h ?? [];
 
       const table = (id, title, data) => {
         const head = `
@@ -249,24 +248,23 @@
             <td>${fmtPctWithPastUsdTooltip(r.ch1,  r.price_usd, '1h tagasi')}</td>
             <td>${fmtPctWithPastUsdTooltip(r.ch24, r.price_usd, '24h tagasi')}</td>
             <td class="mono">${fmtInt(r.vol)}</td>
-            <td>${r.rsi??''}</td>
+            <td>${r.rsi ?? ''}</td>
           </tr>`).join('');
         const foot = '</tbody></table>';
         return head + body + foot;
       };
 
-      const html = table('tblGainers', 'TOP 10 TÕUSJAT (24h, Top‑50 seast)', gainers)
-                 + table('tblLosers',  'TOP 10 LANGEJAT (24h, Top‑50 seast)', losers);
+      const html = table('tblGainers', 'TOP 10 TÕUSJAT (24h, kogu turg)', gainers)
+                 + table('tblLosers',  'TOP 10 LANGEJAT (24h, kogu turg)', losers);
 
       const wrap = document.getElementById('movers');
       wrap.innerHTML = html;
 
-      // Muudame ka need tabelid sorteeritavaks
       makeSortable(document.getElementById('tblGainers'));
       makeSortable(document.getElementById('tblLosers'));
     }
 
-    // Üldine sorteerimisfunktsioon (kõikidele veergudele)
+    // Üldine sorteerija
     function makeSortable(table) {
       if (!table) return;
       const headers = table.querySelectorAll('th');
@@ -278,14 +276,12 @@
           const rows = Array.from(tbody.querySelectorAll('tr'));
           headers.forEach(h => h.classList.remove('sort-asc','sort-desc'));
 
-          // >=60% ridadest peab olema parsitav numbriks, muidu käsitleme tekstina
           const isNumeric = rows.filter(row => row.cells[idx])
             .map(row => row.cells[idx].innerText.replace(/[^\d\.\-]/g, ''))
             .filter(txt => txt !== '')
             .map(txt => !isNaN(parseFloat(txt)))
             .filter(Boolean).length >= Math.max(1, Math.floor(rows.length * 0.6));
 
-          // Suuna toggeldus
           let asc = true;
           if (lastSorted.idx === idx) asc = !lastSorted.asc;
           lastSorted = { idx, asc };
@@ -293,7 +289,6 @@
           rows.sort((a, b) => {
             let A = a.cells[idx]?.innerText?.trim() ?? '';
             let B = b.cells[idx]?.innerText?.trim() ?? '';
-
             if (isNumeric) {
               A = parseFloat(A.replace(/[^\d\.\-]/g, '')) || 0;
               B = parseFloat(B.replace(/[^\d\.\-]/g, '')) || 0;
@@ -309,14 +304,12 @@
       });
     }
 
-    // Esmane laadimine + 30-min refresh
-    loadTop50().catch(err=>{
-      document.getElementById('top50').innerHTML =
-        '<div class="small">Viga andmete laadimisel: '+(err?.message||err)+'</div>';
-      document.getElementById('movers').innerHTML =
-        '<div class="small">Viga andmete laadimisel.</div>';
+    // Laadime mõlemad plokid; värskendus iga 30 min
+    Promise.all([loadTop50(), loadMovers()]).catch(err=>{
+      console.error(err);
+      document.getElementById('movers').innerHTML = '<div class="small">Viga CMC movers laadimisel.</div>';
     });
-    setInterval(loadTop50, 30*60*1000);
+    setInterval(() => { loadTop50().catch(()=>{}); loadMovers().catch(()=>{}); }, 30*60*1000);
   </script>
 </body>
 </html>
