@@ -10,7 +10,9 @@
     .card{background:#1c1c1c;border-radius:14px;padding:16px;box-shadow:0 2px 16px rgba(0,0,0,.3)}
     table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
     th,td{padding:8px 10px;border-bottom:1px solid #2a2a2a}
-    th{position:sticky;top:0;background:#1c1c1c;text-align:left}
+    th{position:sticky;top:0;background:#1c1c1c;text-align:left;cursor:pointer;user-select:none}
+    th.sort-asc::after{content:" ▲";font-size:11px;color:#aaa}
+    th.sort-desc::after{content:" ▼";font-size:11px;color:#aaa}
     .pos{color:#6de38b}.neg{color:#ff7b7b}
     .badge{padding:2px 8px;border-radius:999px;background:#2d2d2d;font-size:12px}
     .buy{background:#0b5}.sell{background:#b00}.hold{background:#444}
@@ -107,7 +109,7 @@
 
     function renderTop50(rows){
       const head = `
-      <table><thead><tr>
+      <table id="cryptoTable"><thead><tr>
         <th>#</th><th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th>
         <th>1h %</th><th>24h %</th><th>7d %</th><th>30d %</th>
         <th>MCap $</th><th>Vol 24h $</th><th>Dom %</th><th>RSI(14)</th><th>Sentiment</th><th>Soovitus</th>
@@ -132,6 +134,52 @@
         </tr>`).join('');
       const foot = '</tbody></table>';
       document.getElementById('top50').innerHTML = head + body + foot;
+
+      makeSortable(document.getElementById('cryptoTable'));
+    }
+
+    // Üldine sorteerimisfunktsioon (kõikidele veergudele)
+    function makeSortable(table) {
+      const headers = table.querySelectorAll('th');
+      let lastSorted = { idx: -1, asc: true };
+
+      headers.forEach((th, idx) => {
+        th.addEventListener('click', () => {
+          const tbody = table.tBodies[0];
+          const rows = Array.from(tbody.querySelectorAll('tr'));
+
+          // Eemalda eelmine suunanool
+          headers.forEach(h => h.classList.remove('sort-asc','sort-desc'));
+
+          // Tuvasta, kas veerg on numbriline (enamus ridu peab parsitama)
+          const isNumeric = rows.filter(row => row.cells[idx])
+            .map(row => row.cells[idx].innerText.replace(/[^\d\.\-]/g, ''))
+            .filter(txt => txt !== '')
+            .map(txt => !isNaN(parseFloat(txt)))
+            .filter(Boolean).length >= Math.max(1, Math.floor(rows.length * 0.6));
+
+          // Suuna toggeldus: kui sama veerg, keera vastupidi
+          let asc = true;
+          if (lastSorted.idx === idx) asc = !lastSorted.asc;
+          lastSorted = { idx, asc };
+
+          rows.sort((a, b) => {
+            let A = a.cells[idx]?.innerText?.trim() ?? '';
+            let B = b.cells[idx]?.innerText?.trim() ?? '';
+
+            if (isNumeric) {
+              A = parseFloat(A.replace(/[^\d\.\-]/g, '')) || 0;
+              B = parseFloat(B.replace(/[^\d\.\-]/g, '')) || 0;
+              return asc ? (A - B) : (B - A);
+            } else {
+              return asc ? A.localeCompare(B) : B.localeCompare(A);
+            }
+          });
+
+          rows.forEach(r => tbody.appendChild(r));
+          th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+        });
+      });
     }
 
     // Lae kohe ja värskenda iga 30 minuti järel
