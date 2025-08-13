@@ -5,19 +5,49 @@
   <title>Krüptoturu analüüs (Top 50 + Tõusjad/Langejad, tasuta API)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:24px;color:#eaeaea;background:#121212}
-    h1,h2{margin:12px 0}.muted{color:#aaa}.small{font-size:12px}
+    :root{
+      --bg:#121212; --card:#1c1c1c; --muted:#aaa; --txt:#eaeaea;
+      --pos:#6de38b; --neg:#ff7b7b;
+      --money-int:#e6e6e6;     /* täiseurod */
+      --money-frac:#bdbdbd;    /* sendid */
+      --money-int-hover:#f2f2f2;
+      --money-frac-hover:#d2d2d2;
+      --tooltip-bg:#222;
+      --tooltip-border:#333;
+    }
+    body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:24px;color:var(--txt);background:var(--bg)}
+    h1,h2{margin:12px 0}.muted{color:var(--muted)}.small{font-size:12px}
     .grid{display:grid;gap:16px}
-    .card{background:#1c1c1c;border-radius:14px;padding:16px;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+    .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 2px 16px rgba(0,0,0,.3)}
     table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
     th,td{padding:8px 10px;border-bottom:1px solid #2a2a2a}
-    th{position:sticky;top:0;background:#1c1c1c;text-align:left;cursor:pointer;user-select:none}
-    th.sort-asc::after{content:" ▲";font-size:11px;color:#aaa}
-    th.sort-desc::after{content:" ▼";font-size:11px;color:#aaa}
-    .pos{color:#6de38b}.neg{color:#ff7b7b}
+    th{position:sticky;top:0;background:var(--card);text-align:left;cursor:pointer;user-select:none}
+    th.sort-asc::after{content:" ▲";font-size:11px;color:var(--muted)}
+    th.sort-desc::after{content:" ▼";font-size:11px;color:var(--muted)}
+    .pos{color:var(--pos)}.neg{color:var(--neg)}
     .badge{padding:2px 8px;border-radius:999px;background:#2d2d2d;font-size:12px}
     .buy{background:#0b5}.sell{background:#b00}.hold{background:#444}
     .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+
+    /* Raha kujundus: valuuta + täiseurod + sendid */
+    .money{white-space:nowrap}
+    .money-cur{opacity:.9;margin-right:4px}
+    .money-int{color:var(--money-int)}
+    .money-frac{color:var(--money-frac)}
+    .money:hover .money-int{color:var(--money-int-hover)}
+    .money:hover .money-frac{color:var(--money-frac-hover)}
+
+    /* Kohandatud tooltip (et saaksime samuti kahetooniliselt) */
+    .tt{position:relative;display:inline-block}
+    .tt::after{
+      content:attr(data-full);
+      position:absolute; left:50%; transform:translateX(-50%); bottom:120%;
+      background:var(--tooltip-bg); color:#ddd; border:1px solid var(--tooltip-border);
+      padding:6px 8px; border-radius:8px; font:12px/1.2 ui-monospace,Menlo,Consolas,monospace;
+      white-space:pre; opacity:0; pointer-events:none; transition:opacity .12s ease; z-index:5;
+      box-shadow:0 6px 20px rgba(0,0,0,.35);
+    }
+    .tt:hover::after{opacity:1}
   </style>
 </head>
 <body>
@@ -53,29 +83,37 @@
       return p>0 ? `<span class="pos">+${s}</span>` : p<0 ? `<span class="neg">${s}</span>` : s;
     };
 
-    // Protsendid + varasem USD hind tooltipis:
-    // kuvab %; title/tooltipis näitab ligikaudset hinda perioodi alguses (nt "≈ $ 0.0123456789 • 24h tagasi")
+    // Protsendid + varasem USD hind tooltipis ("≈ $ x.xxxxxxxxxx • periood")
     function fmtPctWithPastUsdTooltip(pctVal, currentUsdPrice, label){
       if (pctVal==null) return '';
       const pctText = (pctVal>0 ? `+${pctVal.toFixed(2)}%` : `${pctVal.toFixed(2)}%`);
       const cls = pctVal>0 ? 'pos' : (pctVal<0 ? 'neg' : '');
       if (currentUsdPrice==null || pctVal <= -100) {
-        // Kui hind puudub või -100% (vältida /0), näita lihtsalt % ilma tooltipita
         return cls ? `<span class="${cls}">${pctText}</span>` : pctText;
       }
       const prevPrice = currentUsdPrice / (1 + (pctVal/100));
       const full = Number(prevPrice).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 });
       const title = `≈ $ ${full} • ${label}`;
-      return `<span class="${cls}" title="${title}">${pctText}</span>`;
+      return `<span class="${cls} tt" data-full="${title}">${pctText}</span>`;
     }
 
-    // Hinna kuvamine: 5 kohta ekraanil, 10 kohta tooltipis
-    const fmtPriceTooltip = (symbol, n) => {
-      if (n==null) return '';
-      const display = Number(n).toLocaleString('en-US', { minimumFractionDigits: 5, maximumFractionDigits: 5 });
-      const full = Number(n).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 });
-      return `<span title="${symbol} ${full}">${symbol} ${display}</span>`;
-    };
+    // Hinna kuvamine (USD/EUR): 5 kohta ekraanil, 10 kohta tooltipis; integer vs frac värviga
+    function formatMoneySplit(symbol, val, decimalsDisplay=5, decimalsFull=10){
+      if (val==null) return '';
+      const fixedDisp = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimalsDisplay, maximumFractionDigits: decimalsDisplay });
+      const fixedFull = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimalsFull, maximumFractionDigits: decimalsFull });
+      // eralda täis- ja murdosa punktiga; kasutame US formaati (.)
+      const [intPart, fracPart='0'.repeat(decimalsDisplay)] = fixedDisp.split('.');
+      const [fullInt, fullFrac='0'.repeat(decimalsFull)] = fixedFull.split('.');
+      const tooltipContent =
+` ${symbol} ${fullInt}.${fullFrac}`;
+      return `
+        <span class="money tt" data-full="${tooltipContent}">
+          <span class="money-cur">${symbol}</span>
+          <span class="money-int">${intPart}</span><span class="money-frac">.${fracPart}</span>
+        </span>
+      `;
+    }
 
     const badge = s => `<span class="badge ${s==='Osta'?'buy':s==='Müü'?'sell':'hold'}">${s}</span>`;
 
@@ -169,8 +207,8 @@
           <td>${r.rank}</td>
           <td>${r.name}</td>
           <td class="mono">${r.symbol}</td>
-          <td class="mono">${fmtPriceTooltip('$', r.price_usd)}</td>
-          <td class="mono">${fmtPriceTooltip('€', r.price_eur)}</td>
+          <td class="mono">${formatMoneySplit('$', r.price_usd)}</td>
+          <td class="mono">${formatMoneySplit('€', r.price_eur)}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch1,  r.price_usd, '1h tagasi')}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch24, r.price_usd, '24h tagasi')}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch7,  r.price_usd, '7d tagasi')}</td>
@@ -206,8 +244,8 @@
           <tr>
             <td>${r.name}</td>
             <td class="mono">${r.symbol}</td>
-            <td class="mono">${fmtPriceTooltip('$', r.price_usd)}</td>
-            <td class="mono">${fmtPriceTooltip('€', r.price_eur)}</td>
+            <td class="mono">${formatMoneySplit('$', r.price_usd)}</td>
+            <td class="mono">${formatMoneySplit('€', r.price_eur)}</td>
             <td>${fmtPctWithPastUsdTooltip(r.ch1,  r.price_usd, '1h tagasi')}</td>
             <td>${fmtPctWithPastUsdTooltip(r.ch24, r.price_usd, '24h tagasi')}</td>
             <td class="mono">${fmtInt(r.vol)}</td>
