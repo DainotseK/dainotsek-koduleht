@@ -304,7 +304,7 @@
       });
     }
 
-    // Laadime mõlemad plokid; värskendus iga 30 min
+    // Laadime mõlemad plokid; värskendus iga 30 min 
     Promise.all([loadTop50(), loadMovers()]).catch(err=>{
       console.error(err);
       document.getElementById('movers').innerHTML = '<div class="small">Viga CMC movers laadimisel.</div>';
