@@ -46,26 +46,28 @@
     // Suured numbrid (mcap, maht)
     const fmtInt = n => n==null ? '' : n.toLocaleString('en-US');
 
-    // Protsendid (lihtne)
+    // Protsendid (lihtne värviga)
     const basePct = p => {
       if (p==null) return '';
       const s = p.toFixed(2) + '%';
       return p>0 ? `<span class="pos">+${s}</span>` : p<0 ? `<span class="neg">${s}</span>` : s;
     };
 
-    // Protsendid + USD hinnainfo tooltipis (kuni 10 kohta)
-    const fmtPctWithUsdTooltip = (pctVal, usdPrice) => {
+    // Protsendid + varasem USD hind tooltipis:
+    // kuvab %; title/tooltipis näitab ligikaudset hinda perioodi alguses (nt "≈ $ 0.0123456789 • 24h tagasi")
+    function fmtPctWithPastUsdTooltip(pctVal, currentUsdPrice, label){
       if (pctVal==null) return '';
       const pctText = (pctVal>0 ? `+${pctVal.toFixed(2)}%` : `${pctVal.toFixed(2)}%`);
-      if (usdPrice==null) {
-        // kui hinda pole, tagasta ilma tooltipita
-        return pctVal>0 ? `<span class="pos">${pctText}</span>` :
-               pctVal<0 ? `<span class="neg">${pctText}</span>` : pctText;
+      const cls = pctVal>0 ? 'pos' : (pctVal<0 ? 'neg' : '');
+      if (currentUsdPrice==null || pctVal <= -100) {
+        // Kui hind puudub või -100% (vältida /0), näita lihtsalt % ilma tooltipita
+        return cls ? `<span class="${cls}">${pctText}</span>` : pctText;
       }
-      const fullUsd = Number(usdPrice).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 });
-      const cl = pctVal>0 ? 'pos' : (pctVal<0 ? 'neg' : '');
-      return `<span class="${cl}" title="$ ${fullUsd}">${pctText}</span>`;
-    };
+      const prevPrice = currentUsdPrice / (1 + (pctVal/100));
+      const full = Number(prevPrice).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 });
+      const title = `≈ $ ${full} • ${label}`;
+      return `<span class="${cls}" title="${title}">${pctText}</span>`;
+    }
 
     // Hinna kuvamine: 5 kohta ekraanil, 10 kohta tooltipis
     const fmtPriceTooltip = (symbol, n) => {
@@ -169,10 +171,10 @@
           <td class="mono">${r.symbol}</td>
           <td class="mono">${fmtPriceTooltip('$', r.price_usd)}</td>
           <td class="mono">${fmtPriceTooltip('€', r.price_eur)}</td>
-          <td>${fmtPctWithUsdTooltip(r.ch1, r.price_usd)}</td>
-          <td>${fmtPctWithUsdTooltip(r.ch24, r.price_usd)}</td>
-          <td>${fmtPctWithUsdTooltip(r.ch7, r.price_usd)}</td>
-          <td>${fmtPctWithUsdTooltip(r.ch30, r.price_usd)}</td>
+          <td>${fmtPctWithPastUsdTooltip(r.ch1,  r.price_usd, '1h tagasi')}</td>
+          <td>${fmtPctWithPastUsdTooltip(r.ch24, r.price_usd, '24h tagasi')}</td>
+          <td>${fmtPctWithPastUsdTooltip(r.ch7,  r.price_usd, '7d tagasi')}</td>
+          <td>${fmtPctWithPastUsdTooltip(r.ch30, r.price_usd, '30d tagasi')}</td>
           <td class="mono">${fmtInt(r.mcap)}</td>
           <td class="mono">${fmtInt(r.vol)}</td>
           <td>${r.dom??''}</td>
@@ -206,8 +208,8 @@
             <td class="mono">${r.symbol}</td>
             <td class="mono">${fmtPriceTooltip('$', r.price_usd)}</td>
             <td class="mono">${fmtPriceTooltip('€', r.price_eur)}</td>
-            <td>${fmtPctWithUsdTooltip(r.ch1, r.price_usd)}</td>
-            <td>${fmtPctWithUsdTooltip(r.ch24, r.price_usd)}</td>
+            <td>${fmtPctWithPastUsdTooltip(r.ch1,  r.price_usd, '1h tagasi')}</td>
+            <td>${fmtPctWithPastUsdTooltip(r.ch24, r.price_usd, '24h tagasi')}</td>
             <td class="mono">${fmtInt(r.vol)}</td>
             <td>${r.rsi??''}</td>
           </tr>`).join('');
