@@ -1,45 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="et">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crypto Dashboard – DainotseK Official Website</title>
-
-  <!-- Fonts & Base Styles -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="stiil.css"/>
+  <meta charset="utf-8" />
+  <title>Krüptoturu analüüs (Top 50, tasuta API)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:24px;color:#eaeaea;background:#121212}
+    h1,h2{margin:12px 0}.muted{color:#aaa}.small{font-size:12px}
+    .card{background:#1c1c1c;border-radius:14px;padding:16px;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+    table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+    th,td{padding:8px 10px;border-bottom:1px solid #2a2a2a}
+    th{position:sticky;top:0;background:#1c1c1c;text-align:left}
+    .pos{color:#6de38b}.neg{color:#ff7b7b}
+    .badge{padding:2px 8px;border-radius:999px;background:#2d2d2d;font-size:12px}
+    .buy{background:#0b5}.sell{background:#b00}.hold{background:#444}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  </style>
 </head>
 <body>
-  <header>
-    <h1>DainotseK</h1>
-  </header>
+  <h1>Krüptoturu analüüs — Top 50 <span id="ts" class="muted small"></span></h1>
 
-  <nav>
-    <div class="nav-container">
-      <button id="mobile-menu-toggle" class="menu-btn">Menu</button>
-      <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="videos.html">Videos</a>
-        <a href="music.html">Music</a>
-        <a href="finance.html">Finance</a>
-        <a href="tulevik.html">Future</a>
-        <a href="kontakt.html">Contact</a>
-      </div>
+  <div class="card">
+    <div class="small muted">
+      Andmeallikas: CoinGecko (tasuta, võtmeta). Leht värskendab end automaatselt iga 30 minuti järel.
     </div>
-  </nav>
-
-  <div class="container">
-    <h2 class="content-title">Crypto Dashboard</h2>
-    <div id="crypto-dashboard"></div>
+    <div id="top50">Laen andmeid…</div>
   </div>
 
-  <footer>
-    <p class="footer-text">© 2025 DainotseK. All rights reserved.</p>
-  </footer>
+  <script>
+    const API = 'https://api.coingecko.com/api/v3';
+    const fmt = n => n==null ? '' : n.toLocaleString('en-US');
+    const pct = p => p==null ? '' : (p>0?`<span class="pos">+${p.toFixed(2)}%</span>`:p<0?`<span class="neg">${p.toFixed(2)}%</span>`:`${p.toFixed(2)}%`);
+    const badge = s => `<span class="badge ${s==='Osta'?'buy':s==='Müü'?'sell':'hold'}">${s}</span>`;
 
-  <script src="js/menu-toggle.js"></script>
-  <script src="js/crypto-dashboard.js"></script>
+    async function jget(path, params={}) {
+      const url = new URL(API + path);
+      Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,String(v)));
+      const res = await fetch(url, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw new Error('HTTP '+res.status+' '+res.statusText);
+      return res.json();
+    }
+
+    function computeRSI14(series){
+      const period=14;
+      if(!Array.isArray(series)||series.length<period+1) return null;
+      let gains=0, losses=0;
+      for(let i=series.length-period;i<series.length;i++){
+        const d=series[i]-series[i-1];
+        if(d>=0) gains+=d; else losses+=-d;
+      }
+      const avgG=gains/period, avgL=losses/period;
+      if(avgL===0) return 100;
+      const rs=avgG/avgL, rsi=100-(100/(1+rs));
+      return Math.round(rsi*100)/100;
+    }
+
+    const actionFromRSI = rsi => rsi==null?'Hoia': rsi<=30?'Osta': rsi>=70?'Müü':'Hoia';
+    const classify = (rsi, ch7, ch24) =>
+      (rsi!=null && rsi<=30) ? 'positiivne' :
+      (rsi!=null && rsi>=70 && (ch24??0)<0) ? 'negatiivne' :
+      ((ch7??0)>0 && (rsi??50)<70) ? 'positiivne' : 'neutraalne';
+
+    async function loadTop50(){
+      // 1) USD andmed + sparkline RSI jaoks
+      const usd = await jget('/coins/markets', {
+        vs_currency:'usd', order:'market_cap_desc', per_page:50, page:1,
+        sparkline:true, price_change_percentage:'1h,24h,7d,30d'
+      });
+      // 2) EUR hinnad
+      const eur = await jget('/coins/markets', {
+        vs_currency:'eur', order:'market_cap_desc', per_page:50, page:1,
+        sparkline:false, price_change_percentage:'1h,24h,7d,30d'
+      });
+      const eurMap = new Map(eur.map(c=>[c.id, c.current_price]));
+      // 3) Globaalne mcap dominance arvutuseks
+      const global = await jget('/global');
+      const totalMcap = global?.data?.total_market_cap?.usd ?? null;
+
+      const rows = usd.map((c, idx) => {
+        const rsi = computeRSI14(c?.sparkline_in_7d?.price ?? []);
+        const dom = (totalMcap && c.market_cap) ? +(100*c.market_cap/totalMcap).toFixed(3) : null;
+        const sent = classify(rsi, c.price_change_percentage_7d_in_currency, c.price_change_percentage_24h_in_currency);
+        const act = actionFromRSI(rsi);
+        return {
+          rank: idx+1,
+          name: c.name,
+          symbol: (c.symbol||'').toUpperCase(),
+          price_usd: c.current_price,
+          price_eur: eurMap.get(c.id) ?? null,
+          ch1: c.price_change_percentage_1h_in_currency,
+          ch24: c.price_change_percentage_24h_in_currency,
+          ch7: c.price_change_percentage_7d_in_currency,
+          ch30: c.price_change_percentage_30d_in_currency,
+          mcap: c.market_cap,
+          vol: c.total_volume,
+          dom: dom,
+          rsi: rsi,
+          sentiment: sent,
+          action: act
+        };
+      });
+
+      renderTop50(rows);
+      document.getElementById('ts').textContent = '• värskendatud: ' + new Date().toLocaleString();
+    }
+
+    function renderTop50(rows){
+      const head = `
+      <table><thead><tr>
+        <th>#</th><th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th>
+        <th>1h %</th><th>24h %</th><th>7d %</th><th>30d %</th>
+        <th>MCap $</th><th>Vol 24h $</th><th>Dom %</th><th>RSI(14)</th><th>Sentiment</th><th>Soovitus</th>
+      </tr></thead><tbody>`;
+      const body = rows.map(r=>`
+        <tr>
+          <td>${r.rank}</td>
+          <td>${r.name}</td>
+          <td class="mono">${r.symbol}</td>
+          <td class="mono">${fmt(r.price_usd)}</td>
+          <td class="mono">${fmt(r.price_eur)}</td>
+          <td>${r.ch1==null?'':pct(r.ch1)}</td>
+          <td>${r.ch24==null?'':pct(r.ch24)}</td>
+          <td>${r.ch7==null?'':pct(r.ch7)}</td>
+          <td>${r.ch30==null?'':pct(r.ch30)}</td>
+          <td class="mono">${fmt(r.mcap)}</td>
+          <td class="mono">${fmt(r.vol)}</td>
+          <td>${r.dom??''}</td>
+          <td>${r.rsi??''}</td>
+          <td>${r.sentiment}</td>
+          <td>${badge(r.action)}</td>
+        </tr>`).join('');
+      const foot = '</tbody></table>';
+      document.getElementById('top50').innerHTML = head + body + foot;
+    }
+
+    // Lae kohe ja värskenda iga 30 minuti järel
+    loadTop50().catch(err=>{
+      document.getElementById('top50').innerHTML =
+        '<div class="small">Viga andmete laadimisel: '+(err?.message||err)+'</div>';
+    });
+    setInterval(loadTop50, 30*60*1000);
+  </script>
 </body>
 </html>
