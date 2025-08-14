@@ -1,35 +1,30 @@
 // CommonJS Netlify Function.
-// FIX: CMC free plan allows only 1 convert. We fetch USD only and compute EUR via exchangerate.host.
+// CMC: convert=USD (free plaan lubab 1 valuuta).
+// FX: open.er-api.com (võtmeta) + fallback fawazahmed0 currency-api.
 
 const CMC_BASE = 'https://pro-api.coinmarketcap.com/v1';
-const FX_BASE  = 'https://api.exchangerate.host';
 
 exports.handler = async () => {
   try {
     const key = process.env.CMC_API_KEY;
     if (!key) return json(500, { error: 'Missing CMC_API_KEY environment variable' });
 
-    // 1) USD->EUR kursi võtmine (tasuta, võtmeta)
-    const fxRes = await fetch(`${FX_BASE}/latest?base=USD&symbols=EUR`, { headers: { 'Accept': 'application/json' } });
-    if (!fxRes.ok) {
-      return json(502, { error: 'FX HTTP error', detail: `status ${fxRes.status}` });
-    }
-    const fxJson = await fxRes.json();
-    const usdToEur = Number(fxJson?.rates?.EUR);
-    if (!usdToEur || !isFinite(usdToEur)) {
-      return json(502, { error: 'Invalid FX payload', detail: fxJson });
+    // 1) USD->EUR kursi toomine (tasuta, võtmeta)
+    const usdToEur = await getUsdToEur();
+    if (!usdToEur) {
+      return json(502, { error: 'FX rate fetch failed', detail: 'Could not resolve USD->EUR from free sources' });
     }
 
-    // 2) CMC: kuni 5000 kirjet, convert=USD (AINULT ÜKS!)
+    // 2) CMC: kuni 5000 kirjet, convert=USD (AINULT ÜKS free plaanis)
     const url = new URL(`${CMC_BASE}/cryptocurrency/listings/latest`);
     url.searchParams.set('limit', '5000');
-    url.searchParams.set('convert', 'USD'); // free plan: only 1 convert
+    url.searchParams.set('convert', 'USD');
 
     const res = await fetch(url, {
       headers: {
         'Accept': 'application/json',
         'X-CMC_PRO_API_KEY': key,
-        'User-Agent': 'NetlifyCryptoMovers/1.1'
+        'User-Agent': 'NetlifyCryptoMovers/1.2'
       }
     });
 
@@ -71,8 +66,8 @@ exports.handler = async () => {
 
     return json(200, {
       generated_at: new Date().toISOString(),
-      source: 'coinmarketcap+exchangerate.host',
-      usd_to_eur: usdToEurRounded(usdToEur),
+      source: 'coinmarketcap + open.er-api.com (fallback: fawazahmed0)',
+      usd_to_eur: Math.round(usdToEur * 1e6) / 1e6,
       top_gainers_24h: gainers,
       top_losers_24h: losers
     });
@@ -92,4 +87,26 @@ function json(statusCode, obj) {
 }
 function toNum(x) { return (x === null || x === undefined) ? null : Number(x); }
 function isNum(x) { return typeof x === 'number' && isFinite(x); }
-function usdToEurRounded(r) { return Math.round(r * 1e6) / 1e6; }
+
+// Tasuta FX: peamine allikas + fallback
+async function getUsdToEur() {
+  // Primary: open.er-api.com
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD', { headers: { 'Accept': 'application/json' } });
+    if (r.ok) {
+      const j = await r.json();
+      const v = Number(j?.rates?.EUR);
+      if (v && isFinite(v)) return v;
+    }
+  } catch(_) {}
+  // Fallback: fawazahmed0 currency-api (GitHub CDN)
+  try {
+    const r = await fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd.json', { headers: { 'Accept': 'application/json' } });
+    if (r.ok) {
+      const j = await r.json();
+      const v = Number(j?.usd?.eur);
+      if (v && isFinite(v)) return v;
+    }
+  } catch(_) {}
+  return null;
+}
