@@ -2,18 +2,15 @@
 <html lang="et">
 <head>
   <meta charset="utf-8" />
-  <title>Krüptoturu analüüs (Top 50 + globaalsed Tõusjad/Langejad)</title>
+  <title>Krüptoturu analüüs (Top 50 + Movers + Moonshotid + Uudised)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
       --bg:#121212; --card:#1c1c1c; --muted:#aaa; --txt:#eaeaea;
       --pos:#6de38b; --neg:#ff7b7b;
-      --money-int:#e6e6e6;     /* täiseurod */
-      --money-frac:#8a8a8a;    /* sendid tumedam */
-      --money-int-hover:#f2f2f2;
-      --money-frac-hover:#6a6a6a; /* sendid tumedam hover */
-      --tooltip-bg:#222;
-      --tooltip-border:#333;
+      --money-int:#e6e6e6; --money-frac:#8a8a8a;
+      --money-int-hover:#f2f2f2; --money-frac-hover:#6a6a6a;
+      --tooltip-bg:#222; --tooltip-border:#333;
     }
     body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:24px;color:var(--txt);background:var(--bg)}
     h1,h2{margin:12px 0}.muted{color:var(--muted)}.small{font-size:12px}
@@ -28,16 +25,12 @@
     .badge{padding:2px 8px;border-radius:999px;background:#2d2d2d;font-size:12px}
     .buy{background:#0b5}.sell{background:#b00}.hold{background:#444}
     .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-
-    /* Raha toonid */
     .money{white-space:nowrap}
     .money-cur{opacity:.9;margin-right:4px}
     .money-int{color:var(--money-int)}
     .money-frac{color:var(--money-frac)}
     .money:hover .money-int{color:var(--money-int-hover)}
     .money:hover .money-frac{color:var(--money-frac-hover)}
-
-    /* Kohandatud tooltip */
     .tt{position:relative;display:inline-block}
     .tt::after{
       content:attr(data-full);
@@ -57,9 +50,7 @@
     <!-- TOP 50 -->
     <div class="card">
       <h2>Top 50 krüpto</h2>
-      <div class="small muted">
-        Andmeallikas: CoinGecko (tasuta, võtmeta). Leht värskendab end automaatselt iga 30 minuti järel.
-      </div>
+      <div class="small muted">CoinGecko (tasuta, võtmeta). Autovärskendus iga 30 min.</div>
       <div id="top50">Laen andmeid…</div>
     </div>
 
@@ -69,30 +60,40 @@
       <div class="small muted">Allikas: CoinMarketCap (serverifunktsioon, API võti peidetud)</div>
       <div id="movers">Laen andmeid…</div>
     </div>
+
+    <!-- MOONSHOTID -->
+    <div class="card">
+      <h2>Moonshotid — cap &lt; $100M, trendid ↑</h2>
+      <div class="small muted">Allikas: CoinGecko (tasuta). Heuristika: 7p hind ↑, 24h maht &gt; 7p keskmine.</div>
+      <div id="moonshots">Laen andmeid…</div>
+    </div>
+
+    <!-- UUDISED & SOTSIAAL -->
+    <div class="card">
+      <h2>Uudised &amp; sotsiaal — lühike suunasoovitus</h2>
+      <div class="small muted">Allikad: CoinDesk, CoinTelegraph, Decrypt, X/Nitter (Musk, Trump, CZ, Vitalik). Märksõnapõhine sentiment.</div>
+      <div id="news">Laen andmeid…</div>
+    </div>
   </div>
 
   <script>
     const API_CG = 'https://api.coingecko.com/api/v3';
     const API_MOVERS = '/.netlify/functions/cmc-movers';
+    const API_MOON = '/.netlify/functions/moonshots';
+    const API_NEWS = '/.netlify/functions/news-sentiment';
 
-    // Suured numbrid (mcap, maht)
+    // ---------- vormindajad ----------
     const fmtInt = n => n==null ? '' : n.toLocaleString('en-US');
-
-    // Protsendid + varasem USD hind tooltipis ("≈ $ x.xxxxxxxxxx • periood")
     function fmtPctWithPastUsdTooltip(pctVal, currentUsdPrice, label){
       if (pctVal==null) return '';
       const pctText = (pctVal>0 ? `+${pctVal.toFixed(2)}%` : `${pctVal.toFixed(2)}%`);
       const cls = pctVal>0 ? 'pos' : (pctVal<0 ? 'neg' : '');
-      if (currentUsdPrice==null || pctVal <= -100) {
-        return cls ? `<span class="${cls}">${pctText}</span>` : pctText;
-      }
+      if (currentUsdPrice==null || pctVal <= -100) return cls ? `<span class="${cls}">${pctText}</span>` : pctText;
       const prevPrice = currentUsdPrice / (1 + (pctVal/100));
       const full = Number(prevPrice).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 });
       const title = `≈ $ ${full} • ${label}`;
       return `<span class="${cls} tt" data-full="${title}">${pctText}</span>`;
     }
-
-    // Hinna kuvamine (USD/EUR): 5 kohta ekraanil, 10 kohta tooltipis; integer vs frac värviga
     function formatMoneySplit(symbol, val, decimalsDisplay=5, decimalsFull=10){
       if (val==null) return '';
       const fixedDisp = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimalsDisplay, maximumFractionDigits: decimalsDisplay });
@@ -107,9 +108,9 @@
         </span>
       `;
     }
-
     const badge = s => `<span class="badge ${s==='Osta'?'buy':s==='Müü'?'sell':'hold'}">${s}</span>`;
 
+    // ---------- Top 50 (CoinGecko) ----------
     async function jget(path, params={}) {
       const url = new URL(API_CG + path);
       Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,String(v)));
@@ -117,8 +118,6 @@
       if(!res.ok) throw new Error('HTTP '+res.status+' '+res.statusText);
       return res.json();
     }
-
-    // RSI(14) 7 päeva sparkline'ist (tunnisamm)
     function computeRSI14(series){
       const period=14;
       if(!Array.isArray(series)||series.length<period+1) return null;
@@ -132,28 +131,22 @@
       const rs=avgG/avgL, rsi=100-(100/(1+rs));
       return Math.round(rsi*100)/100;
     }
-
     const actionFromRSI = rsi => rsi==null?'Hoia': rsi<=30?'Osta': rsi>=70?'Müü':'Hoia';
     const classify = (rsi, ch7, ch24) =>
       (rsi!=null && rsi<=30) ? 'positiivne' :
       (rsi!=null && rsi>=70 && (ch24??0)<0) ? 'negatiivne' :
       ((ch7??0)>0 && (rsi??50)<70) ? 'positiivne' : 'neutraalne';
 
-    let LAST_ROWS = []; // Top-50 (CoinGecko) hoiustamine
-
     async function loadTop50(){
-      // USD andmed + sparkline RSI jaoks
       const usd = await jget('/coins/markets', {
         vs_currency:'usd', order:'market_cap_desc', per_page:50, page:1,
         sparkline:true, price_change_percentage:'1h,24h,7d,30d'
       });
-      // EUR hinnad (ilma sparklineta)
       const eur = await jget('/coins/markets', {
         vs_currency:'eur', order:'market_cap_desc', per_page:50, page:1,
         sparkline:false, price_change_percentage:'1h,24h,7d,30d'
       });
       const eurMap = new Map(eur.map(c=>[c.id, c.current_price]));
-      // Globaalne mcap dominance arvutuseks (USD)
       const global = await jget('/global');
       const totalMcap = global?.data?.total_market_cap?.usd ?? null;
 
@@ -175,29 +168,13 @@
           ch30: c.price_change_percentage_30d_in_currency,
           mcap: c.market_cap,
           vol: c.total_volume,
-          dom: dom,
+          dom: (totalMcap && c.market_cap) ? +(100*c.market_cap/totalMcap).toFixed(3) : null,
           rsi: rsi,
           sentiment: sent,
           action: act
         };
       });
 
-      LAST_ROWS = rows;
-      renderTop50(rows);
-      document.getElementById('ts').textContent = '• värskendatud: ' + new Date().toLocaleString();
-    }
-
-    async function loadMovers() {
-      const res = await fetch(API_MOVERS, { cache: 'no-store' });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error('Movers API error: ' + txt);
-      }
-      const data = await res.json();
-      renderMoversFromCMC(data);
-    }
-
-    function renderTop50(rows){
       const head = `
       <table id="cryptoTable"><thead><tr>
         <th>#</th><th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th>
@@ -222,13 +199,15 @@
           <td>${r.sentiment}</td>
           <td>${badge(r.action)}</td>
         </tr>`).join('');
-      const foot = '</tbody></table>';
-      document.getElementById('top50').innerHTML = head + body + foot;
+      document.getElementById('top50').innerHTML = head + body + '</tbody></table>';
       makeSortable(document.getElementById('cryptoTable'));
     }
 
-    // CMC movers: kasutame funktsiooni tagastatud struktuuri
-    function renderMoversFromCMC(payload){
+    // ---------- Movers (CMC) ----------
+    async function loadMovers() {
+      const res = await fetch(API_MOVERS, { cache: 'no-store' });
+      if (!res.ok) throw new Error('Movers API error');
+      const payload = await res.json();
       const gainers = payload?.top_gainers_24h ?? [];
       const losers  = payload?.top_losers_24h ?? [];
 
@@ -237,7 +216,7 @@
           <div class="small muted" style="margin-top:8px">${title}</div>
           <table id="${id}"><thead><tr>
             <th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th>
-            <th>1h %</th><th>24h %</th><th>Vol 24h $</th><th>RSI(14)</th>
+            <th>1h %</th><th>24h %</th><th>Vol 24h $</th>
           </tr></thead><tbody>`;
         const body = data.map(r=>`
           <tr>
@@ -248,44 +227,98 @@
             <td>${fmtPctWithPastUsdTooltip(r.ch1,  r.price_usd, '1h tagasi')}</td>
             <td>${fmtPctWithPastUsdTooltip(r.ch24, r.price_usd, '24h tagasi')}</td>
             <td class="mono">${fmtInt(r.vol)}</td>
-            <td>${r.rsi ?? ''}</td>
           </tr>`).join('');
-        const foot = '</tbody></table>';
-        return head + body + foot;
+        return head + body + '</tbody></table>';
       };
 
       const html = table('tblGainers', 'TOP 10 TÕUSJAT (24h, kogu turg)', gainers)
                  + table('tblLosers',  'TOP 10 LANGEJAT (24h, kogu turg)', losers);
-
       const wrap = document.getElementById('movers');
       wrap.innerHTML = html;
-
       makeSortable(document.getElementById('tblGainers'));
       makeSortable(document.getElementById('tblLosers'));
     }
 
-    // Üldine sorteerija
+    // ---------- Moonshotid ----------
+    async function loadMoon(){
+      const r = await fetch(API_MOON, { cache: 'no-store' });
+      if (!r.ok) throw new Error('Moonshots API error');
+      const data = await r.json();
+      const rows = data.items || [];
+      const head = `
+        <table id="tblMoon"><thead><tr>
+          <th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>MCap $</th><th>Vol 24h $</th>
+          <th>24h %</th><th>7d %</th><th>Vol ↑</th><th>Score</th>
+        </tr></thead><tbody>`;
+      const body = rows.map(r=>`
+        <tr>
+          <td>${r.name}</td>
+          <td class="mono">${r.symbol}</td>
+          <td class="mono">${formatMoneySplit('$', r.price_usd)}</td>
+          <td class="mono">${fmtInt(r.mcap)}</td>
+          <td class="mono">${fmtInt(r.vol24)}</td>
+          <td>${r.ch24!=null ? (r.ch24>=0?'<span class="pos">+'+r.ch24.toFixed(2)+'%</span>':'<span class="neg">'+r.ch24.toFixed(2)+'%</span>') : ''}</td>
+          <td>${r.ch7!=null ? (r.ch7>=0?'<span class="pos">+'+r.ch7.toFixed(2)+'%</span>':'<span class="neg">'+r.ch7.toFixed(2)+'%</span>') : ''}</td>
+          <td>${r.vol_up ? '↑' : '→'}</td>
+          <td>${r.score}</td>
+        </tr>`).join('');
+      document.getElementById('moonshots').innerHTML = head + body + '</tbody></table>';
+      makeSortable(document.getElementById('tblMoon'));
+    }
+
+    // ---------- Uudised & sotsiaal ----------
+    async function loadNews(){
+      const r = await fetch('/.netlify/functions/news-sentiment', { cache: 'no-store' });
+      if (!r.ok) throw new Error('News API error');
+      const data = await r.json();
+      const bias = data?.bias ?? [];
+      const latest = data?.latest ?? [];
+
+      const head1 = `
+        <div class="small muted">Automaatne märksõnaskoor: &gt;0.5 = ↑, &lt;-0.5 = ↓, muidu →</div>
+        <table id="tblBias"><thead><tr><th>Asset</th><th>Mentse</th><th>Score</th><th>Bias</th></tr></thead><tbody>`;
+      const body1 = bias.map(b=>`
+        <tr>
+          <td class="mono">${b.asset}</td>
+          <td>${b.mentions}</td>
+          <td>${b.score}</td>
+          <td>${b.direction==='UP' ? '<span class="pos">↑</span>' : b.direction==='DOWN' ? '<span class="neg">↓</span>' : '→'}</td>
+        </tr>`).join('');
+      const tbl1 = head1 + body1 + '</tbody></table>';
+
+      const head2 = `<div class="small muted" style="margin-top:8px">Viimased pealkirjad (50):</div>
+        <table id="tblNews"><thead><tr><th>Allikas</th><th>Pealkiri</th><th>Seotud</th><th>Sentiment</th></tr></thead><tbody>`;
+      const body2 = latest.map(n=>{
+        const s = n.sentiment;
+        const sig = s>0 ? `<span class="pos">+${s}</span>` : s<0 ? `<span class="neg">${s}</span>` : s;
+        const assets = (n.assets||[]).join(', ');
+        const title = n.link ? `<a href="${n.link}" target="_blank" rel="noopener">${escapeHtml(n.title)}</a>` : escapeHtml(n.title);
+        return `<tr><td>${n.source}</td><td>${title}</td><td class="mono">${assets}</td><td>${sig}</td></tr>`;
+      }).join('');
+      const tbl2 = head2 + body2 + '</tbody></table>';
+
+      document.getElementById('news').innerHTML = tbl1 + tbl2;
+      makeSortable(document.getElementById('tblBias'));
+      makeSortable(document.getElementById('tblNews'));
+    }
+
+    // ---------- Üldine sorteerija ----------
     function makeSortable(table) {
       if (!table) return;
       const headers = table.querySelectorAll('th');
       let lastSorted = { idx: -1, asc: true };
-
       headers.forEach((th, idx) => {
         th.addEventListener('click', () => {
           const tbody = table.tBodies[0];
           const rows = Array.from(tbody.querySelectorAll('tr'));
           headers.forEach(h => h.classList.remove('sort-asc','sort-desc'));
-
           const isNumeric = rows.filter(row => row.cells[idx])
             .map(row => row.cells[idx].innerText.replace(/[^\d\.\-]/g, ''))
             .filter(txt => txt !== '')
-            .map(txt => !isNaN(parseFloat(txt)))
-            .filter(Boolean).length >= Math.max(1, Math.floor(rows.length * 0.6));
-
+            .map(txt => !isNaN(parseFloat(txt))).filter(Boolean).length >= Math.max(1, Math.floor(rows.length * 0.6));
           let asc = true;
           if (lastSorted.idx === idx) asc = !lastSorted.asc;
           lastSorted = { idx, asc };
-
           rows.sort((a, b) => {
             let A = a.cells[idx]?.innerText?.trim() ?? '';
             let B = b.cells[idx]?.innerText?.trim() ?? '';
@@ -297,19 +330,24 @@
               return asc ? A.localeCompare(B) : B.localeCompare(A);
             }
           });
-
           rows.forEach(r => tbody.appendChild(r));
           th.classList.add(asc ? 'sort-asc' : 'sort-desc');
         });
       });
     }
 
-    // Laadime mõlemad plokid; värskendus iga 30 min 
-    Promise.all([loadTop50(), loadMovers()]).catch(err=>{
-      console.error(err);
-      document.getElementById('movers').innerHTML = '<div class="small">Viga CMC movers laadimisel.</div>';
-    });
-    setInterval(() => { loadTop50().catch(()=>{}); loadMovers().catch(()=>{}); }, 30*60*1000);
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])) }
+
+    // ---------- Käivita ----------
+    function refreshAll(){
+      loadTop50().catch(err => document.getElementById('top50').innerHTML = '<div class="small">Viga andmete laadimisel.</div>');
+      loadMovers().catch(err => document.getElementById('movers').innerHTML = '<div class="small">Viga CMC movers laadimisel.</div>');
+      loadMoon().catch(err => document.getElementById('moonshots').innerHTML = '<div class="small">Viga moonshotide laadimisel.</div>');
+      loadNews().catch(err => document.getElementById('news').innerHTML = '<div class="small">Viga uudiste laadimisel.</div>');
+      document.getElementById('ts').textContent = '• värskendatud: ' + new Date().toLocaleString();
+    }
+    refreshAll();
+    setInterval(refreshAll, 30*60*1000);
   </script>
 </body>
 </html>
