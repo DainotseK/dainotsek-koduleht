@@ -25,12 +25,14 @@
     .badge{padding:2px 8px;border-radius:999px;background:#2d2d2d;font-size:12px}
     .buy{background:#0b5}.sell{background:#b00}.hold{background:#444}
     .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+
     .money{white-space:nowrap}
     .money-cur{opacity:.9;margin-right:4px}
     .money-int{color:var(--money-int)}
     .money-frac{color:var(--money-frac)}
     .money:hover .money-int{color:var(--money-int-hover)}
     .money:hover .money-frac{color:var(--money-frac-hover)}
+
     .tt{position:relative;display:inline-block}
     .tt::after{
       content:attr(data-full);
@@ -47,24 +49,28 @@
   <h1>Krüptoturu analüüs <span id="ts" class="muted small"></span></h1>
 
   <div class="grid">
+    <!-- TOP 50 -->
     <div class="card">
       <h2>Top 50 krüpto</h2>
-      <div class="small muted">CoinGecko (tasuta). Autovärskendus iga 30 min.</div>
+      <div class="small muted">CoinGecko (tasuta, võtmeta). Autovärskendus iga 30 min.</div>
       <div id="top50">Laen andmeid…</div>
     </div>
 
+    <!-- GLOBAALSED TÕUSJAD / LANGEJAD -->
     <div class="card">
       <h2>Top 10 tõusjat &amp; Top 10 langejat (24h, kogu turg – CMC kuni 5000)</h2>
-      <div class="small muted">Allikas: CoinMarketCap (serverifunktsioon)</div>
+      <div class="small muted">Allikas: CoinMarketCap (serverifunktsioon, API võti peidetud)</div>
       <div id="movers">Laen andmeid…</div>
     </div>
 
+    <!-- MOONSHOTID -->
     <div class="card">
       <h2>Moonshotid — cap &lt; $100M, trendid ↑</h2>
-      <div class="small muted">Heuristika: 7p hind ↑ või 7p maht ↑. Kui CG piirab graafikuid, näitame 7p hinnatrendi põhjal.</div>
+      <div class="small muted">Allikad: CoinPaprika (hind/maht/cap) + LunarCrush (soovi korral social). Näitame: 7d hind, 24h maht, Galaxy, social volume, skoor.</div>
       <div id="moonshots">Laen andmeid…</div>
     </div>
 
+    <!-- SIGNALS -->
     <div class="card">
       <h2>Signals — uudised + momentum ⇒ Action</h2>
       <div class="small muted">Koond: pealkirjade sentiment + 24h/7d momentum (CG). Väljund: Buy/Hold/Sell + põhjused.</div>
@@ -78,8 +84,9 @@
     const API_MOON = '/.netlify/functions/moonshots';
     const API_SIGNALS = '/.netlify/functions/news-signals';
 
-    // ----------- utils -----------
+    // ---------- UTILID ----------
     const fmtInt = n => n==null ? '' : n.toLocaleString('en-US');
+
     function fmtPctWithPastUsdTooltip(pctVal, currentUsdPrice, label){
       if (pctVal==null) return '';
       const pctText = (pctVal>0 ? `+${pctVal.toFixed(2)}%` : `${pctVal.toFixed(2)}%`);
@@ -90,6 +97,7 @@
       const title = `≈ $ ${full} • ${label}`;
       return `<span class="${cls} tt" data-full="${title}">${pctText}</span>`;
     }
+
     function formatMoneySplit(symbol, val, decimalsDisplay=5, decimalsFull=10){
       if (val==null) return '';
       const fixedDisp = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimalsDisplay, maximumFractionDigits: decimalsDisplay });
@@ -104,6 +112,7 @@
         </span>
       `;
     }
+
     function makeSortable(table) {
       if (!table) return;
       const headers = table.querySelectorAll('th');
@@ -137,7 +146,9 @@
       });
     }
 
-    // ----------- Top-50 (sama mis enne, lühendatult) -----------
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])) }
+
+    // ---------- TOP 50 (CoinGecko) ----------
     async function jget(path, params={}) {
       const url = new URL(API_CG + path);
       Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,String(v)));
@@ -176,53 +187,80 @@
       const eurMap = new Map(eur.map(c=>[c.id, c.current_price]));
       const global = await jget('/global');
       const totalMcap = global?.data?.total_market_cap?.usd ?? null;
+
       const rows = usd.map((c, idx) => {
         const rsi = computeRSI14(c?.sparkline_in_7d?.price ?? []);
         const dom = (totalMcap && c.market_cap) ? +(100*c.market_cap/totalMcap).toFixed(3) : null;
         const sent = classify(rsi, c.price_change_percentage_7d_in_currency, c.price_change_percentage_24h_in_currency);
         const act = actionFromRSI(rsi);
         return {
-          rank: idx+1, name: c.name, symbol: (c.symbol||'').toUpperCase(),
-          price_usd: c.current_price, price_eur: eurMap.get(c.id) ?? null,
-          ch1: c.price_change_percentage_1h_in_currency, ch24: c.price_change_percentage_24h_in_currency,
-          ch7: c.price_change_percentage_7d_in_currency, ch30: c.price_change_percentage_30d_in_currency,
-          mcap: c.market_cap, vol: c.total_volume, dom, rsi, sentiment: sent, action: act
+          id: c.id,
+          rank: idx+1,
+          name: c.name,
+          symbol: (c.symbol||'').toUpperCase(),
+          price_usd: c.current_price,
+          price_eur: eurMap.get(c.id) ?? null,
+          ch1: c.price_change_percentage_1h_in_currency,
+          ch24: c.price_change_percentage_24h_in_currency,
+          ch7: c.price_change_percentage_7d_in_currency,
+          ch30: c.price_change_percentage_30d_in_currency,
+          mcap: c.market_cap,
+          vol: c.total_volume,
+          dom: dom,
+          rsi: rsi,
+          sentiment: sent,
+          action: act
         };
       });
-      const head = `<table id="cryptoTable"><thead><tr>
+
+      const head = `
+      <table id="cryptoTable"><thead><tr>
         <th>#</th><th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th>
         <th>1h %</th><th>24h %</th><th>7d %</th><th>30d %</th>
         <th>MCap $</th><th>Vol 24h $</th><th>Dom %</th><th>RSI(14)</th><th>Sentiment</th><th>Soovitus</th>
       </tr></thead><tbody>`;
       const body = rows.map(r=>`
         <tr>
-          <td>${r.rank}</td><td>${r.name}</td><td class="mono">${r.symbol}</td>
+          <td>${r.rank}</td>
+          <td>${r.name}</td>
+          <td class="mono">${r.symbol}</td>
           <td class="mono">${formatMoneySplit('$', r.price_usd)}</td>
           <td class="mono">${formatMoneySplit('€', r.price_eur)}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch1,  r.price_usd, '1h tagasi')}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch24, r.price_usd, '24h tagasi')}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch7,  r.price_usd, '7d tagasi')}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch30, r.price_usd, '30d tagasi')}</td>
-          <td class="mono">${fmtInt(r.mcap)}</td><td class="mono">${fmtInt(r.vol)}</td>
-          <td>${r.dom??''}</td><td>${r.rsi??''}</td><td>${r.sentiment}</td><td><span class="badge">${r.action}</span></td>
+          <td class="mono">${fmtInt(r.mcap)}</td>
+          <td class="mono">${fmtInt(r.vol)}</td>
+          <td>${r.dom??''}</td>
+          <td>${r.rsi??''}</td>
+          <td>${r.sentiment}</td>
+          <td><span class="badge ${r.action==='Osta'?'buy':r.action==='Müü'?'sell':'hold'}">${r.action}</span></td>
         </tr>`).join('');
       document.getElementById('top50').innerHTML = head + body + '</tbody></table>';
       makeSortable(document.getElementById('cryptoTable'));
     }
 
-    // ----------- Movers (CMC) -----------
+    // ---------- MOVERS (CMC) ----------
     async function loadMovers() {
       const res = await fetch(API_MOVERS, { cache: 'no-store' });
       if (!res.ok) throw new Error('Movers API error');
-      const { top_gainers_24h: gainers = [], top_losers_24h: losers = [] } = await res.json();
+      renderMoversFromCMC(await res.json());
+    }
+    function renderMoversFromCMC(payload){
+      const gainers = payload?.top_gainers_24h ?? [];
+      const losers  = payload?.top_losers_24h ?? [];
       const table = (id, title, data) => {
-        const head = `<div class="small muted" style="margin-top:8px">${title}</div>
+        const head = `
+          <div class="small muted" style="margin-top:8px">${title}</div>
           <table id="${id}"><thead><tr>
             <th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th>
-            <th>1h %</th><th>24h %</th><th>Vol 24h $</th></tr></thead><tbody>`;
+            <th>1h %</th><th>24h %</th><th>Vol 24h $</th>
+          </tr></thead><tbody>`;
         const body = data.map(r=>`
           <tr>
-            <td>${r.name}</td><td class="mono">${r.symbol}</td>
+            <td>${r.name}</td>
+            <td class="mono">${r.symbol}</td>
             <td class="mono">${formatMoneySplit('$', r.price_usd)}</td>
             <td class="mono">${formatMoneySplit('€', r.price_eur)}</td>
             <td>${fmtPctWithPastUsdTooltip(r.ch1,  r.price_usd, '1h tagasi')}</td>
@@ -231,37 +269,49 @@
           </tr>`).join('');
         return head + body + '</tbody></table>';
       };
-      const html = table('tblGainers','TOP 10 TÕUSJAT (24h, kogu turg)',gainers)
-                 + table('tblLosers','TOP 10 LANGEJAT (24h, kogu turg)',losers);
-      document.getElementById('movers').innerHTML = html;
+      const html = table('tblGainers', 'TOP 10 TÕUSJAT (24h, kogu turg)', gainers)
+                 + table('tblLosers',  'TOP 10 LANGEJAT (24h, kogu turg)', losers);
+      const wrap = document.getElementById('movers');
+      wrap.innerHTML = html;
       makeSortable(document.getElementById('tblGainers'));
       makeSortable(document.getElementById('tblLosers'));
     }
 
-    // ----------- Moonshots -----------
+    // ---------- MOONSHOTID (Paprika + LunarCrush) ----------
     async function loadMoon(){
       const r = await fetch(API_MOON, { cache: 'no-store' });
       if (!r.ok) throw new Error('Moonshots API error');
       const data = await r.json();
       const rows = data.items || [];
-      const head = `<table id="tblMoon"><thead><tr>
-        <th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>MCap $</th><th>Vol 24h $</th>
-        <th>24h %</th><th>7d %</th><th>Vol ↑</th><th>Score</th></tr></thead><tbody>`;
-      const body = rows.map(r=>`
-        <tr>
-          <td>${r.name}</td><td class="mono">${r.symbol}</td>
-          <td class="mono">${formatMoneySplit('$', r.price_usd)}</td>
-          <td class="mono">${fmtInt(r.mcap)}</td><td class="mono">${fmtInt(r.vol24)}</td>
-          <td>${r.ch24!=null ? (r.ch24>=0?'<span class="pos">+'+r.ch24.toFixed(2)+'%</span>':'<span class="neg">'+r.ch24.toFixed(2)+'%</span>') : ''}</td>
-          <td>${r.ch7!=null ? (r.ch7>=0?'<span class="pos">+'+r.ch7.toFixed(2)+'%</span>':'<span class="neg">'+r.ch7.toFixed(2)+'%</span>') : ''}</td>
-          <td>${r.vol_up===true ? '↑' : (r.vol_up===false ? '↓' : '—')}</td>
-          <td>${r.score}</td>
-        </tr>`).join('');
+      const head = `
+        <table id="tblMoon"><thead><tr>
+          <th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>MCap $</th><th>Vol 24h $</th>
+          <th>24h %</th><th>7d %</th><th>Galaxy</th><th>Soc Vol 24h</th><th>Score</th>
+        </tr></thead><tbody>`;
+      const body = rows.map(r=>{
+        const ch24 = r.ch24!=null ? (r.ch24>=0?`<span class="pos">+${r.ch24.toFixed(2)}%</span>`:`<span class="neg">${r.ch24.toFixed(2)}%</span>`) : '';
+        const ch7  = r.ch7 !=null ? (r.ch7 >=0?`<span class="pos">+${r.ch7 .toFixed(2)}%</span>`:`<span class="neg">${r.ch7 .toFixed(2)}%</span>`) : '';
+        const galaxy = r.social?.galaxy!=null ? r.social.galaxy.toFixed(0) : '';
+        const socVol = r.social?.social_volume_24h!=null ? r.social.social_volume_24h.toLocaleString('en-US') : '';
+        return `
+          <tr>
+            <td>${r.name}</td>
+            <td class="mono">${r.symbol}</td>
+            <td class="mono">${formatMoneySplit('$', r.price_usd)}</td>
+            <td class="mono">${fmtInt(r.mcap)}</td>
+            <td class="mono">${fmtInt(r.vol24)}</td>
+            <td>${ch24}</td>
+            <td>${ch7}</td>
+            <td class="mono">${galaxy}</td>
+            <td class="mono">${socVol}</td>
+            <td>${r.score}</td>
+          </tr>`;
+      }).join('');
       document.getElementById('moonshots').innerHTML = head + body + '</tbody></table>';
       makeSortable(document.getElementById('tblMoon'));
     }
 
-    // ----------- Signals (news + momentum) -----------
+    // ---------- SIGNALS (news + momentum) ----------
     async function loadSignals(){
       const r = await fetch(API_SIGNALS, { cache: 'no-store' });
       if (!r.ok) throw new Error('Signals API error');
@@ -274,7 +324,7 @@
       const body = rows.map(x=>{
         const ch24 = x.mom?.ch24, ch7 = x.mom?.ch7;
         const ch24Cell = ch24==null ? '' : (ch24>=0?`<span class="pos">+${ch24.toFixed(2)}%</span>`:`<span class="neg">${ch24.toFixed(2)}%</span>`);
-        const ch7Cell = ch7==null ? '' : (ch7>=0?`<span class="pos">+${ch7.toFixed(2)}%</span>`:`<span class="neg">${ch7.toFixed(2)}%</span>`);
+        const ch7Cell  = ch7 ==null ? '' : (ch7 >=0?`<span class="pos">+${ch7 .toFixed(2)}%</span>`:`<span class="neg">${ch7 .toFixed(2)}%</span>`);
         const heads = (x.headlines||[]).map(h=> h.link ? `<a href="${h.link}" target="_blank" rel="noopener">${escapeHtml(h.title)}</a>` : escapeHtml(h.title)).join('<br/>');
         return `<tr>
           <td class="mono">${x.asset}</td>
@@ -291,9 +341,7 @@
       makeSortable(document.getElementById('tblSignals'));
     }
 
-    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])) }
-
-    // ----------- Run & refresh -----------
+    // ---------- KÄIVITUS ----------
     function refreshAll(){
       loadTop50().catch(()=>document.getElementById('top50').innerHTML='<div class="small">Viga andmete laadimisel.</div>');
       loadMovers().catch(()=>document.getElementById('movers').innerHTML='<div class="small">Viga CMC movers laadimisel.</div>');
