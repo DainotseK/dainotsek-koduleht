@@ -1,43 +1,49 @@
-// CommonJS (Netlify Functions): ei kasuta ESM ega undici't
-// Kasutab Node 18 sisseehitatud fetch'i
+// CommonJS Netlify Function.
+// FIX: CMC free plan allows only 1 convert. We fetch USD only and compute EUR via exchangerate.host.
 
 const CMC_BASE = 'https://pro-api.coinmarketcap.com/v1';
+const FX_BASE  = 'https://api.exchangerate.host';
 
 exports.handler = async () => {
   try {
     const key = process.env.CMC_API_KEY;
-    if (!key) {
-      return json(500, { error: 'Missing CMC_API_KEY environment variable' });
+    if (!key) return json(500, { error: 'Missing CMC_API_KEY environment variable' });
+
+    // 1) USD->EUR kursi võtmine (tasuta, võtmeta)
+    const fxRes = await fetch(`${FX_BASE}/latest?base=USD&symbols=EUR`, { headers: { 'Accept': 'application/json' } });
+    if (!fxRes.ok) {
+      return json(502, { error: 'FX HTTP error', detail: `status ${fxRes.status}` });
+    }
+    const fxJson = await fxRes.json();
+    const usdToEur = Number(fxJson?.rates?.EUR);
+    if (!usdToEur || !isFinite(usdToEur)) {
+      return json(502, { error: 'Invalid FX payload', detail: fxJson });
     }
 
+    // 2) CMC: kuni 5000 kirjet, convert=USD (AINULT ÜKS!)
     const url = new URL(`${CMC_BASE}/cryptocurrency/listings/latest`);
-    url.searchParams.set('limit', '5000');   // kuni 5000 kirjet
-    url.searchParams.set('convert', 'USD,EUR');
-    // (vajadusel võiks lisada start=1)
+    url.searchParams.set('limit', '5000');
+    url.searchParams.set('convert', 'USD'); // free plan: only 1 convert
 
     const res = await fetch(url, {
       headers: {
         'Accept': 'application/json',
         'X-CMC_PRO_API_KEY': key,
-        'User-Agent': 'NetlifyCryptoMovers/1.0'
+        'User-Agent': 'NetlifyCryptoMovers/1.1'
       }
     });
 
-    // Kui CMC tagastab vea, anna detailne sisu edasi
     const text = await res.text();
     if (!res.ok) {
-      // püüa JSON-iks parsida, kui võimalik
-      let detail;
-      try { detail = JSON.parse(text); } catch(e) { detail = text; }
+      let detail; try { detail = JSON.parse(text); } catch { detail = text; }
       return json(res.status, { error: `CMC HTTP ${res.status}`, detail });
     }
 
-    let jsonBody;
-    try { jsonBody = JSON.parse(text); } catch(e) {
+    let body; try { body = JSON.parse(text); } catch {
       return json(502, { error: 'Invalid JSON from CMC', detail: text?.slice?.(0, 400) });
     }
 
-    const data = Array.isArray(jsonBody?.data) ? jsonBody.data : [];
+    const data = Array.isArray(body?.data) ? body.data : [];
 
     // Eemalda stabiilid
     const stable = new Set(['USDT','USDC','DAI','FDUSD','TUSD','BUSD']);
@@ -45,16 +51,16 @@ exports.handler = async () => {
       .filter(x => x?.symbol && !stable.has(String(x.symbol).toUpperCase()))
       .map(x => {
         const qUSD = x.quote?.USD || {};
-        const qEUR = x.quote?.EUR || {};
+        const price_usd = toNum(qUSD.price);
         return {
           id: x.id,
           name: x.name,
           symbol: String(x.symbol || '').toUpperCase(),
-          price_usd: num(qUSD.price),
-          price_eur: num(qEUR.price),
-          ch1: num(qUSD.percent_change_1h),
-          ch24: num(qUSD.percent_change_24h),
-          vol: num(qUSD.volume_24h),
+          price_usd,
+          price_eur: isNum(price_usd) ? +(price_usd * usdToEur) : null,
+          ch1: toNum(qUSD.percent_change_1h),
+          ch24: toNum(qUSD.percent_change_24h),
+          vol: toNum(qUSD.volume_24h),
           rsi: null
         };
       })
@@ -65,7 +71,8 @@ exports.handler = async () => {
 
     return json(200, {
       generated_at: new Date().toISOString(),
-      source: 'coinmarketcap',
+      source: 'coinmarketcap+exchangerate.host',
+      usd_to_eur: usdToEurRounded(usdToEur),
       top_gainers_24h: gainers,
       top_losers_24h: losers
     });
@@ -75,17 +82,14 @@ exports.handler = async () => {
   }
 };
 
-// --- helpers ---
-function json(code, obj) {
+// ---- helpers ----
+function json(statusCode, obj) {
   return {
-    statusCode: code,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store'
-    },
+    statusCode,
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     body: JSON.stringify(obj)
   };
 }
-function num(x) {
-  return (x === null || x === undefined) ? null : Number(x);
-}
+function toNum(x) { return (x === null || x === undefined) ? null : Number(x); }
+function isNum(x) { return typeof x === 'number' && isFinite(x); }
+function usdToEurRounded(r) { return Math.round(r * 1e6) / 1e6; }
