@@ -1,132 +1,127 @@
-// CommonJS Netlify Function – Moonshotid (<$100M cap) CoinGecko pealt (tasuta).
-const CG = 'https://api.coingecko.com/api/v3';
+// Moonshotid (< $100M cap) – CoinPaprika (võtmeta) + LunarCrush (tasuta võtmega, kui olemas)
+// CommonJS Netlify Function
 
-// Väike viide, et CoinGecko't mitte "koputada"
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const PAPRIKA = 'https://api.coinpaprika.com/v1';
+const LC = 'https://api.lunarcrush.com/v2'; // v2 free endpoint
 
 exports.handler = async () => {
   try {
-    // Võtame kuni 4 lehte (1000 koini) turukapitali ASC järgi – väiksed esimesena
-    const pages = [];
-    for (let p = 1; p <= 4; p++) {
-      pages.push(cg('/coins/markets', {
-        vs_currency: 'usd',
-        order: 'market_cap_asc',
-        per_page: 250,
-        page: p,
-        sparkline: false,
-        price_change_percentage: '1h,24h,7d'
-      }));
-      await sleep(200); // viisakuspaus
-    }
-    const all = (await Promise.all(pages)).flat();
+    // 1) Tõmba KÕIK tickers Paprika'st (quotes=USD)
+    // NB! See on 1 päring ja tuleb järjest – filterdame serveris
+    const tickers = await jget(`${PAPRIKA}/tickers`, { quotes: 'USD' });
 
-    // Esmane filter: cap < 100M, hind > 0
-    let base = all.filter(c =>
-      isNum(c.market_cap) && c.market_cap > 0 && c.market_cap < 100_000_000 &&
-      isNum(c.current_price) && c.current_price > 0
-    );
+    // 2) Filtreeri moonshot-kandidaadid: cap < $100M, hind > 0, maht > 50k
+    const base = (tickers || [])
+      .map(t => {
+        const q = t.quotes?.USD || {};
+        return {
+          id: t.id,
+          name: t.name,
+          symbol: String(t.symbol || '').toUpperCase(),
+          price_usd: num(q.price),
+          mcap: num(q.market_cap),
+          vol24: num(q.volume_24h),
+          ch1: num(q.percent_change_1h),
+          ch24: num(q.percent_change_24h),
+          ch7: num(q.percent_change_7d)
+        };
+      })
+      .filter(x =>
+        isNum(x.mcap) && x.mcap > 0 && x.mcap < 100_000_000 &&
+        isNum(x.price_usd) && x.price_usd > 0 &&
+        isNum(x.vol24) && x.vol24 >= 50_000
+      );
 
-    // Sorteerime 24h mahu järgi (likviidsus)
-    base.sort((a,b) => (b.total_volume ?? 0) - (a.total_volume ?? 0));
+    // 3) Võta likviidsuse järgi esimesed ~120; neist skoorime
+    base.sort((a,b) => (b.vol24 ?? 0) - (a.vol24 ?? 0));
+    const shortlist = base.slice(0, 120);
 
-    // Vali kuni 40 kandidaati süvavaatluseks (7p volume chart)
-    const toCheck = base.slice(0, 40);
-
-    const out = [];
-    for (const c of toCheck) {
-      // Püüame võtta 7 päeva graafiku; kui ebaõnnestub, teeme heuristika vaid hinna põhjal
-      let volUp = null, pxUp = null;
-      try {
-        const chart = await cg(`/coins/${c.id}/market_chart`, {
-          vs_currency: 'usd', days: 7, interval: 'daily'
+    // 4) Võta LunarCrush sotsiaal (kui võti on olemas); batche 25 kaupa
+    const lcKey = process.env.LUNARCRUSH_API_KEY || '';
+    let socialMap = new Map();
+    if (lcKey) {
+      const symbols = [...new Set(shortlist.map(x => x.symbol).filter(Boolean))];
+      const batches = chunk(symbols, 25);
+      const results = [];
+      for (const batch of batches) {
+        const qs = new URLSearchParams({
+          data: 'assets',
+          symbol: batch.join(','),
+          key: lcKey
         });
-        const vols = Array.isArray(chart?.total_volumes) ? chart.total_volumes.map(v => v[1]) : [];
-        const prices = Array.isArray(chart?.prices) ? chart.prices.map(v => v[1]) : [];
-        const avgVol = mean(vols.slice(0, Math.max(0, vols.length - 1)));
-        const lastVol = vols[vols.length - 1] ?? null;
-        volUp = (isNum(avgVol) && isNum(lastVol)) ? (lastVol > avgVol * 1.2) : null;
-        const p7 = prices[0], pNow = prices[prices.length - 1];
-        pxUp = (isNum(p7) && isNum(pNow)) ? (pNow > p7) : null;
-      } catch { /* ignoreerime – jätkame hinna % järgi */ }
-
-      const ch7 = num(c.price_change_percentage_7d_in_currency);
-      const ch24 = num(c.price_change_percentage_24h_in_currency);
-
-      // Heuristika: nõuame vähemalt üht signaali (kas 7d hind ↑ või volUp true)
-      const hasSignal = (isNum(ch7) && ch7 > 0) || (volUp === true);
-
-      if (hasSignal) {
-        // Skoor: mahukasv + hinna 7d kasv; väike boonus 24h > 0; likviidsus boonus
-        const score =
-          (volUp === true ? 1.0 : 0) +
-          ((isNum(ch7) && ch7 > 0) ? Math.min(ch7 / 30, 1) * 1.0 : 0) +
-          ((isNum(ch24) && ch24 > 0) ? 0.3 : 0) +
-          Math.min((c.total_volume ?? 0) / 2e6, 1) * 0.4;
-
-        out.push({
-          id: c.id,
-          name: c.name,
-          symbol: String(c.symbol || '').toUpperCase(),
-          price_usd: num(c.current_price),
-          mcap: num(c.market_cap),
-          vol24: num(c.total_volume),
-          ch24,
-          ch7,
-          vol_up: (volUp === true),
-          px_up: (pxUp === true),
-          score: Math.round(score * 100) / 100
-        });
+        try {
+          const r = await fetch(`${LC}?${qs}`, { headers: { 'Accept':'application/json' }});
+          const txt = await r.text();
+          if (!r.ok) continue;
+          const j = JSON.parse(txt);
+          const arr = Array.isArray(j?.data) ? j.data : [];
+          for (const it of arr) {
+            // v2 väljad: symbol, galaxy_score, social_volume_24h, social_score
+            socialMap.set(String(it.symbol).toUpperCase(), {
+              galaxy: toNum(it.galaxy_score),
+              social_volume_24h: toNum(it.social_volume_24h),
+              social_score: toNum(it.social_score)
+            });
+          }
+        } catch { /* ignore */ }
       }
-
-      await sleep(150); // väike viide iga graafikupäringu järel
     }
 
-    // Kui out jäi väga väikseks (nt CG throttling), täida baasselektsioonist hinnatrendiga
-    if (out.length < 5) {
-      const fallback = base
-        .filter(c => (num(c.price_change_percentage_7d_in_currency) ?? 0) > 0)
-        .slice(0, 15 - out.length)
-        .map(c => ({
-          id: c.id,
-          name: c.name,
-          symbol: String(c.symbol || '').toUpperCase(),
-          price_usd: num(c.current_price),
-          mcap: num(c.market_cap),
-          vol24: num(c.total_volume),
-          ch24: num(c.price_change_percentage_24h_in_currency),
-          ch7: num(c.price_change_percentage_7d_in_currency),
-          vol_up: null,
-          px_up: null,
-          score: Math.round(((c.price_change_percentage_7d_in_currency ?? 0) / 30) * 100) / 100
-        }));
-      out.push(...fallback);
-    }
+    // 5) Lõplik skoor: 7d price ↑, 24h % ↑, vol24/mcap, + social (kui olemas)
+    const withScore = shortlist.map(x => {
+      const social = socialMap.get(x.symbol) || null;
 
-    out.sort((a,b) => (b.score ?? 0) - (a.score ?? 0));
-    const top = out.slice(0, 15);
+      // normaliseerimised (pehmed capid, et mitte ülevõimendada)
+      const s_price7  = clamp((x.ch7 ?? 0) / 30, 0, 1);       // 0..1
+      const s_ch24    = clamp((x.ch24 ?? 0) / 15, -1, 1);     // -1..1 (kasutame ainult positiivset osa)
+      const s_liq     = clamp((x.vol24 ?? 0) / Math.max(1, x.mcap), 0, 1); // vol/mcap 0..1
+      const s_social  = social && isNum(social.galaxy) ? clamp(social.galaxy / 100, 0, 1) :
+                        social && isNum(social.social_score) ? clamp(social.social_score / 100, 0, 1) :
+                        0;
+
+      const score = round2(
+        (s_price7 * 0.45) +
+        (Math.max(0, s_ch24) * 0.15) +
+        (s_liq * 0.20) +
+        (s_social * 0.20)
+      );
+
+      return {
+        ...x,
+        social: social ? {
+          galaxy: social.galaxy ?? null,
+          social_volume_24h: social.social_volume_24h ?? null
+        } : null,
+        score
+      };
+    });
+
+    // 6) Sorteeri ja tagasta top 15
+    withScore.sort((a,b) => (b.score ?? 0) - (a.score ?? 0));
+    const out = withScore.slice(0, 15);
 
     return json(200, {
       generated_at: new Date().toISOString(),
-      count: top.length,
-      items: top
+      source: `coinpaprika${lcKey ? ' + lunarcrush' : ''}`,
+      items: out
     });
   } catch (e) {
-    return json(500, { error: 'Moonshots failed', detail: String(e?.message || e) });
+    return json(500, { error: 'moonshots failed', detail: String(e?.message || e) });
   }
 };
 
-// ---- helpers ----
-async function cg(path, params={}) {
-  const url = new URL(CG + path);
-  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, String(v)));
-  const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
-  if (!r.ok) throw new Error(`CG ${path} HTTP ${r.status}`);
+// --- utils ---
+async function jget(url, params = {}) {
+  const u = new URL(url);
+  Object.entries(params).forEach(([k,v]) => u.searchParams.set(k, String(v)));
+  const r = await fetch(u, { headers: { 'Accept':'application/json' } });
+  if (!r.ok) throw new Error(`HTTP ${r.status} at ${u}`);
   return r.json();
 }
-function json(statusCode, obj) {
-  return { statusCode, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: JSON.stringify(obj) };
-}
+function json(code, obj){ return { statusCode: code, headers: { 'Content-Type':'application/json','Cache-Control':'no-store' }, body: JSON.stringify(obj) }; }
 function num(x){ return (x===null||x===undefined)?null:Number(x) }
+function toNum(x){ return (x===null||x===undefined || x==='') ? null : Number(x) }
 function isNum(x){ return typeof x==='number' && isFinite(x) }
-function mean(arr){ if(!arr.length) return null; return arr.reduce((a,b)=>a+(Number(b)||0),0)/arr.length; }
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function round2(x){ return Math.round(x*100)/100; }
+function chunk(arr, n){ const out=[]; for(let i=0;i<arr.length;i+=n) out.push(arr.slice(i,i+n)); return out; }
