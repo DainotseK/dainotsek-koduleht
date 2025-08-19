@@ -58,29 +58,6 @@
     .up::before{content:"▲";} .down::before{content:"▼";} .up{color:var(--pos)} .down{color:var(--neg)} .dim{opacity:.85}
     details summary{cursor:pointer;user-select:none}
     .hidden{display:none}
-
-    /* ----- Mobiili lisad ----- */
-    .table-wrap{width:100%;overflow:auto} /* turvaline horisontaalne scroll, kui vaja */
-    #top50Cards{display:none;gap:10px}
-    .coin-card{
-      display:grid; grid-template-columns: 1fr auto; gap:8px;
-      padding:12px;border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.03)
-    }
-    .coin-title{font-weight:600}
-    .kv{display:flex;gap:8px;flex-wrap:wrap}
-    .kv .k{color:var(--muted)}
-    .badge-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-    @media (max-width: 820px){
-      .toolbar{gap:6px}
-      .health{display:none}      /* peidame terviseriba, et hoida ruumi */
-      .decision{gap:6px}
-      /* Top50: peida suur tabel, näita kaarte */
-      #top50Table{display:none}
-      #top50Cards{display:grid}
-      /* Movers ka jääb, aga tabel on scrollitav */
-      .card table{font-size:13px}
-      th,td{padding:8px}
-    }
   </style>
 </head>
 <body>
@@ -125,26 +102,23 @@
   </header>
 
   <main>
-    <!-- TOP 50 (põhitabel + mobiilikaardid) -->
+    <!-- TOP 50 (põhitabel) -->
     <section class="card">
       <h2>Top 50 krüpto — põhivaade</h2>
-      <div class="small muted">Desktop: tabel. Mobiil: lihtsamad kaardid.</div>
-      <div id="top50">
-        <div class="table-wrap" id="top50Table">Laen andmeid…</div>
-        <div id="top50Cards"></div>
-      </div>
+      <div class="small muted">Signals on integreeritud veergu “Uudiste signaal”. “Momentum” näitab MACD ületuse noolt.</div>
+      <div id="top50">Laen andmeid…</div>
     </section>
 
     <!-- MOVERS (ainult Breakout preset’is) -->
     <section class="card" id="moversCard" style="display:none">
       <h2>Breakout radar — Top 10 tõusjat &amp; langejat (24h, CMC kuni 5000)</h2>
-      <div class="table-wrap" id="movers">Laen andmeid…</div>
+      <div id="movers">Laen andmeid…</div>
     </section>
 
     <!-- MOONSHOTID -->
     <section class="card">
       <h2>Moonshotid — cap &lt; $100M, trendid ↑</h2>
-      <div class="table-wrap" id="moonshots">Laen andmeid…</div>
+      <div id="moonshots">Laen andmeid…</div>
     </section>
 
     <!-- MINU PORTFELL (EUR) -->
@@ -162,7 +136,7 @@
           <label style="margin-left:10px">min Sell score <input id="minSellScore" type="number" step="0.05" value="0.45" style="width:70px"></label>
         </span>
       </div>
-      <div class="table-wrap" id="pfTable" style="margin-top:8px">Portfell puudub.</div>
+      <div id="pfTable" style="margin-top:8px">Portfell puudub.</div>
       <div id="alerts"></div>
     </section>
 
@@ -177,10 +151,10 @@
         <label class="pill small">VolSurge <input id="wVOL" type="range" min="0" max="1" step="0.05" value="0.30"></label>
         <button id="btnSortRadar" class="btn">Sordi: parimad ostud ↑</button>
       </div>
-      <div class="table-wrap" id="pfRadar">Portfell puudub.</div>
+      <div id="pfRadar">Portfell puudub.</div>
       <details style="margin-top:8px">
         <summary>Portfelli uudised (accordion)</summary>
-        <div class="table-wrap" id="pfNews" style="margin-top:8px" class="small muted">Laen andmeid… (vajadusel)</div>
+        <div id="pfNews" style="margin-top:8px" class="small muted">Laen andmeid… (vajadusel)</div>
       </details>
     </section>
 
@@ -202,162 +176,737 @@
   </main>
 
   <script>
-    /* ===== (1) UTILID + TA (sama nagu varem) ===== */
-    const API_CG='https://api.coingecko.com/api/v3';
-    const API_MOV='/.netlify/functions/cmc-movers';
-    const API_MOON='/.netlify/functions/moonshots';
-    const API_SIG='/.netlify/functions/news-signals';
-    const API_FNG='https://api.alternative.me/fng/?limit=1&format=json';
-    const fmtInt=n=>n==null?'':Number(n).toLocaleString('en-US');
-    const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-    const isNum=x=>x!==null && x!=='' && !isNaN(Number(x));
-    const escapeHtml=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    const moneySplit=(sym,val,fd=5,ff=10)=>{ if(val==null) return ''; const d=Number(val).toLocaleString('en-US',{minimumFractionDigits:fd,maximumFractionDigits:fd}); const f=Number(val).toLocaleString('en-US',{minimumFractionDigits:ff,maximumFractionDigits:ff}); const [di,df='0'.repeat(fd)]=d.split('.'); const [fi,ffr='0'.repeat(ff)]=f.split('.'); return `<span class="money tt" data-full=" ${sym} ${fi}.${ffr}"><span class="money-cur">${sym}</span><span class="money-int">${di}</span><span class="money-frac">.${df}</span></span>`; };
-    const pctWithPast=(pct,pxNow,lbl)=>{ if(pct==null) return ''; const t=(pct>0?`+${pct.toFixed(2)}%`:`${pct.toFixed(2)}%`); const cls=pct>0?'pos':(pct<0?'neg':''); if(pxNow==null||pct<=-100) return `<span class="${cls}">${t}</span>`; const prev=pxNow/(1+(pct/100)); const full=Number(prev).toLocaleString('en-US',{minimumFractionDigits:10,maximumFractionDigits:10}); return `<span class="${cls} tt" data-full="≈ $ ${full} • ${lbl}">${t}</span>`; };
+    /* -------------------- Konst & utilid -------------------- */
+    const API_CG   = 'https://api.coingecko.com/api/v3';
+    const API_MOV  = '/.netlify/functions/cmc-movers';
+    const API_MOON = '/.netlify/functions/moonshots';
+    const API_SIG  = '/.netlify/functions/news-signals';
+    const API_FNG  = 'https://api.alternative.me/fng/?limit=1&format=json';
+    const fmtInt = n => n==null ? '' : Number(n).toLocaleString('en-US');
+    const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+    const isNum = x => x!==null && x!=='' && !isNaN(Number(x));
+    const escapeHtml = s => String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    const moneySplit = (sym,val,fd=5,ff=10)=>{
+      if(val==null) return '';
+      const d = Number(val).toLocaleString('en-US',{minimumFractionDigits:fd,maximumFractionDigits:fd});
+      const f = Number(val).toLocaleString('en-US',{minimumFractionDigits:ff,maximumFractionDigits:ff});
+      const [di,df='0'.repeat(fd)] = d.split('.'); const [fi,ffr='0'.repeat(ff)] = f.split('.');
+      return `<span class="money tt" data-full=" ${sym} ${fi}.${ffr}"><span class="money-cur">${sym}</span><span class="money-int">${di}</span><span class="money-frac">.${df}</span></span>`;
+    };
+    const pctWithPast = (pct, pxNow, lbl)=>{
+      if (pct==null) return '';
+      const t = (pct>0?`+${pct.toFixed(2)}%`:`${pct.toFixed(2)}%`);
+      const cls = pct>0?'pos':(pct<0?'neg':'');
+      if(pxNow==null||pct<=-100) return `<span class="${cls}">${t}</span>`;
+      const prev = pxNow/(1+(pct/100));
+      const full = Number(prev).toLocaleString('en-US',{minimumFractionDigits:10,maximumFractionDigits:10});
+      return `<span class="${cls} tt" data-full="≈ $ ${full} • ${lbl}">${t}</span>`;
+    };
 
-    function ema(series,p){ if(!Array.isArray(series)||!series.length) return []; const k=2/(p+1); const out=[series[0]]; let prev=series[0]; for(let i=1;i<series.length;i++){ const v=series[i]*k+prev*(1-k); out.push(v); prev=v; } return out; }
-    function rsi14(series){ const p=14; if(!Array.isArray(series)||series.length<p+1) return null; let g=0,l=0; for(let i=series.length-p;i<series.length;i++){ const d=series[i]-series[i-1]; if(d>=0) g+=d; else l+=-d; } if(l===0) return 100; const rs=(g/p)/(l/p); return Math.round((100-(100/(1+rs)))*100)/100; }
-    function macd(series){ if(!Array.isArray(series)||series.length<35) return null; const e12=ema(series,12), e26=ema(series,26); const mac=e12.map((v,i)=>v-e26[i]); const sig=ema(mac,9); const hist=mac.map((v,i)=>v-sig[i]); const n=hist.length; return {mac,signal:sig,hist,last:mac[n-1],lastSignal:sig[n-1],lastHist:hist[n-1],crossUp:n>1&&hist[n-2]<=0&&hist[n-1]>0,crossDn:n>1&&hist[n-2]>=0&&hist[n-1]<0}; }
-    function sparkSVG(data,w=120,h=28,p=2){ if(!Array.isArray(data)||data.length<2) return ''; const min=Math.min(...data),max=Math.max(...data),rng=(max-min)||1; const sx=(w-p*2)/(data.length-1), sy=(h-p*2)/rng; let d=''; data.forEach((v,i)=>{ const x=p+i*sx, y=h-p-((v-min)*sy); d+=(i?` L ${x} ${y}`:`M ${x} ${y}`); }); return `<svg class="spark" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.1"/></svg>`; }
-    function momChip(m){ if(!m) return `<span class="chip dim">—</span>`; if(m.crossUp) return `<span class="chip up">Tule liikuma ↑</span>`; if(m.crossDn) return `<span class="chip down">Tule liikuma ↓</span>`; return `<span class="chip dim">${m.lastHist>=0?'Trend ↑':'Trend ↓'}</span>`; }
-    function atrPct(series){ if(!Array.isArray(series)||series.length<15) return null; let sum=0,n=0; for(let i=1;i<series.length;i++){ sum+=Math.abs(series[i]-series[i-1]); n++; } const last=series[series.length-1]||0; if(last===0) return null; return +(((sum/n)/last)*100).toFixed(2); }
-    function corr(a,b){ if(!Array.isArray(a)||!Array.isArray(b)) return null; const n=Math.min(a.length,b.length); if(n<10) return null; const x=a.slice(-n), y=b.slice(-n); const mx=x.reduce((s,v)=>s+v,0)/n, my=y.reduce((s,v)=>s+v,0)/n; let num=0,dx=0,dy=0; for(let i=0;i<n;i++){ const vx=x[i]-mx, vy=y[i]-my; num+=vx*vy; dx+=vx*vx; dy+=vy*vy; } const den=Math.sqrt(dx*dy)||0; if(!den) return null; return +(num/den).toFixed(2); }
-
-    /* ===== (2) SEIS ===== */
-    let rowsTop50=[]; let newsMap=new Map(); let btcSpark=null;
-    const volCache=new Map(); const sparkCache=new Map();
-    const LS_PF='pfYahooCSV_multiEUR'; const LS_ALERTS='pfAlertPrefs'; const LS_TRIGS='pfPriceTriggers'; const LS_TRSTATE='pfTriggerState';
-
-    /* ===== (3) HEALTH BAR + TOP50 LAADIMINE ===== */
-    async function jget(path,params={}){ const url=new URL(API_CG+path); Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,String(v))); const r=await fetch(url); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
-    async function healthBar(){
-      try{ const g=await jget('/global'); const d=g.data||{}; const dom=(d.bitcoin_percentage_of_market_cap!=null)? d.bitcoin_percentage_of_market_cap.toFixed(2)+'%' : '—'; const total=d.total_market_cap?.usd; const ch24=d.market_cap_change_percentage_24h_usd; document.getElementById('kpiDom').textContent=dom; document.getElementById('kpiMcap').textContent= total? '$ '+fmtInt(Math.round(total)):'—'; document.getElementById('kpiMcapCh').innerHTML=(ch24!=null)? (ch24>=0?`<span class="pos">(+${ch24.toFixed(2)}%)</span>`:`<span class="neg">(${ch24.toFixed(2)}%)</span>`):''; }catch{}
-      try{ const r=await fetch(API_FNG); const j=await r.json(); const v=j?.data?.[0]?.value_classification || j?.data?.[0]?.value || '—'; document.getElementById('kpiFng').textContent=v; }catch{}
+    /* -------------------- TA funktsioonid -------------------- */
+    function ema(series, period){
+      if(!Array.isArray(series)||!series.length) return [];
+      const k = 2/(period+1); const out=[series[0]]; let prev=series[0];
+      for(let i=1;i<series.length;i++){ const v=series[i]*k + prev*(1-k); out.push(v); prev=v; }
+      return out;
     }
+    function rsi14(series){
+      const p=14; if(!Array.isArray(series) || series.length<p+1) return null;
+      let g=0,l=0; for(let i=series.length-p;i<series.length;i++){ const d=series[i]-series[i-1]; if(d>=0) g+=d; else l+=-d; }
+      if(l===0) return 100; const rs=(g/p)/(l/p); return Math.round((100-(100/(1+rs)))*100)/100;
+    }
+    function macd(series){ // 12/26/9
+      if(!Array.isArray(series)||series.length<35) return null;
+      const e12=ema(series,12), e26=ema(series,26);
+      const mac=e12.map((v,i)=>v-e26[i]); const sig=ema(mac,9); const hist=mac.map((v,i)=>v-sig[i]);
+      const n=hist.length; const crossUp=n>1 && hist[n-2]<=0 && hist[n-1]>0; const crossDn=n>1 && hist[n-2]>=0 && hist[n-1]<0;
+      return {mac,signal:sig,hist,last:mac[n-1],lastSignal:sig[n-1],lastHist:hist[n-1],crossUp,crossDn};
+    }
+    function sparkSVG(data,w=120,h=28,p=2){
+      if(!Array.isArray(data)||data.length<2) return '';
+      const min=Math.min(...data), max=Math.max(...data), rng=(max-min)||1;
+      const sx=(w-p*2)/(data.length-1), sy=(h-p*2)/rng;
+      let d=''; data.forEach((v,i)=>{ const x=p+i*sx, y=h-p-((v-min)*sy); d+=(i?` L ${x} ${y}`:`M ${x} ${y}`); });
+      return `<svg class="spark" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.1"/></svg>`;
+    }
+    function momChip(m){ if(!m) return `<span class="chip dim">—</span>`; if(m.crossUp) return `<span class="chip up">Tule liikuma ↑</span>`; if(m.crossDn) return `<span class="chip down">Tule liikuma ↓</span>`; return `<span class="chip dim">${m.lastHist>=0?'Trend ↑':'Trend ↓'}</span>`; }
+    function atrPct(series){
+      if(!Array.isArray(series)||series.length<15) return null;
+      let sum=0, n=0; for(let i=1;i<series.length;i++){ sum+=Math.abs(series[i]-series[i-1]); n++; }
+      const last=series[series.length-1]||0; if(last===0) return null;
+      return +( (sum/n)/last*100 ).toFixed(2);
+    }
+    function corr(a,b){
+      if(!Array.isArray(a)||!Array.isArray(b)) return null;
+      const n=Math.min(a.length,b.length); if(n<10) return null;
+      const x=a.slice(-n), y=b.slice(-n);
+      const mx=x.reduce((s,v)=>s+v,0)/n, my=y.reduce((s,v)=>s+v,0)/n;
+      let num=0, dx=0, dy=0;
+      for(let i=0;i<n;i++){ const vx=x[i]-mx, vy=y[i]-my; num+=vx*vy; dx+=vx*vx; dy+=vy*vy; }
+      const den=Math.sqrt(dx*dy)||0; if(!den) return null; return +(num/den).toFixed(2);
+    }
+
+    /* -------------------- Seis & cache -------------------- */
+    let rowsTop50 = [];            // {id,symbol,name,usd,eur,ch1,ch24,ch7,ch30,mcap,vol,spark, rsi, macd, volCapPct, atrp, corrBtc, volSurge}
+    let newsMap = new Map();       // id/symbol -> {action,score,confidence,...}
+    let btcSpark = null;
+    const sparkCache = new Map();  // id -> sparkline (7d hourly)
+    const volCache   = new Map();  // id -> total_volumes[7d]
+    const LS_PF  = 'pfYahooCSV_multiEUR';
+    const LS_ALERTS = 'pfAlertPrefs';
+    const LS_TRIGS  = 'pfPriceTriggers';
+    const LS_TRSTATE= 'pfTriggerState';
+
+    /* -------------------- API abid -------------------- */
+    async function jget(path, params={}){
+      const url=new URL(API_CG+path); Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,String(v)));
+      const r=await fetch(url); if(!r.ok) throw new Error('HTTP '+r.status); return r.json();
+    }
+    async function healthBar(){
+      try{
+        const g=await jget('/global'); const d=g.data||{};
+        const dom=(d.bitcoin_percentage_of_market_cap!=null)? d.bitcoin_percentage_of_market_cap.toFixed(2)+'%' : '—';
+        const total=d.total_market_cap?.usd; const ch24=d.market_cap_change_percentage_24h_usd;
+        document.getElementById('kpiDom').textContent = dom;
+        document.getElementById('kpiMcap').textContent = total ? '$ '+fmtInt(Math.round(total)) : '—';
+        document.getElementById('kpiMcapCh').innerHTML = (ch24!=null)? (ch24>=0?`<span class="pos">(+${ch24.toFixed(2)}%)</span>`:`<span class="neg">(${ch24.toFixed(2)}%)</span>`) : '';
+      }catch{}
+      try{
+        const r=await fetch(API_FNG); const j=await r.json();
+        const v=j?.data?.[0]?.value_classification || j?.data?.[0]?.value || '—';
+        document.getElementById('kpiFng').textContent = v;
+      }catch{}
+    }
+
     async function loadTop50(){
       const usd = await jget('/coins/markets',{vs_currency:'usd',order:'market_cap_desc',per_page:50,page:1,sparkline:true,price_change_percentage:'1h,24h,7d,30d'});
       const eur = await jget('/coins/markets',{vs_currency:'eur',order:'market_cap_desc',per_page:50,page:1,sparkline:false,price_change_percentage:'1h,24h,7d,30d'});
-      const eurMap=new Map(eur.map(c=>[c.id,c.current_price]));
+      const eurMap = new Map(eur.map(c=>[c.id,c.current_price]));
       rowsTop50 = usd.map(c=>{
-        const sp=c?.sparkline_in_7d?.price??[]; const rs=rsi14(sp), mc=macd(sp);
-        return { id:c.id, name:c.name, symbol:(c.symbol||'').toUpperCase(), usd:c.current_price, eur:eurMap.get(c.id)??null, ch1:c.price_change_percentage_1h_in_currency, ch24:c.price_change_percentage_24h_in_currency, ch7:c.price_change_percentage_7d_in_currency, ch30:c.price_change_percentage_30d_in_currency, mcap:c.market_cap, vol:c.total_volume, spark:sp, rsi:rs, macd:mc, volCapPct: (isNum(c.total_volume)&&isNum(c.market_cap)&&c.market_cap>0)? +((c.total_volume/c.market_cap)*100).toFixed(2):null, atrp: atrPct(sp), corrBtc:null, volSurge:null };
+        const sp = c?.sparkline_in_7d?.price ?? [];
+        const rs = rsi14(sp); const mc = macd(sp);
+        const volCap = (isNum(c.total_volume)&&isNum(c.market_cap)&&c.market_cap>0)? +( (c.total_volume/c.market_cap)*100 ).toFixed(2) : null;
+        const atrp = atrPct(sp);
+        return {
+          id:c.id, name:c.name, symbol:(c.symbol||'').toUpperCase(),
+          usd:c.current_price, eur:eurMap.get(c.id)??null,
+          ch1:c.price_change_percentage_1h_in_currency,
+          ch24:c.price_change_percentage_24h_in_currency,
+          ch7:c.price_change_percentage_7d_in_currency,
+          ch30:c.price_change_percentage_30d_in_currency,
+          mcap:c.market_cap, vol:c.total_volume,
+          spark:sp, rsi:rs, macd:mc, volCapPct:volCap, atrp, corrBtc:null, volSurge:null
+        };
       });
-      const btc=rowsTop50.find(r=>r.symbol==='BTC'||r.id==='bitcoin'); btcSpark=btc?.spark||null;
-      if(btcSpark){ rowsTop50.forEach(r=> r.corrBtc=corr(r.spark,btcSpark)); }
+      const btc = rowsTop50.find(r=>r.symbol==='BTC' || r.id==='bitcoin'); btcSpark = btc?.spark || null;
+
+      // esialgne corrBTC
+      if (btcSpark){
+        rowsTop50.forEach(r=> r.corrBtc = corr(r.spark, btcSpark));
+      }
+
       await loadNewsSignalsTop50();
-      await computeVolSurgeSmart();
+      await computeVolSurgeSmart(); // püüan 7d volume mediaani osale müntidest
       renderTop50();
-      document.getElementById('ts').textContent='• värskendatud: '+new Date().toLocaleString();
+      computeDecisionRow();
+      document.getElementById('ts').textContent = '• värskendatud: ' + new Date().toLocaleString();
     }
+
     async function loadNewsSignalsTop50(){
-      const payload={coins:rowsTop50.map(r=>({id:r.id,symbol:r.symbol,name:r.name}))};
-      try{ const r=await fetch(API_SIG,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); const j=await r.json(); newsMap=new Map(); (j.signals||[]).forEach(s=>{ if(s.id) newsMap.set(s.id,s); if(s.symbol) newsMap.set(String(s.symbol).toUpperCase(),s); }); }catch{ newsMap=new Map(); }
+      const payload = { coins: rowsTop50.map(r=>({ id:r.id, symbol:r.symbol, name:r.name })) };
+      try{
+        const r = await fetch(API_SIG,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const j = await r.json(); newsMap = new Map();
+        (j.signals||[]).forEach(s=>{ if(s.id) newsMap.set(s.id,s); if(s.symbol) newsMap.set(String(s.symbol).toUpperCase(),s); });
+      }catch{ newsMap = new Map(); }
     }
+
     async function computeVolSurgeSmart(){
-      const g=await jget('/global'); const total=g?.data?.total_market_cap?.usd||null; // mitte kriitiline
-      const topByCap=[...rowsTop50].sort((a,b)=> (b.mcap??0)-(a.mcap??0)).slice(0,15);
-      // approx kõigile
-      for(const r of rowsTop50){ const approx = r.volCapPct==null? null : clamp(r.volCapPct/5,0,1); r.volSurge={score:approx,precise:false}; }
-      // täpsusta top 15
-      for(const r of topByCap){
+      // 1) Kõigile: approx = volCapPct (normeeritud 0..1) -> tooltip "approx"
+      // 2) Esimese 15 mcap’iga: täpsem – /market_chart -> total_volumes -> 24h vs 7d median
+      const topByCap = [...rowsTop50].sort((a,b)=> (b.mcap??0)-(a.mcap??0)).slice(0,15);
+      for (const r of rowsTop50){
+        const approx = r.volCapPct==null? null : clamp(r.volCapPct/5, 0, 1); // heuristika
+        r.volSurge = { score: approx, precise:false };
+      }
+      for (const r of topByCap){
         try{
-          let vols=volCache.get(r.id);
-          if(!vols){ const u=new URL(`${API_CG}/coins/${r.id}/market_chart`); u.searchParams.set('vs_currency','usd'); u.searchParams.set('days','7'); u.searchParams.set('interval','hourly'); const j=await (await fetch(u)).json(); vols=(j?.total_volumes||[]).map(x=>x[1]); volCache.set(r.id,vols); }
-          if(Array.isArray(vols)&&vols.length>10){ const last=vols[vols.length-1]; const med=vols.slice(0,-1).sort((a,b)=>a-b)[Math.floor((vols.length-1)/2)]; const score=med>0? clamp((last/med)-1,0,3)/3 : 0; r.volSurge={score:+score.toFixed(3),precise:true}; }
+          let vols = volCache.get(r.id);
+          if (!vols){
+            const u = new URL(`${API_CG}/coins/${r.id}/market_chart`);
+            u.searchParams.set('vs_currency','usd'); u.searchParams.set('days','7'); u.searchParams.set('interval','hourly');
+            const j = await (await fetch(u)).json(); vols = (j?.total_volumes||[]).map(x=>x[1]); volCache.set(r.id,vols);
+          }
+          if (Array.isArray(vols) && vols.length>10){
+            const last = vols[vols.length-1];
+            const med = vols.slice(0,-1).sort((a,b)=>a-b)[Math.floor((vols.length-1)/2)];
+            const score = med>0 ? clamp((last/med)-1, 0, 3)/3 : 0; // 0..~1
+            r.volSurge = { score:+score.toFixed(3), precise:true };
+          }
         }catch{}
       }
     }
 
-    /* ===== (4) TOP50 RENDER: tabel (desktop) + kaardid (mobiil) ===== */
-    const columns=[
-      {key:'rank',name:'#'},{key:'name',name:'Nimi'},{key:'symbol',name:'Sümbol'},{key:'usd',name:'Hind $'},
-      {key:'eur',name:'Hind €'},{key:'ch1',name:'1h %'},{key:'ch24',name:'24h %'},{key:'ch7',name:'7d %'},
-      {key:'ch30',name:'30d %'},{key:'spark',name:'7d graafik'},{key:'mom',name:'Momentum'},{key:'mcap',name:'MCap $'},
-      {key:'vol',name:'Vol 24h $'},{key:'volcap',name:'Vol/Cap %'},{key:'volsurge',name:'Vol Surge'},{key:'atrp',name:'ATR% (7d)'},
-      {key:'corr',name:'Corr BTC (7d)'},{key:'rsi',name:'RSI(14)'},{key:'action',name:'Soovitus'},{key:'news',name:'Uudiste signaal'}
+    /* -------------------- Render Top50 -------------------- */
+    const columns = [
+      {key:'rank',    name:'#'},
+      {key:'name',    name:'Nimi'},
+      {key:'symbol',  name:'Sümbol'},
+      {key:'usd',     name:'Hind $'},
+      {key:'eur',     name:'Hind €'},
+      {key:'ch1',     name:'1h %'},
+      {key:'ch24',    name:'24h %'},
+      {key:'ch7',     name:'7d %'},
+      {key:'ch30',    name:'30d %'},
+      {key:'spark',   name:'7d graafik'},
+      {key:'mom',     name:'Momentum'},
+      {key:'mcap',    name:'MCap $'},
+      {key:'vol',     name:'Vol 24h $'},
+      {key:'volcap',  name:'Vol/Cap %'},
+      {key:'volsurge',name:'Vol Surge'},
+      {key:'atrp',    name:'ATR% (7d)'},
+      {key:'corr',    name:'Corr BTC (7d)'},
+      {key:'rsi',     name:'RSI(14)'},
+      {key:'action',  name:'Soovitus'},
+      {key:'news',    name:'Uudiste signaal'}
     ];
-    const colState=new Map(columns.map(c=>[c.key,true]));
+    const colState = new Map(columns.map(c=>[c.key,true]));
+
     function buildColumnChooser(){
-      const wrap=document.getElementById('columnChooser'); wrap.innerHTML='';
+      const wrap = document.getElementById('columnChooser'); wrap.innerHTML='';
       columns.forEach(c=>{
-        const id='col_'+c.key; const el=document.createElement('label'); el.className='pill';
+        const id='col_'+c.key;
+        const el=document.createElement('label'); el.className='pill';
         el.innerHTML=`<input type="checkbox" id="${id}" ${colState.get(c.key)?'checked':''}/> ${c.name}`;
-        el.querySelector('input').addEventListener('change',e=>{ colState.set(c.key,e.target.checked); renderTop50(); });
+        el.querySelector('input').addEventListener('change',e=>{ colState.set(c.key, e.target.checked); renderTop50(); });
         wrap.appendChild(el);
       });
     }
-    function actionFromRSI(rsi){ return rsi==null?'Hoia': rsi<=30?'Osta': rsi>=70?'Müü':'Hoia'; }
 
-    function renderTop50(preset){
-      const q=document.getElementById('search').value.trim().toLowerCase();
-      const fAct=document.getElementById('filterAction').value;
-      const fNews=document.getElementById('filterNews').value;
-      let list=rowsTop50.map((r,i)=>({...r,rank:i+1}));
-      list=list.filter(r=>{
-        const hitQ=!q || r.name.toLowerCase().includes(q) || r.symbol.toLowerCase().includes(q);
-        const act=actionFromRSI(r.rsi); const sig=newsMap.get(r.id)||newsMap.get(r.symbol)||null;
-        const hitA=!fAct || ({'Osta':'Osta','Hoia':'Hoia','Müü':'Müü'}[act]===fAct);
-        const hitN=!fNews || (sig && sig.action===fNews);
-        return hitQ && hitA && hitN;
-      });
-      // vaikimisi sort (trend)
-      list.sort((a,b)=> ((b.macd?.lastHist??-999)-(a.macd?.lastHist??-999)) || ((b.ch7??0)-(a.ch7??0)));
-
-      // --- Desktop tabel ---
-      const displayCols=columns.filter(c=>colState.get(c.key));
-      const head=`<table id="tblTop"><thead><tr>${displayCols.map(c=>`<th>${c.name}</th>`).join('')}</tr></thead><tbody>`;
-      const body=list.map(r=>{
-        const sig=newsMap.get(r.id)||newsMap.get(r.symbol)||null;
-        const badgeCls = sig ? (sig.action==='Buy'?'buy':sig.action==='Sell'?'sell':'hold') : 'hold';
-        const tip=sig ? `News score ${sig.score} • ${sig.confidence}\n${(sig.reasons||[]).join(', ')}` : 'Puudub';
-        const mom=momChip(r.macd); const act=actionFromRSI(r.rsi);
-        const volcap=r.volCapPct!=null ? r.volCapPct.toFixed(2)+'%':'';
-        const vs=r.volSurge ? (r.volSurge.precise? r.volSurge.score.toFixed(2) : (r.volSurge.score!=null ? r.volSurge.score.toFixed(2)+'*':'')) : '';
-        const corrTxt=r.corrBtc!=null ? r.corrBtc.toFixed(2) : '';
-        const row={
-          rank:r.rank,name:r.name,symbol:`<span class="mono">${r.symbol}</span>`,
-          usd:moneySplit('$',r.usd), eur:moneySplit('€',r.eur),
-          ch1:pctWithPast(r.ch1,r.usd,'1h tagasi'), ch24:pctWithPast(r.ch24,r.usd,'24h tagasi'),
-          ch7:pctWithPast(r.ch7,r.usd,'7d tagasi'), ch30:pctWithPast(r.ch30,r.usd,'30d tagasi'),
-          spark:sparkSVG(r.spark), mom:mom, mcap:fmtInt(r.mcap), vol:fmtInt(r.vol),
-          volcap:volcap, volsurge: vs ? `<span class="tt" data-full="${r.volSurge.precise?'7d mediaaniga võrreldes':'Approx (Vol/Mcap)'}">${vs}</span>`:'',
-          atrp:r.atrp!=null? r.atrp.toFixed(2)+'%':'', corr:corrTxt, rsi:r.rsi!=null?r.rsi:'',
-          action:`<span class="badge ${act==='Osta'?'buy':act==='Müü'?'sell':'hold'}">${act}</span>`,
-          news: sig ? `<span class="badge ${badgeCls} tt" data-full="${escapeHtml(tip)}">${sig.action} · ${sig.score}</span>`:`<span class="badge hold tt" data-full="Puudub">—</span>`
-        };
-        return `<tr>${displayCols.map(c=>`<td>${row[c.key]??''}</td>`).join('')}</tr>`;
-      }).join('');
-      document.getElementById('top50Table').innerHTML = head + body + '</tbody></table>';
-      makeSortable(document.getElementById('tblTop'));
-      buildColumnChooser();
-
-      // --- Mobiili kaardid (lihtsustatud) ---
-      const cards = list.map(r=>{
-        const sig=newsMap.get(r.id)||newsMap.get(r.symbol)||null;
-        const badgeCls = sig ? (sig.action==='Buy'?'buy':sig.action==='Sell'?'sell':'hold') : 'hold';
-        const mom=momChip(r.macd); const act=actionFromRSI(r.rsi);
-        return `
-          <div class="coin-card">
-            <div>
-              <div class="coin-title">${r.name} <span class="mono muted">(${r.symbol})</span></div>
-              <div class="kv small">
-                <span><span class="k">Hind €:</span> <span class="mono">${moneySplit('€',r.eur)}</span></span>
-                <span><span class="k">24h:</span> ${pctWithPast(r.ch24,r.usd,'24h tagasi')}</span>
-                <span><span class="k">RSI:</span> ${r.rsi??'—'}</span>
-              </div>
-            </div>
-            <div class="badge-row">
-              ${mom}
-              <span class="badge ${act==='Osta'?'buy':act==='Müü'?'sell':'hold'}">${act}</span>
-              ${sig ? `<span class="badge ${badgeCls}">${sig.action}</span>` : `<span class="badge hold">—</span>`}
-            </div>
-            <div style="grid-column:1 / -1">${sparkSVG(r.spark)}</div>
-          </div>
-        `;
-      }).join('');
-      document.getElementById('top50Cards').innerHTML = cards;
+    function applyPreset(preset){
+      document.querySelectorAll('#presets button').forEach(b=>b.classList.toggle('on', b.dataset.preset===preset));
+      // vaikimisi kõik veerud on sees
+      columns.forEach(c=>colState.set(c.key,true));
+      // nähtavus + sort
+      if (preset==='breakout'){
+        document.getElementById('moversCard').style.display='';
+        // rõhuta 24h%, VolSurge, 7d graafik, Momentum
+        ['atrp','corr'].forEach(k=>colState.set(k,false));
+      } else {
+        document.getElementById('moversCard').style.display='none';
+      }
+      if (preset==='mean'){
+        // rõhuta RSI, ATR
+        ['volsurge','corr'].forEach(k=>colState.set(k,false));
+      }
+      renderTop50(preset);
     }
 
+    function renderTop50(preset='trend'){
+      const el=document.getElementById('top50');
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      const fAct = document.getElementById('filterAction').value;
+      const fNews= document.getElementById('filterNews').value;
+
+      let list = rowsTop50.map((r,i)=>({...r, rank:i+1}));
+      list = list.filter(r=>{
+        const hitQ = !q || r.name.toLowerCase().includes(q) || r.symbol.toLowerCase().includes(q);
+        const act = actionFromRSI(r.rsi);
+        const sig = newsMap.get(r.id) || newsMap.get(r.symbol) || null;
+        const hitA = !fAct || ({'Osta':'Osta','Hoia':'Hoia','Müü':'Müü'}[act]===fAct);
+        const hitN = !fNews || (sig && sig.action===fNews);
+        return hitQ && hitA && hitN;
+      });
+
+      // preset’i sort
+      if (preset==='breakout'){
+        list.sort((a,b)=> ( (b.volSurge?.score??0) - (a.volSurge?.score??0) ) || ((b.ch24??0)-(a.ch24??0)) );
+      } else if (preset==='mean'){
+        list.sort((a,b)=> ( (a.rsi??50) - (b.rsi??50) ) ); // madalam RSI ette
+      } else { // trend
+        list.sort((a,b)=> ((b.macd?.lastHist??-999)-(a.macd?.lastHist??-999)) || ((b.ch7??0)-(a.ch7??0)) );
+      }
+
+      // tabel
+      const displayCols = columns.filter(c=>colState.get(c.key));
+      const head = `<table id="tblTop"><thead><tr>${
+        displayCols.map(c=>`<th data-col="${c.key}">${c.name}</th>`).join('')
+      }</tr></thead><tbody>`;
+      const body = list.map(r=>{
+        const sig = newsMap.get(r.id) || newsMap.get(r.symbol) || null;
+        const badgeCls = sig ? (sig.action==='Buy'?'buy':sig.action==='Sell'?'sell':'hold') : 'hold';
+        const tip = sig ? `News score ${sig.score} • ${sig.confidence}\n${(sig.reasons||[]).join(', ')}` : 'Puudub';
+        const mom = momChip(r.macd);
+        const act = actionFromRSI(r.rsi);
+        const volcap = r.volCapPct!=null ? r.volCapPct.toFixed(2)+'%' : '';
+        const vs = r.volSurge ? (r.volSurge.precise? (r.volSurge.score.toFixed(2)) : (r.volSurge.score!=null? (r.volSurge.score.toFixed(2)+'*') : '')) : '';
+        const corrTxt = r.corrBtc!=null ? r.corrBtc.toFixed(2) : '';
+        const row = {
+          rank:r.rank,
+          name:r.name,
+          symbol:`<span class="mono">${r.symbol}</span>`,
+          usd: moneySplit('$',r.usd),
+          eur: moneySplit('€',r.eur),
+          ch1: pctWithPast(r.ch1,r.usd,'1h tagasi'),
+          ch24: pctWithPast(r.ch24,r.usd,'24h tagasi'),
+          ch7: pctWithPast(r.ch7,r.usd,'7d tagasi'),
+          ch30: pctWithPast(r.ch30,r.usd,'30d tagasi'),
+          spark: sparkSVG(r.spark),
+          mom: mom,
+          mcap: fmtInt(r.mcap),
+          vol: fmtInt(r.vol),
+          volcap: volcap,
+          volsurge: vs ? `<span class="tt" data-full="${r.volSurge.precise?'7d mediaaniga võrreldes':'Approx (Vol/Mcap)'}">${vs}</span>` : '',
+          atrp: r.atrp!=null ? r.atrp.toFixed(2)+'%' : '',
+          corr: corrTxt,
+          rsi: r.rsi!=null ? r.rsi : '',
+          action: `<span class="badge ${act==='Osta'?'buy':act==='Müü'?'sell':'hold'}">${act}</span>`,
+          news: sig ? `<span class="badge ${badgeCls} tt" data-full="${escapeHtml(tip)}">${sig.action} · ${sig.score}</span>` : `<span class="badge hold tt" data-full="Puudub">—</span>`
+        };
+        return `<tr>${
+          displayCols.map(c=>`<td data-col="${c.key}">${row[c.key]??''}</td>`).join('')
+        }</tr>`;
+      }).join('');
+
+      el.innerHTML = head + body + '</tbody></table>';
+      makeSortable(document.getElementById('tblTop'));
+      buildColumnChooser();
+    }
+
+    function makeSortable(table){
+      if(!table) return;
+      const ths = table.querySelectorAll('th'); let last={i:-1,asc:true};
+      ths.forEach((th,i)=>{
+        th.addEventListener('click',()=>{
+          const tb=table.tBodies[0]; const rows=[...tb.rows];
+          ths.forEach(h=>h.classList.remove('sort-asc','sort-desc'));
+          let asc=true; if(last.i===i) asc=!last.asc; last={i,asc};
+          const isNumCol = rows.filter(r=>r.cells[i]).map(r=>r.cells[i].innerText.replace(/[^\d.\-]/g,'')).filter(s=>s!=='').map(s=>!isNaN(parseFloat(s))).filter(Boolean).length >= Math.max(1,Math.floor(rows.length*0.6));
+          rows.sort((a,b)=>{
+            let A=a.cells[i]?.innerText?.trim()??'', B=b.cells[i]?.innerText?.trim()??'';
+            if(isNumCol){ A=parseFloat(A.replace(/[^\d.\-]/g,''))||0; B=parseFloat(B.replace(/[^\d.\-]/g,''))||0; return asc?(A-B):(B-A); }
+            return asc? A.localeCompare(B) : B.localeCompare(A);
+          });
+          rows.forEach(r=>tb.appendChild(r));
+          th.classList.add(asc?'sort-asc':'sort-desc');
+        });
+      });
+    }
+
+    function actionFromRSI(rsi){ return rsi==null?'Hoia': rsi<=30?'Osta': rsi>=70?'Müü':'Hoia'; }
+
+    /* -------------------- Movers & Moonshots -------------------- */
+    async function loadMovers(){
+      try{
+        const r=await fetch(API_MOV); const j=await r.json();
+        const section = (title, arr, id) => {
+          const head = `<div class="small muted" style="margin-top:8px">${title}</div>
+          <table id="${id}"><thead><tr>
+            <th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th><th>1h %</th><th>24h %</th><th>Vol 24h $</th>
+          </tr></thead><tbody>`;
+          const body = (arr||[]).map(r=>`<tr>
+            <td>${r.name}</td><td class="mono">${r.symbol}</td>
+            <td class="mono">${moneySplit('$',r.price_usd)}</td>
+            <td class="mono">${moneySplit('€',r.price_eur)}</td>
+            <td>${pctWithPast(r.ch1,r.price_usd,'1h tagasi')}</td>
+            <td>${pctWithPast(r.ch24,r.price_usd,'24h tagasi')}</td>
+            <td class="mono">${fmtInt(r.vol)}</td>
+          </tr>`).join('');
+          return head + body + '</tbody></table>';
+        };
+        document.getElementById('movers').innerHTML = section('TOP 10 TÕUSJAT (24h)', j.top_gainers_24h, 'tblG') + section('TOP 10 LANGEJAT (24h)', j.top_losers_24h, 'tblL');
+        makeSortable(document.getElementById('tblG')); makeSortable(document.getElementById('tblL'));
+      }catch{ document.getElementById('movers').innerHTML = '<div class="small muted">Movers pole saadaval.</div>'; }
+    }
+    async function loadMoon(){
+      try{
+        const r=await fetch(API_MOON); if(!r.ok) throw 0; const j=await r.json();
+        const rows=j.items||[];
+        const head = `<table id="tblMoon"><thead><tr>
+          <th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>MCap $</th><th>Vol 24h $</th><th>24h %</th><th>7d %</th><th>Galaxy</th><th>Soc Vol 24h</th><th>Score</th>
+        </tr></thead><tbody>`;
+        const body = rows.map(r=>{
+          const c24=r.ch24!=null?(r.ch24>=0?`<span class="pos">+${r.ch24.toFixed(2)}%</span>`:`<span class="neg">${r.ch24.toFixed(2)}%</span>`):'';
+          const c7 =r.ch7 !=null?(r.ch7 >=0?`<span class="pos">+${r.ch7 .toFixed(2)}%</span>`:`<span class="neg">${r.ch7 .toFixed(2)}%</span>`):'';
+          return `<tr>
+            <td>${r.name}</td><td class="mono">${r.symbol}</td>
+            <td class="mono">${moneySplit('$',r.price_usd)}</td>
+            <td class="mono">${fmtInt(r.mcap)}</td>
+            <td class="mono">${fmtInt(r.vol24)}</td>
+            <td>${c24}</td><td>${c7}</td>
+            <td class="mono">${r.social?.galaxy??''}</td>
+            <td class="mono">${r.social?.social_volume_24h?.toLocaleString('en-US')??''}</td>
+            <td>${r.score??''}</td>
+          </tr>`;
+        }).join('');
+        document.getElementById('moonshots').innerHTML = head + body + '</tbody></table>';
+        makeSortable(document.getElementById('tblMoon'));
+      }catch{
+        document.getElementById('moonshots').innerHTML = '<div class="small muted">Moonshotid pole saadaval.</div>';
+      }
+    }
+
+    /* -------------------- Portfell & Radar -------------------- */
+    function splitCsvLine(line){
+      const out=[], n=line.length; let cur='', inQ=false;
+      for(let i=0;i<n;i++){
+        const ch=line[i];
+        if(ch==='"'){ if(inQ && line[i+1]==='"'){ cur+='"'; i++; } else inQ=!inQ; }
+        else if(ch===',' && !inQ){ out.push(cur); cur=''; }
+        else cur+=ch;
+      }
+      out.push(cur); return out.map(s=>s.replace(/^"|"$/g,''));
+    }
+    function parseCSV(text){
+      const ls=text.replace(/\r/g,'').split('\n').filter(x=>x.trim()!==''); if(!ls.length) return [];
+      const head=splitCsvLine(ls[0]); const rows=[];
+      for(let i=1;i<ls.length;i++){ const cols=splitCsvLine(ls[i]); const o={}; head.forEach((h,ix)=>o[h]= (cols[ix]??'').trim()); rows.push(o); }
+      return rows;
+    }
+    function symbolFromYahoo(sym){ if(!sym) return ''; const s=String(sym).toUpperCase().trim(); const m=s.match(/^([A-Z0-9]+)[-\.]/); return m?m[1]:s; }
+    function loadPF(){ try{return JSON.parse(localStorage.getItem(LS_PF))||[]}catch{return[]} }
+    function savePF(x){ localStorage.setItem(LS_PF, JSON.stringify(x||[])); }
+    function mergePos(list){
+      const map=new Map();
+      for(const r of list){
+        const k=String(r.symbol).toUpperCase(); const prev=map.get(k);
+        if(!prev) map.set(k,{symbol:k, qty:Number(r.qty||0), costAvgEur:isNum(r.costAvgEur)?Number(r.costAvgEur):null, costTotalEur:isNum(r.costAvgEur)&&isNum(r.qty)?Number(r.costAvgEur)*Number(r.qty):null});
+        else {
+          const qty = Number(prev.qty)+Number(r.qty||0);
+          let tot=null; if(isNum(prev.costTotalEur)||(isNum(prev.costAvgEur)&&isNum(prev.qty))) tot=(prev.costTotalEur ?? prev.costAvgEur*prev.qty);
+          if(isNum(r.costAvgEur)&&isNum(r.qty)) tot=(tot??0)+Number(r.costAvgEur)*Number(r.qty);
+          const avg=(isNum(tot)&&qty>0)? tot/qty : (prev.costAvgEur ?? r.costAvgEur ?? null);
+          map.set(k,{symbol:k, qty, costAvgEur:avg, costTotalEur:isNum(tot)?tot:null});
+        }
+      }
+      return [...map.values()];
+    }
+    async function resolveSymbolsEUR(symbols){
+      const out={}; const topMap=new Map(rowsTop50.map(r=>[r.symbol,r]));
+      const miss=[];
+      for(const s of symbols){
+        const hit=topMap.get(s);
+        if(hit){ out[s]={usd:hit.usd, eur:hit.eur, id:hit.id, spark:hit.spark}; }
+        else miss.push(s);
+      }
+      for(const s of miss){
+        try{
+          const sr=await (await fetch(`${API_CG}/search?query=${encodeURIComponent(s)}`)).json();
+          const id = sr?.coins?.find(c=>String(c.symbol||'').toUpperCase()===s)?.id || sr?.coins?.[0]?.id || null;
+          if(!id){ out[s]={usd:null,eur:null,id:null,spark:null}; continue; }
+          const sp = new URL(`${API_CG}/simple/price`); sp.searchParams.set('ids',id); sp.searchParams.set('vs_currencies','usd,eur');
+          const j=await (await fetch(sp)).json(); const p=j?.[id]||{};
+          out[s]={usd:isNum(p.usd)?Number(p.usd):null, eur:isNum(p.eur)?Number(p.eur):null, id, spark:null};
+        }catch{ out[s]={usd:null,eur:null,id:null,spark:null}; }
+      }
+      return out;
+    }
+
+    function renderPFTable(){
+      const pf=loadPF(); const el=document.getElementById('pfTable');
+      if(!pf.length){ el.textContent='Portfell puudub.'; return; }
+      const head = `<table id="tblPF"><thead><tr>
+        <th>Sümbol</th><th>Kogus</th><th>Omahind €/tk</th><th>Turuhind €/tk</th><th>Positsioon €</th><th>Tulemus %</th>
+      </tr></thead><tbody>`;
+      const body = pf.map(r=>{
+        const eur=r.price_eur??null; const pos=(isNum(eur)&&isNum(r.qty))? eur*r.qty : null;
+        const pnl=(isNum(r.costAvgEur)&&isNum(eur)&&r.costAvgEur>0)? ((eur-r.costAvgEur)/r.costAvgEur)*100 : null;
+        return `<tr>
+          <td class="mono">${r.symbol}</td>
+          <td class="mono">${isNum(r.qty)?Number(r.qty).toLocaleString('en-US'):''}</td>
+          <td class="mono">${r.costAvgEur!=null? moneySplit('€',r.costAvgEur):''}</td>
+          <td class="mono">${eur!=null? moneySplit('€',eur):''}</td>
+          <td class="mono">${pos!=null? fmtInt(Math.round(pos)) : ''}</td>
+          <td class="${pnl==null?'':(pnl>=0?'pos':'neg')}">${pnl!=null?(pnl>=0?`+${pnl.toFixed(2)}%`:`${pnl.toFixed(2)}%`):''}</td>
+        </tr>`;
+      }).join('');
+      el.innerHTML = head + body + '</tbody></table>';
+      makeSortable(document.getElementById('tblPF'));
+    }
+
+    function weights(){ return {
+      rsi: Number(document.getElementById('wRSI').value || 0.35),
+      macd:Number(document.getElementById('wMACD').value|| 0.40),
+      news:Number(document.getElementById('wNEWS').value|| 0.50),
+      vol :Number(document.getElementById('wVOL').value || 0.30)
+    };}
+
+    function combineDecision(rsi, mac, newsScore, volSurge, w){
+      let s=0;
+      if(rsi!=null){ if(rsi<=30)s+=0.7*w.rsi; else if(rsi>=70)s-=0.7*w.rsi; }
+      if(mac){ if(mac.crossUp)s+=1.0*w.macd; else if(mac.crossDn)s-=1.0*w.macd; else s+=clamp((mac.lastHist)/(Math.abs(mac.last)+1e-9),-0.4,0.4)*w.macd; }
+      if(isNum(newsScore)) s+= clamp(newsScore,-0.8,0.8)*w.news;
+      if(isNum(volSurge))  s+= clamp(volSurge,0,1)*0.6*w.vol;
+      s=+s.toFixed(2);
+      const action = s>=0.6?'Buy': s<=-0.6?'Sell':'Hold';
+      const conf = Math.abs(s)>=1.0?'High': Math.abs(s)>=0.7?'Med':'Low';
+      return {score:s,action,confidence:conf};
+    }
+
+    async function renderPFRadar(sorted=false){
+      const pf=loadPF(); const wrap=document.getElementById('pfRadar');
+      if(!pf.length){ wrap.textContent='Portfell puudub.'; return; }
+      const wm = new Map(rowsTop50.map(r=>[r.symbol,r]));
+      const w=weights();
+      const out=[];
+      let fetched=0;
+      for(const p of pf){
+        let base=wm.get(p.symbol); let spark=null,rsi=null,mc=null, eur=p.price_eur??null, news=null, volS=null;
+        if(base){ spark=base.spark; rsi=base.rsi; mc=base.macd; eur=base.eur??eur; const sig=newsMap.get(base.id)||newsMap.get(base.symbol)||null; news=sig; volS=base.volSurge?.score??null; }
+        else {
+          // väljas top50 → lisa spark (kuni 10 tk)
+          if(p.id && fetched<10){ fetched++; const arr=await fetchSpark(p.id); spark=arr; rsi=rsi14(arr||[]); mc=macd(arr||[]); }
+        }
+        const combo = combineDecision(rsi,mc, news?.score??null, volS, w);
+        out.push({symbol:p.symbol, eur, rsi, mac:mc, news, volS, combo, spark});
+      }
+      if(sorted){ out.sort((a,b)=> (b.combo?.score??0)-(a.combo?.score??0)); }
+      const head = `<table id="tblRadar"><thead><tr>
+        <th>Sümbol</th><th>Hind €</th><th>RSI</th><th>MACD</th><th>Momentum</th><th>News</th><th>Kombineeritud</th><th>7d</th>
+      </tr></thead><tbody>`;
+      const body = out.map(r=>{
+        const macTxt = r.mac? (r.mac.crossUp?'<span class="pos">bullish crossover</span>': r.mac.crossDn?'<span class="neg">bearish crossover</span>': (r.mac.lastHist>=0?'üles trend':'alla trend')) : '—';
+        const mom = momChip(r.mac);
+        const news = r.news? `<span class="badge ${r.news.action==='Buy'?'buy':r.news.action==='Sell'?'sell':'hold'}">${r.news.action} · ${r.news.score}</span>`:'<span class="badge hold">—</span>';
+        const combo = r.combo? `<span class="badge ${r.combo.action==='Buy'?'buy':r.combo.action==='Sell'?'sell':'hold'} tt" data-full="score ${r.combo.score} • ${r.combo.confidence}">${r.combo.action}</span>`:'—';
+        return `<tr>
+          <td class="mono">${r.symbol}</td>
+          <td class="mono">${isNum(r.eur)? moneySplit('€',r.eur):''}</td>
+          <td>${r.rsi??''}</td>
+          <td>${macTxt}</td>
+          <td>${mom}</td>
+          <td>${news}</td>
+          <td>${combo}</td>
+          <td>${sparkSVG(r.spark||[])}</td>
+        </tr>`;
+      }).join('');
+      wrap.innerHTML = head + body + '</tbody></table>';
+      makeSortable(document.getElementById('tblRadar'));
+    }
+
+    async function renderPFNewsAccordion(){
+      const pf=loadPF(); const el=document.getElementById('pfNews');
+      if(!pf.length){ el.textContent='Portfell puudub.'; return; }
+      const coins = pf.map(p=>({id:p.id||'',symbol:p.symbol,name:p.symbol}));
+      if(!coins.some(c=>c.id)){ el.textContent='ID puudub (väljas Top‑50) — jätan uudised vahele.'; return; }
+      try{
+        const r=await fetch(API_SIG,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({coins})});
+        const j=await r.json(); const rows=j.signals||[];
+        const head=`<table id="tblPfNews"><thead><tr><th>Asset</th><th>News action</th><th>Score</th><th>Confidence</th><th>Pealkirjad</th></tr></thead><tbody>`;
+        const body=rows.map(x=>{
+          const heads=(x.headlines||[]).map(h=>h.link?`<a href="${h.link}" target="_blank" rel="noopener">${escapeHtml(h.title)}</a>`:escapeHtml(h.title)).join('<br/>');
+          return `<tr>
+            <td class="mono">${x.symbol||x.asset}</td>
+            <td><span class="badge ${x.action==='Buy'?'buy':x.action==='Sell'?'sell':'hold'}">${x.action}</span></td>
+            <td>${x.score}</td><td>${x.confidence}</td><td>${heads}</td>
+          </tr>`;
+        }).join('');
+        el.innerHTML=head+body+'</tbody></table>'; makeSortable(document.getElementById('tblPfNews'));
+      }catch{ el.textContent='Uudiste päring ebaõnnestus.'; }
+    }
+
+    async function fetchSpark(id){
+      if(!id) return null; if(sparkCache.has(id)) return sparkCache.get(id);
+      try{
+        const u=new URL(`${API_CG}/coins/${id}/market_chart`); u.searchParams.set('vs_currency','usd'); u.searchParams.set('days','7'); u.searchParams.set('interval','hourly');
+        const j=await (await fetch(u)).json(); const arr=(j?.prices||[]).map(p=>p[1]); sparkCache.set(id,arr); return arr;
+      }catch{ return null; }
+    }
+
+    /* -------------------- Alerts & triggers -------------------- */
+    function readAlertPrefs(){ try{return JSON.parse(localStorage.getItem(LS_ALERTS))||{buy:true,sell:false,minBuy:0.45,minSell:0.45}}catch{return{buy:true,sell:false,minBuy:0.45,minSell:0.45}} }
+    function saveAlertPrefs(p){ localStorage.setItem(LS_ALERTS, JSON.stringify(p)); }
+    function maybeAlerts(){
+      const pf=loadPF(); const prefs=readAlertPrefs(); const out=[];
+      for(const p of pf){
+        const s = newsMap.get(p.id)||newsMap.get(p.symbol);
+        if(!s) continue;
+        const okLvl=(s.confidence==='High'||s.confidence==='Med');
+        if(s.action==='Buy' && prefs.buy && okLvl && s.score>=Number(prefs.minBuy)) out.push({t:'Buy',s});
+        if(s.action==='Sell'&& prefs.sell&& okLvl && Math.abs(s.score)>=Number(prefs.minSell)) out.push({t:'Sell',s});
+      }
+      const el=document.getElementById('alerts');
+      el.innerHTML = out.map(a=> `<div class="pill" style="background:#1b2233">${a.t} ALERT: ${a.s.symbol||a.s.asset} — score ${a.s.score} (${a.s.confidence})</div>`).join('');
+    }
+    function loadTrigs(){ try{return JSON.parse(localStorage.getItem(LS_TRIGS))||[]}catch{return[]} }
+    function saveTrigs(x){ localStorage.setItem(LS_TRIGS, JSON.stringify(x||[])); }
+    function loadTrigState(){ try{return JSON.parse(localStorage.getItem(LS_TRSTATE))||{}}catch{return{}} }
+    function saveTrigState(s){ localStorage.setItem(LS_TRSTATE, JSON.stringify(s||{})); }
+
+    function evalPriceTriggers(){
+      const pf=loadPF(); const map=new Map(pf.map(r=>[r.symbol.toUpperCase(), r.price_eur]));
+      const trs=loadTrigs(); if(!trs.length) return;
+      const st=loadTrigState(); const alerts=[];
+      for(const t of trs){
+        const cur=map.get(String(t.sym).toUpperCase()); if(!isNum(cur)) continue;
+        const key=`${t.sym}|${t.dir}|${t.px}`; const prev=!!st[key];
+        let hit=false; if(t.dir==='>=') hit = cur>=Number(t.px); else if(t.dir==='<=') hit = cur<=Number(t.px);
+        if(hit && !prev){ alerts.push(`<div class="pill warn">Hinnalävi: ${t.sym} ${t.dir} €${Number(t.px).toLocaleString('en-US')} (praegu €${Number(cur).toLocaleString('en-US')})</div>`); st[key]=true; }
+        if(!hit && prev){ st[key]=false; }
+      }
+      saveTrigState(st);
+      if(alerts.length) document.getElementById('alerts').innerHTML += alerts.join('');
+    }
+
+    /* -------------------- Decision Row -------------------- */
+    function computeDecisionRow(){
+      const buys=[], sells=[], holds=[], breakouts=[];
+      for(const r of rowsTop50){
+        const act=actionFromRSI(r.rsi);
+        if(act==='Osta') buys.push(r); else if(act==='Müü') sells.push(r); else holds.push(r);
+        if((r.volSurge?.score??0)>0.6 && (r.ch24??0)>0) breakouts.push(r);
+      }
+      const el=document.getElementById('decisionRow');
+      el.innerHTML = [
+        `<span class="pill">Top50: <b>${buys.length}</b> Buy · <b>${holds.length}</b> Hold · <b>${sells.length}</b> Sell</span>`,
+        `<span class="pill">Breakout kandidaate: <b>${breakouts.length}</b></span>`
+      ].join(' ');
+    }
+
+    /* -------------------- Backtest mini -------------------- */
+    async function backtestRun(){
+      const idSel=document.getElementById('btAsset').value;
+      const strat=document.getElementById('btStrat').value;
+      const param=Number(document.getElementById('btParam').value||2.0);
+      const out=document.getElementById('btResult');
+      if(!idSel){ out.textContent='Vali vara.'; return; }
+      try{
+        const u=new URL(`${API_CG}/coins/${idSel}/market_chart`); u.searchParams.set('vs_currency','usd'); u.searchParams.set('days','90'); u.searchParams.set('interval','daily');
+        const j=await (await fetch(u)).json(); const closes=(j?.prices||[]).map(p=>p[1]); const vols=(j?.total_volumes||[]).map(v=>v[1]);
+        if(closes.length<40){ out.textContent='Andmeid napib.'; return; }
+
+        // Ehitame signaalid
+        let pnl=0,trades=0,wins=0, maxDD=0, eq=100, peak=100; let inPos=false,entry=0;
+        const histMAC = macd(closes);
+        for(let i=1;i<closes.length;i++){
+          let buy=false, sell=false;
+          if(strat==='trend'){
+            const h=macd(closes.slice(0,i+1)); if(!h) continue;
+            if(!inPos && h.crossUp) buy=true; if(inPos && h.crossDn) sell=true;
+          } else if(strat==='breakout'){
+            const ret = (closes[i]-closes[i-1])/closes[i-1]*100;
+            // vol surge: tänane vs eelmiste 7 median
+            const med = i>7 ? vols.slice(i-7,i).sort((a,b)=>a-b)[3] : vols[i-1];
+            const vs = (med>0)? (vols[i]/med) : 1;
+            if(!inPos && ret>param && vs>1.2) buy=true;
+            if(inPos && (ret<-param/2 || vs<0.8)) sell=true;
+          } else { // mean-reversion
+            const rs = rsi14(closes.slice(0,i+1));
+            if(!inPos && rs!=null && rs<30) buy=true;
+            if(inPos && rs!=null && rs>55) sell=true;
+          }
+          if(buy){ inPos=true; entry=closes[i]; trades++; }
+          if(sell && inPos){
+            const r=(closes[i]-entry)/entry; eq*= (1+r); if(r>0) wins++; inPos=false;
+          }
+          peak=Math.max(peak,eq); maxDD=Math.max(maxDD, (peak-eq)/peak*100);
+        }
+        if(inPos){ const r=(closes[closes.length-1]-entry)/entry; eq*=(1+r); if(r>0) wins++; }
+
+        const retPct = ((eq/100)-1)*100;
+        out.innerHTML = `
+          <div class="pill">Tulemus: <b>${retPct.toFixed(2)}%</b></div>
+          <span class="pill">Tehinguid: <b>${trades}</b></span>
+          <span class="pill">Võidumäär: <b>${trades? (wins/trades*100).toFixed(1):'0.0'}%</b></span>
+          <span class="pill">Max drawdown: <b>${maxDD.toFixed(1)}%</b></span>
+          <div class="small muted" style="margin-top:6px">Lihtsustatud backtest; tasuta andmed (CG). Trend on kõige täpsem; Breakout/Mean kasutavad ligikaudseid maht/RSI hinnanguid.</div>
+        `;
+      }catch{ out.textContent='Backtest ebaõnnestus.'; }
+    }
+
+    function fillBacktestAssets(){
+      const sel=document.getElementById('btAsset'); sel.innerHTML='<option value="">— vali vara —</option>';
+      rowsTop50.forEach(r=> sel.innerHTML += `<option value="${r.id}">${r.name} (${r.symbol})</option>`);
+    }
+
+    /* -------------------- Init & sündmused -------------------- */
+    async function initAll(){
+      await healthBar();
+      await loadTop50();
+      fillBacktestAssets();
+      await loadMoon();
+      // movers laadime ainult kui Breakout preset aktiivne
+      const activePreset = document.querySelector('#presets .on')?.dataset?.preset || 'trend';
+      if(activePreset==='breakout') loadMovers();
+
+      // density
+      document.getElementById('densitySel').addEventListener('change', e=>{
+        document.documentElement.style.setProperty('--row-pad', e.target.value==='compact'?'6px':'10px');
+        document.querySelectorAll('td,th').forEach(x=>x.style.padding = e.target.value==='compact'?'6px':'10px');
+      });
+
+      // preset nupud
+      document.querySelectorAll('#presets button').forEach(b=>{
+        b.addEventListener('click',()=>{
+          applyPreset(b.dataset.preset);
+          if(b.dataset.preset==='breakout') loadMovers();
+        });
+      });
+      // filtrid
+      document.getElementById('search').addEventListener('input',()=>renderTop50(document.querySelector('#presets .on')?.dataset?.preset||'trend'));
+      document.getElementById('filterAction').addEventListener('change',()=>renderTop50(document.querySelector('#presets .on')?.dataset?.preset||'trend'));
+      document.getElementById('filterNews').addEventListener('change',()=>renderTop50(document.querySelector('#presets .on')?.dataset?.preset||'trend'));
+
+      // portfell failid
+      document.getElementById('csvFiles').addEventListener('change', async (e)=>{
+        const files=[...(e.target.files||[])]; if(!files.length) return;
+        const all=[];
+        for(const f of files){
+          const txt=await f.text(); const rows=parseCSV(txt);
+          for(const r of rows){
+            const raw=r.Symbol||r.symbol||r.Ticker||r.ticker||''; if(!raw) continue;
+            const sym=symbolFromYahoo(raw); const qty=r.Quantity||r.Qty||r.Shares||r.shares||''; const cost=r['Cost Basis']||r.Cost||r.cost||'';
+            all.push({symbol:sym, qty:isNum(qty)?Number(qty):0, costAvgEur:isNum(cost)?Number(cost):null});
+          }
+        }
+        let merged=mergePos(all); const priceMap=await resolveSymbolsEUR(merged.map(x=>x.symbol));
+        merged=merged.map(x=>({ ...x, id:priceMap[x.symbol]?.id??null, price_eur:priceMap[x.symbol]?.eur??null, price_usd:priceMap[x.symbol]?.usd??null }));
+        savePF(merged); renderPFTable(); await renderPFRadar(false); await renderPFNewsAccordion(); maybeAlerts(); evalPriceTriggers();
+      });
+
+      document.getElementById('btnDemo').addEventListener('click', async ()=>{
+        const demo=[{symbol:'BTC',qty:0.5,costAvgEur:null},{symbol:'ETH',qty:2,costAvgEur:null},{symbol:'SOL',qty:30,costAvgEur:null},{symbol:'DOGE',qty:1000,costAvgEur:null}];
+        const map=await resolveSymbolsEUR(demo.map(d=>d.symbol));
+        savePF(demo.map(d=>({...d,id:map[d.symbol]?.id??null, price_eur:map[d.symbol]?.eur??null, price_usd:map[d.symbol]?.usd??null })));
+        renderPFTable(); await renderPFRadar(false); await renderPFNewsAccordion(); maybeAlerts(); evalPriceTriggers();
+      });
+      document.getElementById('btnClearPf').addEventListener('click',()=>{
+        localStorage.removeItem(LS_PF);
+        document.getElementById('pfTable').textContent='Portfell puudub.';
+        document.getElementById('pfRadar').textContent='Portfell puudub.';
+        document.getElementById('pfNews').textContent='Portfell puudub.';
+        document.getElementById('alerts').textContent='';
+      });
+
+      // alert eelistused
+      const ap=readAlertPrefs(); const chkBuy=document.getElementById('chkBuy'), chkSell=document.getElementById('chkSell');
+      const minBuy=document.getElementById('minBuyScore'), minSell=document.getElementById('minSellScore');
+      chkBuy.checked=!!ap.buy; chkSell.checked=!!ap.sell; minBuy.value=ap.minBuy; minSell.value=ap.minSell;
+      function saveAP(){ saveAlertPrefs({buy:chkBuy.checked,sell:chkSell.checked,minBuy:Number(minBuy.value||0.45),minSell:Number(minSell.value||0.45)}); maybeAlerts(); }
+      chkBuy.addEventListener('change',saveAP); chkSell.addEventListener('change',saveAP); minBuy.addEventListener('change',saveAP); minSell.addEventListener('change',saveAP);
+
+      // radar sort & kaalud
+      document.getElementById('btnSortRadar').addEventListener('click',()=>renderPFRadar(true));
+      ['wRSI','wMACD','wNEWS','wVOL'].forEach(id=> document.getElementById(id).addEventListener('input',()=>renderPFRadar(false)));
+
+      // backtest
+      document.getElementById('btnBacktest').addEventListener('click', backtestRun);
+
+      // perioodiline värskendus
+      setInterval(async ()=>{
+        await healthBar();
+        await loadTop50(); fillBacktestAssets();
+        const preset=document.querySelector('#presets .on')?.dataset?.preset||'trend';
+        if(preset==='breakout') loadMovers();
+        await renderPFRadar(false); await renderPFNewsAccordion();
+        maybeAlerts(); evalPriceTriggers();
+      }, 30*60*1000);
+    }
+
+    // Lihtne sorteerija (kasutame uuesti)
+    function makeSortable(el){ /* Overridden ülal; hoian ühe versiooni */ }
+
+    // asenda globaalne makeSortable definitsioon (kaetud)
     function makeSortable(table){
       if(!table) return;
       const ths=table.querySelectorAll('th'); let last={i:-1,asc:true};
@@ -378,137 +927,7 @@
       });
     }
 
-    /* ===== (5) Ülejäänud plokid (movers/moonshots/portfell/radar/backtest) — sama loogika, scroll mobiilis ===== */
-    async function loadMovers(){ try{ const r=await fetch(API_MOV); const j=await r.json(); const section=(title,arr,id)=>{ const head=`<div class="small muted" style="margin-top:8px">${title}</div>
-      <table id="${id}"><thead><tr><th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th><th>1h %</th><th>24h %</th><th>Vol 24h $</th></tr></thead><tbody>`;
-      const body=(arr||[]).map(x=>`<tr><td>${x.name}</td><td class="mono">${x.symbol}</td><td class="mono">${moneySplit('$',x.price_usd)}</td><td class="mono">${moneySplit('€',x.price_eur)}</td><td>${pctWithPast(x.ch1,x.price_usd,'1h tagasi')}</td><td>${pctWithPast(x.ch24,x.price_usd,'24h tagasi')}</td><td class="mono">${fmtInt(x.vol)}</td></tr>`).join('');
-      return head + body + '</tbody></table>'; };
-      document.getElementById('movers').innerHTML = section('TOP 10 TÕUSJAT (24h)', j.top_gainers_24h, 'tblG') + section('TOP 10 LANGEJAT (24h)', j.top_losers_24h, 'tblL'); makeSortable(document.getElementById('tblG')); makeSortable(document.getElementById('tblL')); }catch{ document.getElementById('movers').innerHTML='<div class="small muted">Movers pole saadaval.</div>'; } }
-    async function loadMoon(){ try{ const r=await fetch(API_MOON); if(!r.ok) throw 0; const j=await r.json(); const rows=j.items||[]; const head=`<table id="tblMoon"><thead><tr><th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>MCap $</th><th>Vol 24h $</th><th>24h %</th><th>7d %</th><th>Galaxy</th><th>Soc Vol 24h</th><th>Score</th></tr></thead><tbody>`;
-      const body=rows.map(r=>{ const c24=r.ch24!=null?(r.ch24>=0?`<span class="pos">+${r.ch24.toFixed(2)}%</span>`:`<span class="neg">${r.ch24.toFixed(2)}%</span>`):''; const c7=r.ch7!=null?(r.ch7>=0?`<span class="pos">+${r.ch7.toFixed(2)}%</span>`:`<span class="neg">${r.ch7.toFixed(2)}%</span>`):''; return `<tr><td>${r.name}</td><td class="mono">${r.symbol}</td><td class="mono">${moneySplit('$',r.price_usd)}</td><td class="mono">${fmtInt(r.mcap)}</td><td class="mono">${fmtInt(r.vol24)}</td><td>${c24}</td><td>${c7}</td><td class="mono">${r.social?.galaxy??''}</td><td class="mono">${r.social?.social_volume_24h?.toLocaleString('en-US')??''}</td><td>${r.score??''}</td></tr>`; }).join('');
-      document.getElementById('moonshots').innerHTML=head+body+'</tbody></table>'; makeSortable(document.getElementById('tblMoon')); }catch{ document.getElementById('moonshots').innerHTML='<div class="small muted">Moonshotid pole saadaval.</div>'; } }
-
-    /* Portfell, radar, uudised, alerts, backtest – (lühemaks, sama mis eelmises versioonis) */
-    function splitCsvLine(line){const out=[],n=line.length;let cur='',inQ=false;for(let i=0;i<n;i++){const ch=line[i];if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(ch===','&&!inQ){out.push(cur);cur='';}else cur+=ch;}out.push(cur);return out.map(s=>s.replace(/^"|"$/g,''));}
-    function parseCSV(text){const ls=text.replace(/\r/g,'').split('\n').filter(x=>x.trim()!=='');if(!ls.length)return[];const head=splitCsvLine(ls[0]);const rows=[];for(let i=1;i<ls.length;i++){const cols=splitCsvLine(ls[i]);const o={};head.forEach((h,ix)=>o[h]=(cols[ix]??'').trim());rows.push(o);}return rows;}
-    function symbolFromYahoo(sym){if(!sym)return'';const s=String(sym).toUpperCase().trim();const m=s.match(/^([A-Z0-9]+)[-\.]/);return m?m[1]:s;}
-    function loadPF(){try{return JSON.parse(localStorage.getItem(LS_PF))||[]}catch{return[]}}
-    function savePF(x){localStorage.setItem(LS_PF,JSON.stringify(x||[]))}
-    function mergePos(list){const map=new Map();for(const r of list){const k=String(r.symbol).toUpperCase();const prev=map.get(k);if(!prev)map.set(k,{symbol:k,qty:Number(r.qty||0),costAvgEur:isNum(r.costAvgEur)?Number(r.costAvgEur):null,costTotalEur:isNum(r.costAvgEur)&&isNum(r.qty)?Number(r.costAvgEur)*Number(r.qty):null});else{const qty=Number(prev.qty)+Number(r.qty||0);let tot=null;if(isNum(prev.costTotalEur)||(isNum(prev.costAvgEur)&&isNum(prev.qty)))tot=(prev.costTotalEur??prev.costAvgEur*prev.qty);if(isNum(r.costAvgEur)&&isNum(r.qty))tot=(tot??0)+Number(r.costAvgEur)*Number(r.qty);const avg=(isNum(tot)&&qty>0)?tot/qty:(prev.costAvgEur??r.costAvgEur??null);map.set(k,{symbol:k,qty,costAvgEur:avg,costTotalEur:isNum(tot)?tot:null});}}return[...map.values()];}
-    async function resolveSymbolsEUR(symbols){const out={};const topMap=new Map(rowsTop50.map(r=>[r.symbol,r]));const miss=[];for(const s of symbols){const hit=topMap.get(s);if(hit){out[s]={usd:hit.usd,eur:hit.eur,id:hit.id,spark:hit.spark};}else miss.push(s);}for(const s of miss){try{const sr=await (await fetch(`${API_CG}/search?query=${encodeURIComponent(s)}`)).json();const id=sr?.coins?.find(c=>String(c.symbol||'').toUpperCase()===s)?.id||sr?.coins?.[0]?.id||null;if(!id){out[s]={usd:null,eur:null,id:null,spark:null};continue;}const sp=new URL(`${API_CG}/simple/price`);sp.searchParams.set('ids',id);sp.searchParams.set('vs_currencies','usd,eur');const j=await (await fetch(sp)).json();const p=j?.[id]||{};out[s]={usd:isNum(p.usd)?Number(p.usd):null,eur:isNum(p.eur)?Number(p.eur):null,id,spark:null};}catch{out[s]={usd:null,eur:null,id:null,spark:null};}}return out;}
-    function renderPFTable(){const pf=loadPF();const el=document.getElementById('pfTable');if(!pf.length){el.textContent='Portfell puudub.';return;}const head=`<table id="tblPF"><thead><tr><th>Sümbol</th><th>Kogus</th><th>Omahind €/tk</th><th>Turuhind €/tk</th><th>Positsioon €</th><th>Tulemus %</th></tr></thead><tbody>`;const body=pf.map(r=>{const eur=r.price_eur??null;const pos=(isNum(eur)&&isNum(r.qty))?eur*r.qty:null;const pnl=(isNum(r.costAvgEur)&&isNum(eur)&&r.costAvgEur>0)?((eur-r.costAvgEur)/r.costAvgEur)*100:null;return `<tr><td class="mono">${r.symbol}</td><td class="mono">${isNum(r.qty)?Number(r.qty).toLocaleString('en-US'):''}</td><td class="mono">${r.costAvgEur!=null?moneySplit('€',r.costAvgEur):''}</td><td class="mono">${eur!=null?moneySplit('€',eur):''}</td><td class="mono">${pos!=null?fmtInt(Math.round(pos)):''}</td><td class="${pnl==null?'':(pnl>=0?'pos':'neg')}">${pnl!=null?(pnl>=0?`+${pnl.toFixed(2)}%`:`${pnl.toFixed(2)}%`):''}</td></tr>`;}).join('');el.innerHTML=head+body+'</tbody></table>';makeSortable(document.getElementById('tblPF'));}
-    const newsMapRef=()=>newsMap;
-    function momText(m){return m? (m.crossUp?'<span class="pos">bullish crossover</span>': m.crossDn?'<span class="neg">bearish crossover</span>': (m.lastHist>=0?'üles trend':'alla trend')) : '—';}
-    function weights(){return {rsi:Number(document.getElementById('wRSI').value||0.35), macd:Number(document.getElementById('wMACD').value||0.40), news:Number(document.getElementById('wNEWS').value||0.50), vol:Number(document.getElementById('wVOL').value||0.30)}}
-    function combineDecision(rsi,mc,newsScore,volS,w){let s=0;if(rsi!=null){if(rsi<=30)s+=0.7*w.rsi; else if(rsi>=70)s-=0.7*w.rsi;}if(mc){if(mc.crossUp)s+=1.0*w.macd; else if(mc.crossDn)s-=1.0*w.macd; else s+=clamp((mc.lastHist)/(Math.abs(mc.last)+1e-9),-0.4,0.4)*w.macd;} if(isNum(newsScore))s+=clamp(newsScore,-0.8,0.8)*w.news; if(isNum(volS))s+=clamp(volS,0,1)*0.6*w.vol; s=+s.toFixed(2); const action=s>=0.6?'Buy':s<=-0.6?'Sell':'Hold'; const conf=Math.abs(s)>=1.0?'High':Math.abs(s)>=0.7?'Med':'Low'; return {score:s,action,confidence:conf};}
-    async function fetchSpark(id){if(!id)return null;if(sparkCache.has(id))return sparkCache.get(id);try{const u=new URL(`${API_CG}/coins/${id}/market_chart`);u.searchParams.set('vs_currency','usd');u.searchParams.set('days','7');u.searchParams.set('interval','hourly');const j=await (await fetch(u)).json();const arr=(j?.prices||[]).map(p=>p[1]);sparkCache.set(id,arr);return arr;}catch{return null}}
-    async function renderPFRadar(sorted=false){const pf=loadPF();const wrap=document.getElementById('pfRadar');if(!pf.length){wrap.textContent='Portfell puudub.';return;}const wm=new Map(rowsTop50.map(r=>[r.symbol,r]));const w=weights();const out=[];let fetched=0;for(const p of pf){let base=wm.get(p.symbol);let spark=null,rsi=null,mc=null,eur=p.price_eur??null,news=null,volS=null;if(base){spark=base.spark;rsi=base.rsi;mc=base.macd;eur=base.eur??eur;news=newsMap.get(base.id)||newsMap.get(base.symbol)||null;volS=base.volSurge?.score??null;}else{ if(p.id && fetched<10){fetched++;const arr=await fetchSpark(p.id);spark=arr;rsi=rsi14(arr||[]);mc=macd(arr||[]);} }const combo=combineDecision(rsi,mc,news?.score??null,volS,w);out.push({symbol:p.symbol,eur,rsi,mc,news,volS,combo,spark});} if(sorted){out.sort((a,b)=>(b.combo?.score??0)-(a.combo?.score??0));} const head=`<table id="tblRadar"><thead><tr><th>Sümbol</th><th>Hind €</th><th>RSI</th><th>MACD</th><th>Momentum</th><th>News</th><th>Kombineeritud</th><th>7d</th></tr></thead><tbody>`; const body=out.map(r=>{const news=r.news?`<span class="badge ${r.news.action==='Buy'?'buy':r.news.action==='Sell'?'sell':'hold'}">${r.news.action} · ${r.news.score}</span>`:'<span class="badge hold">—</span>'; const combo=r.combo?`<span class="badge ${r.combo.action==='Buy'?'buy':r.combo.action==='Sell'?'sell':'hold'} tt" data-full="score ${r.combo.score} • ${r.combo.confidence}">${r.combo.action}</span>`:'—'; return `<tr><td class="mono">${r.symbol}</td><td class="mono">${isNum(r.eur)?moneySplit('€',r.eur):''}</td><td>${r.rsi??''}</td><td>${momText(r.mc)}</td><td>${momChip(r.mc)}</td><td>${news}</td><td>${combo}</td><td>${sparkSVG(r.spark||[])}</td></tr>`;}).join(''); wrap.innerHTML=head+body+'</tbody></table>'; makeSortable(document.getElementById('tblRadar'));}
-
-    function readAlertPrefs(){try{return JSON.parse(localStorage.getItem(LS_ALERTS))||{buy:true,sell:false,minBuy:0.45,minSell:0.45}}catch{return{buy:true,sell:false,minBuy:0.45,minSell:0.45}}}
-    function saveAlertPrefs(p){localStorage.setItem(LS_ALERTS,JSON.stringify(p))}
-    function maybeAlerts(){const pf=loadPF();const prefs=readAlertPrefs();const out=[];for(const p of pf){const s=newsMap.get(p.id)||newsMap.get(p.symbol);if(!s)continue;const ok=(s.confidence==='High'||s.confidence==='Med');if(s.action==='Buy'&&prefs.buy&&ok&&s.score>=Number(prefs.minBuy))out.push({t:'Buy',s});if(s.action==='Sell'&&prefs.sell&&ok&&Math.abs(s.score)>=Number(prefs.minSell))out.push({t:'Sell',s});}document.getElementById('alerts').innerHTML=out.map(a=>`<div class="pill" style="background:#1b2233">${a.t} ALERT: ${a.s.symbol||a.s.asset} — score ${a.s.score} (${a.s.confidence})</div>`).join('');}
-    function loadTrigs(){try{return JSON.parse(localStorage.getItem(LS_TRIGS))||[]}catch{return[]}}
-    function saveTrigs(x){localStorage.setItem(LS_TRIGS,JSON.stringify(x||[]))}
-    function loadTrigState(){try{return JSON.parse(localStorage.getItem(LS_TRSTATE))||{}}catch{return{}}}
-    function saveTrigState(s){localStorage.setItem(LS_TRSTATE,JSON.stringify(s||{}))}
-    function evalPriceTriggers(){const pf=loadPF();const map=new Map(pf.map(r=>[r.symbol.toUpperCase(),r.price_eur]));const trs=loadTrigs();if(!trs.length)return;const st=loadTrigState();const alerts=[];for(const t of trs){const cur=map.get(String(t.sym).toUpperCase());if(!isNum(cur))continue;const key=`${t.sym}|${t.dir}|${t.px}`;const prev=!!st[key];let hit=false;if(t.dir==='>=')hit=cur>=Number(t.px);else if(t.dir==='<=')hit=cur<=Number(t.px);if(hit&&!prev){alerts.push(`<div class="pill warn">Hinnalävi: ${t.sym} ${t.dir} €${Number(t.px).toLocaleString('en-US')} (praegu €${Number(cur).toLocaleString('en-US')})</div>`);st[key]=true;}if(!hit&&prev){st[key]=false;}}saveTrigState(st);if(alerts.length)document.getElementById('alerts').innerHTML+=alerts.join('');}
-
-    async function loadMoversIfNeeded(){ const active=document.querySelector('#presets .on')?.dataset?.preset||'trend'; if(active==='breakout'){ await loadMovers(); } else { document.getElementById('moversCard').style.display='none'; } }
-
-    /* ===== (6) INIT ===== */
-    async function initAll(){
-      await healthBar();
-      await loadTop50();
-      await loadMoon();
-      // presets
-      document.querySelectorAll('#presets button').forEach(b=>{
-        b.addEventListener('click',()=>{
-          document.querySelectorAll('#presets button').forEach(x=>x.classList.toggle('on',x===b));
-          if(b.dataset.preset==='breakout'){ document.getElementById('moversCard').style.display=''; loadMovers(); }
-          else { document.getElementById('moversCard').style.display='none'; }
-          renderTop50(b.dataset.preset);
-        });
-      });
-      // filtrid
-      document.getElementById('search').addEventListener('input',()=>renderTop50(document.querySelector('#presets .on')?.dataset?.preset||'trend'));
-      document.getElementById('filterAction').addEventListener('change',()=>renderTop50(document.querySelector('#presets .on')?.dataset?.preset||'trend'));
-      document.getElementById('filterNews').addEventListener('change',()=>renderTop50(document.querySelector('#presets .on')?.dataset?.preset||'trend'));
-
-      // portfell failid
-      document.getElementById('csvFiles').addEventListener('change', async (e)=>{
-        const files=[...(e.target.files||[])]; if(!files.length) return;
-        const all=[]; for(const f of files){ const txt=await f.text(); const rows=parseCSV(txt);
-          for(const r of rows){ const raw=r.Symbol||r.symbol||r.Ticker||r.ticker||''; if(!raw) continue; const sym=symbolFromYahoo(raw); const qty=r.Quantity||r.Qty||r.Shares||r.shares||''; const cost=r['Cost Basis']||r.Cost||r.cost||''; all.push({symbol:sym, qty:isNum(qty)?Number(qty):0, costAvgEur:isNum(cost)?Number(cost):null}); } }
-        let merged=mergePos(all); const map=await resolveSymbolsEUR(merged.map(x=>x.symbol));
-        merged=merged.map(x=>({...x,id:map[x.symbol]?.id??null, price_eur:map[x.symbol]?.eur??null, price_usd:map[x.symbol]?.usd??null }));
-        savePF(merged); renderPFTable(); await renderPFRadar(false); maybeAlerts(); evalPriceTriggers();
-      });
-      document.getElementById('btnDemo').addEventListener('click', async ()=>{
-        const demo=[{symbol:'BTC',qty:0.5,costAvgEur:null},{symbol:'ETH',qty:2,costAvgEur:null},{symbol:'SOL',qty:30,costAvgEur:null},{symbol:'DOGE',qty:1000,costAvgEur:null}];
-        const map=await resolveSymbolsEUR(demo.map(d=>d.symbol));
-        savePF(demo.map(d=>({...d,id:map[d.symbol]?.id??null, price_eur:map[d.symbol]?.eur??null, price_usd:map[d.symbol]?.usd??null })));
-        renderPFTable(); await renderPFRadar(false); maybeAlerts(); evalPriceTriggers();
-      });
-      document.getElementById('btnClearPf').addEventListener('click',()=>{
-        localStorage.removeItem(LS_PF);
-        document.getElementById('pfTable').textContent='Portfell puudub.';
-        document.getElementById('pfRadar').textContent='Portfell puudub.';
-        document.getElementById('pfNews').textContent='Portfell puudub.';
-        document.getElementById('alerts').textContent='';
-      });
-
-      // alerts eelistused
-      const ap=readAlertPrefs(); const chkBuy=document.getElementById('chkBuy'), chkSell=document.getElementById('chkSell');
-      const minBuy=document.getElementById('minBuyScore'), minSell=document.getElementById('minSellScore');
-      chkBuy.checked=!!ap.buy; chkSell.checked=!!ap.sell; minBuy.value=ap.minBuy; minSell.value=ap.minSell;
-      function saveAP(){ saveAlertPrefs({buy:chkBuy.checked,sell:chkSell.checked,minBuy:Number(minBuy.value||0.45),minSell:Number(minSell.value||0.45)}); maybeAlerts(); }
-      chkBuy.addEventListener('change',saveAP); chkSell.addEventListener('change',saveAP); minBuy.addEventListener('change',saveAP); minSell.addEventListener('change',saveAP);
-
-      // radar sort & kaalud
-      document.getElementById('btnSortRadar').addEventListener('click',()=>renderPFRadar(true));
-      ['wRSI','wMACD','wNEWS','wVOL'].forEach(id=> document.getElementById(id).addEventListener('input',()=>renderPFRadar(false)));
-
-      // backtest
-      document.getElementById('btAsset').innerHTML='<option value="">— vali vara —</option>';
-      rowsTop50.forEach(r=> document.getElementById('btAsset').innerHTML += `<option value="${r.id}">${r.name} (${r.symbol})</option>`);
-      document.getElementById('btnBacktest').addEventListener('click', backtestRun);
-
-      // perioodiline värskendus
-      setInterval(async ()=>{
-        await healthBar();
-        await loadTop50();
-        await loadMoversIfNeeded();
-        await renderPFRadar(false);
-        maybeAlerts(); evalPriceTriggers();
-      }, 30*60*1000);
-    }
-
-    async function backtestRun(){
-      const idSel=document.getElementById('btAsset').value;
-      const strat=document.getElementById('btStrat').value;
-      const param=Number(document.getElementById('btParam').value||2.0);
-      const out=document.getElementById('btResult');
-      if(!idSel){ out.textContent='Vali vara.'; return; }
-      try{
-        const u=new URL(`${API_CG}/coins/${idSel}/market_chart`); u.searchParams.set('vs_currency','usd'); u.searchParams.set('days','90'); u.searchParams.set('interval','daily');
-        const j=await (await fetch(u)).json(); const closes=(j?.prices||[]).map(p=>p[1]); const vols=(j?.total_volumes||[]).map(v=>v[1]);
-        if(closes.length<40){ out.textContent='Andmeid napib.'; return; }
-        let eq=100,peak=100,trades=0,wins=0,maxDD=0,inPos=false,entry=0;
-        for(let i=1;i<closes.length;i++){
-          let buy=false,sell=false;
-          if(strat==='trend'){ const h=macd(closes.slice(0,i+1)); if(!h) continue; if(!inPos&&h.crossUp)buy=true; if(inPos&&h.crossDn)sell=true; }
-          else if(strat==='breakout'){ const ret=(closes[i]-closes[i-1])/closes[i-1]*100; const med=i>7? vols.slice(i-7,i).sort((a,b)=>a-b)[3] : vols[i-1]; const vs=(med>0)? (vols[i]/med):1; if(!inPos&&ret>param&&vs>1.2)buy=true; if(inPos&&(ret<-param/2||vs<0.8))sell=true; }
-          else { const rs=rsi14(closes.slice(0,i+1)); if(!inPos&&rs!=null&&rs<30)buy=true; if(inPos&&rs!=null&&rs>55)sell=true; }
-          if(buy){ inPos=true; entry=closes[i]; trades++; }
-          if(sell&&inPos){ const r=(closes[i]-entry)/entry; eq*=(1+r); if(r>0)wins++; inPos=false; }
-          peak=Math.max(peak,eq); maxDD=Math.max(maxDD,(peak-eq)/peak*100);
-        }
-        if(inPos){ const r=(closes[closes.length-1]-entry)/entry; eq*=(1+r); if(r>0)wins++; }
-        const retPct=((eq/100)-1)*100;
-        out.innerHTML=`<div class="pill">Tulemus: <b>${retPct.toFixed(2)}%</b></div><span class="pill">Tehinguid: <b>${trades}</b></span><span class="pill">Võidumäär: <b>${trades?(wins/trades*100).toFixed(1):'0.0'}%</b></span><span class="pill">Max drawdown: <b>${maxDD.toFixed(1)}%</b></span><div class="small muted" style="margin-top:6px">Lihtsustatud backtest; tasuta andmed (CG).</div>`;
-      }catch{ out.textContent='Backtest ebaõnnestus.'; }
-    }
-
+    // käivita
     initAll();
   </script>
 </body>
