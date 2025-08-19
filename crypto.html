@@ -2,7 +2,7 @@
 <html lang="et">
 <head>
   <meta charset="utf-8" />
-  <title>Krüptoturu analüüs (Top 50 + Movers + Moonshotid + Signals + Portfell EUR)</title>
+  <title>Krüptoturu analüüs — Top50, Movers, Moonshotid, Signals, Portfell</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -11,6 +11,7 @@
       --money-int:#e6e6e6; --money-frac:#8a8a8a;
       --money-int-hover:#f2f2f2; --money-frac-hover:#6a6a6a;
       --tooltip-bg:#222; --tooltip-border:#333;
+      --accent:#3388ff; --warn:#f5c542;
     }
     body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:24px;color:var(--txt);background:var(--bg)}
     h1,h2{margin:12px 0}.muted{color:var(--muted)}.small{font-size:12px}
@@ -21,25 +22,22 @@
     th{position:sticky;top:0;background:var(--card);text-align:left;cursor:pointer;user-select:none}
     th.sort-asc::after{content:" ▲";font-size:11px;color:var(--muted)}
     th.sort-desc::after{content:" ▼";font-size:11px;color:var(--muted)}
-    .pos{color:var(--pos)}.neg{color:var(--neg)}
+    .pos{color:var(--pos)}.neg{color:var(--neg)} .warn{color:var(--warn)}
     .badge{padding:2px 8px;border-radius:999px;background:#2d2d2d;font-size:12px}
     .buy{background:#0b5}.sell{background:#b00}.hold{background:#444}
     .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
     .money{white-space:nowrap}
     .money-cur{opacity:.9;margin-right:4px}
-    .money-int{color:var(--money-int)}
-    .money-frac{color:var(--money-frac)}
-    .money:hover .money-int{color:var(--money-int-hover)}
-    .money:hover .money-frac{color:var(--money-frac-hover)}
+    .money-int{color:var(--money-int)} .money-frac{color:var(--money-frac)}
+    .money:hover .money-int{color:var(--money-int-hover)} .money:hover .money-frac{color:var(--money-frac-hover)}
     .tt{position:relative;display:inline-block}
     .tt::after{
       content:attr(data-full);
       position:absolute; left:50%; transform:translateX(-50%); bottom:120%;
       background:var(--tooltip-bg); color:#ddd; border:1px solid var(--tooltip-border);
       padding:6px 8px; border-radius:8px; font:12px/1.2 ui-monospace,Menlo,Consolas,monospace;
-      white-space:pre; opacity:0; pointer-events:none; transition:opacity .12s ease; z-index:5;
-      box-shadow:0 6px 20px rgba(0,0,0,.35);
-      max-width:520px; white-space:pre-wrap;
+      opacity:0; pointer-events:none; transition:opacity .12s ease; z-index:5; box-shadow:0 6px 20px rgba(0,0,0,.35);
+      max-width:560px; white-space:pre-wrap;
     }
     .tt:hover::after{opacity:1}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -47,6 +45,15 @@
     .btn:hover{background:#333}
     .pill{border:1px solid #333;border-radius:999px;padding:4px 10px}
     .alert{padding:10px 12px;border:1px solid #333;border-radius:10px;background:#1b1b1b;margin-top:8px}
+    .controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .controls input, .controls select{background:#1b1b1b;border:1px solid #333;color:#ddd;border-radius:10px;padding:6px 8px}
+    .spark{width:120px;height:28px}
+    .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #333;border-radius:12px;padding:3px 8px}
+    .up::before{content:"▲";} .down::before{content:"▼";}
+    .up{color:var(--pos)} .down{color:var(--neg)}
+    .note{font-size:12px;color:var(--muted);margin-top:6px}
+    .sep{height:1px;background:#2a2a2a;margin:8px 0}
+    .dim{opacity:.85}
   </style>
 </head>
 <body>
@@ -56,8 +63,19 @@
     <!-- TOP 50 -->
     <div class="card">
       <h2>Top 50 krüpto</h2>
-      <div class="small muted">CoinGecko (tasuta). Uuendan iga 30 min. Uudiste signaal arvutatakse just selle nimekirja jaoks.</div>
-      <div id="top50">Laen andmeid…</div>
+      <div class="small muted">CoinGecko (tasuta). Uudiste signaal arvutatakse just selle nimekirja jaoks. Uuendan iga 30 min.</div>
+      <div class="controls">
+        <input id="fltSearch" placeholder="Otsi (nimi või sümbol)…" />
+        <select id="fltAction">
+          <option value="">Soovitus (kõik)</option><option>Osta</option><option>Hoia</option><option>Müü</option>
+        </select>
+        <select id="fltNews">
+          <option value="">Uudiste signaal (kõik)</option><option>Buy</option><option>Hold</option><option>Sell</option>
+        </select>
+        <button id="btnResetFilters" class="btn">Lähtesta filtrid</button>
+        <button id="btnExportTop50" class="btn">Ekspordi Top50 CSV</button>
+      </div>
+      <div id="top50" style="margin-top:6px">Laen andmeid…</div>
     </div>
 
     <!-- MOVERS -->
@@ -70,18 +88,18 @@
     <!-- MOONSHOTID -->
     <div class="card">
       <h2>Moonshotid — cap &lt; $100M, trendid ↑</h2>
-      <div class="small muted">CoinPaprika + LunarCrush (soovi korral social).</div>
+      <div class="small muted">CoinPaprika + (valikuliselt) LunarCrush.</div>
       <div id="moonshots">Laen andmeid…</div>
     </div>
 
     <!-- SIGNALS (Top‑50) -->
     <div class="card">
-      <h2>Signals (Top‑50) — uudised + momentum ⇒ Action</h2>
+      <h2>Signals (Top‑50) — Uudised + Momentum ⇒ Action</h2>
       <div class="small muted">Koond: pealkirjade sentiment + 24h/7d momentum (Top‑50 ulatuses).</div>
       <div id="signals">Laen andmeid…</div>
     </div>
 
-    <!-- MINU PORTFELL (EUR), multi-CSV -->
+    <!-- PORTFELL (EUR), multi-CSV -->
     <div class="card">
       <h2>Minu krüptoportfell (Yahoo CSV, EUR)</h2>
       <div class="small muted">
@@ -95,17 +113,51 @@
         <span class="pill small">Teavitused:
           <label><input type="checkbox" id="chkBuy" checked /> Buy (Med/High)</label>
           <label style="margin-left:10px"><input type="checkbox" id="chkSell" /> Sell (Med/High)</label>
+          <label style="margin-left:10px">min Buy score <input id="minBuyScore" type="number" step="0.05" value="0.45" style="width:70px"></label>
+          <label style="margin-left:10px">min Sell score <input id="minSellScore" type="number" step="0.05" value="0.45" style="width:70px"></label>
         </span>
       </div>
       <div id="pfTable" style="margin-top:8px">Portfell puudub.</div>
       <div id="alerts"></div>
     </div>
 
-    <!-- PORTFELLI SIGNAALID (EUR) -->
+    <!-- PORTFELLI Ostu/Müügi Radar (RSI+MACD+News+Momentum) -->
+    <div class="card">
+      <h2>Portfelli Ostu/Müügi Radar</h2>
+      <div class="small muted">Ristanalüüs: RSI, MACD, Uudiste signaal ja “Tule liikuma” (MACD ületus). Kombineeritud soovitus on kaalutud hinnang.</div>
+      <div class="controls">
+        <button id="btnSortRadar" class="btn">Sordi: parimad ostud ↑</button>
+        <span class="note">Mitte‑Top50 varade jaoks tõmban kuni 10 tk 7 päeva graafiku (piiramaks päringuid).</span>
+      </div>
+      <div id="pfRadar">Portfell puudub.</div>
+    </div>
+
+    <!-- PORTFELLI uudiste mõju -->
+    <div class="card">
+      <h2>Portfelli uudiste mõju</h2>
+      <div class="small muted">Uudiste signaalid arvutatud <strong>ainult sinu portfelli</strong> varadele (kui CG‑ID tuvastatud).</div>
+      <div id="pfNews">Laen andmeid… (vajadusel)</div>
+    </div>
+
+    <!-- PORTFELLI Signaalid (kokkuvõte) -->
     <div class="card">
       <h2>Portfelli signaalid (EUR)</h2>
-      <div class="small muted">Seotud sinu krüptoportfelliga. Näitan Buy/Hold/Sell, põhjused ja viimased pealkirjad.</div>
+      <div class="small muted">Buy/Hold/Sell, põhjused ja viimased pealkirjad.</div>
+      <div class="row"><button id="btnExportPfSignals" class="btn">Ekspordi Portfelli signaalid CSV</button></div>
       <div id="pfSignals">Portfell puudub.</div>
+    </div>
+
+    <!-- Hinnalävede alertid (EUR) -->
+    <div class="card">
+      <h2>Hinnalävede alertid (EUR)</h2>
+      <div class="small muted">Lisa reegel: sümbol + tingimus (≥ või ≤) + hind (€). Kui hind ületab läve, kuvatakse ALERT.</div>
+      <div class="row">
+        <input id="trSym" placeholder="Sümbol nt BTC" />
+        <select id="trDir"><option value=">=">&ge;</option><option value="<=">&le;</option></select>
+        <input id="trPx" type="number" step="0.00001" placeholder="Hind €" />
+        <button id="btnAddTrig" class="btn">Lisa reegel</button>
+      </div>
+      <div id="trigsTable" class="note">Reegleid pole.</div>
     </div>
   </div>
 
@@ -175,15 +227,10 @@
         });
       });
     }
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+    function isNum(x){ return x!==null && x!=='' && !isNaN(Number(x)); }
 
-    // ---------- TOP‑50 & SIGNALS ----------
-    async function jget(path, params={}) {
-      const url = new URL(API_CG + path);
-      Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,String(v)));
-      const res = await fetch(url, {headers:{'Accept':'application/json'}});
-      if(!res.ok) throw new Error('HTTP '+res.status+' '+res.statusText);
-      return res.json();
-    }
+    // ---------- TA (RSI, MACD, Sparkline) ----------
     function computeRSI14(series){
       const period=14;
       if(!Array.isArray(series)||series.length<period+1) return null;
@@ -197,14 +244,86 @@
       const rs=avgG/avgL, rsi=100-(100/(1+rs));
       return Math.round(rsi*100)/100;
     }
-    const actionFromRSI = rsi => rsi==null?'Hoia': rsi<=30?'Osta': rsi>=70?'Müü':'Hoia';
-    const classify = (rsi, ch7, ch24) =>
-      (rsi!=null && rsi<=30) ? 'positiivne' :
-      (rsi!=null && rsi>=70 && (ch24??0)<0) ? 'negatiivne' :
-      ((ch7??0)>0 && (rsi??50)<70) ? 'positiivne' : 'neutraalne';
+    function ema(series, period){
+      if(!Array.isArray(series)||series.length===0) return [];
+      const k = 2/(period+1);
+      const out = [];
+      let prev = series[0];
+      out.push(prev);
+      for(let i=1;i<series.length;i++){
+        const val = series[i]*k + prev*(1-k);
+        out.push(val); prev = val;
+      }
+      return out;
+    }
+    function computeMACD(series){ // 12/26/9
+      if(!Array.isArray(series)||series.length<35) return null;
+      const ema12 = ema(series,12);
+      const ema26 = ema(series,26);
+      const macd = ema12.map((v,i)=> v - ema26[i]);
+      const signal = ema(macd,9);
+      const hist = macd.map((v,i)=> v - signal[i]);
+      const n = hist.length;
+      const crossUp = n>1 && hist[n-2]<=0 && hist[n-1]>0;
+      const crossDn = n>1 && hist[n-2]>=0 && hist[n-1]<0;
+      return { macd, signal, hist, crossUp, crossDn, last: macd[n-1], lastSignal: signal[n-1], lastHist: hist[n-1] };
+    }
+    function sparklineSVG(data, w=120, h=28, pad=2){
+      if (!Array.isArray(data) || data.length<2) return '';
+      const min = Math.min(...data), max = Math.max(...data);
+      const rng = (max-min) || 1;
+      const sx = (w - pad*2) / (data.length - 1);
+      const sy = (h - pad*2) / rng;
+      let d = '';
+      data.forEach((v, i) => {
+        const x = pad + i*sx;
+        const y = h - pad - ((v - min) * sy);
+        d += (i===0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+      });
+      return `<svg class="spark" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.2" /></svg>`;
+    }
+    function momentumChip(macdRes){
+      if(!macdRes) return `<span class="chip dim">—</span>`;
+      if(macdRes.crossUp) return `<span class="chip up">Tule liikuma ↑</span>`;
+      if(macdRes.crossDn) return `<span class="chip down">Tule liikuma ↓</span>`;
+      return `<span class="chip dim">${macdRes.lastHist>=0?'Trend ↑':'Trend ↓'}</span>`;
+    }
+    function combinedDecision(rsi, macdRes, newsScore){
+      // Lihtne kaalumine: MACD ületus suur, RSI äärmused keskmine, uudised toetav
+      let score = 0;
+      if (rsi!=null){
+        if (rsi<=30) score += 0.35;
+        else if (rsi>=70) score -= 0.35;
+      }
+      if (macdRes){
+        if (macdRes.crossUp) score += 0.40;
+        else if (macdRes.crossDn) score -= 0.40;
+        else score += clamp(macdRes.lastHist/ (Math.abs(macdRes.last) + 1e-9), -0.2, 0.2);
+      }
+      if (isNum(newsScore)) score += clamp(newsScore, -0.6, 0.6) * 0.5;
+      score = +score.toFixed(2);
+      const action = score >= 0.35 ? 'Buy' : score <= -0.35 ? 'Sell' : 'Hold';
+      const conf = Math.abs(score)>=0.7?'High':Math.abs(score)>=0.45?'Med':'Low';
+      return { score, action, confidence: conf };
+    }
 
-    let lastTop50Rows = [];        // {id, symbol, name, price_usd, price_eur, ...}
-    let lastSignalsMap = new Map();// key: id/symbol -> signal
+    // ---------- GLOBAL STATE ----------
+    let lastTop50Rows = [];         // {id, symbol, name, price_usd, price_eur, spark[], rsi, macd, ...}
+    let lastSignalsMap = new Map(); // id/symbol -> news signal
+    const sparkCache = new Map();   // id -> sparkline array
+    const LS_KEY_PF = 'pfYahooCSV_multiEUR';
+    const LS_KEY_ALERTS = 'pfAlertPrefs';
+    const LS_KEY_TRIGS = 'pfPriceTriggers';
+    const LS_KEY_TRIGSTATE = 'pfTriggerState';
+
+    // ---------- API HELPERS ----------
+    async function jget(path, params={}) {
+      const url = new URL(API_CG + path);
+      Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,String(v)));
+      const res = await fetch(url, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw new Error('HTTP '+res.status+' '+res.statusText);
+      return res.json();
+    }
 
     async function loadTop50(){
       const usd = await jget('/coins/markets', {
@@ -220,72 +339,92 @@
       const totalMcap = global?.data?.total_market_cap?.usd ?? null;
 
       lastTop50Rows = usd.map((c, idx) => {
-        const rsi = computeRSI14(c?.sparkline_in_7d?.price ?? []);
+        const spark = c?.sparkline_in_7d?.price ?? [];
+        const rsi = computeRSI14(spark);
+        const macdRes = computeMACD(spark);
         const dom = (totalMcap && c.market_cap) ? +(100*c.market_cap/totalMcap).toFixed(3) : null;
-        const sent = classify(rsi, c.price_change_percentage_7d_in_currency, c.price_change_percentage_24h_in_currency);
-        const act = actionFromRSI(rsi);
+        const sentiment = (rsi!=null && rsi<=30) ? 'positiivne' :
+                          (rsi!=null && rsi>=70 && (c.price_change_percentage_24h_in_currency??0)<0) ? 'negatiivne' :
+                          ((c.price_change_percentage_7d_in_currency??0)>0 && (rsi??50)<70) ? 'positiivne' : 'neutraalne';
+        const actionRSI = rsi==null?'Hoia': rsi<=30?'Osta': rsi>=70?'Müü':'Hoia';
         return {
-          id: c.id,
-          rank: idx+1,
-          name: c.name,
-          symbol: (c.symbol||'').toUpperCase(),
-          price_usd: c.current_price,
-          price_eur: eurMap.get(c.id) ?? null,
+          id: c.id, rank: idx+1, name: c.name, symbol: (c.symbol||'').toUpperCase(),
+          price_usd: c.current_price, price_eur: eurMap.get(c.id) ?? null,
           ch1: c.price_change_percentage_1h_in_currency,
           ch24: c.price_change_percentage_24h_in_currency,
           ch7: c.price_change_percentage_7d_in_currency,
           ch30: c.price_change_percentage_30d_in_currency,
-          mcap: c.market_cap,
-          vol: c.total_volume,
-          dom, rsi, sentiment: sent, action: act
+          mcap: c.market_cap, vol: c.total_volume, dom,
+          rsi, macdRes, spark, sentiment, action: actionRSI
         };
       });
 
-      await loadSignalsForTop50(); // arvuta uudiste signaal top-50 jaoks
+      await loadSignalsForTop50(); // uudiste signaal top‑50 jaoks
       renderTop50();
-      renderPortfolioSignals();    // uuenda portfelli signaalid (EUR)
-      maybeShowAlerts();
+      renderPortfolioViews();      // radar + pf signals + pf news + alerts
       document.getElementById('ts').textContent = '• värskendatud: ' + new Date().toLocaleString();
     }
 
     function renderTop50(){
+      const q = document.getElementById('fltSearch').value.trim().toLowerCase();
+      const fAct = document.getElementById('fltAction').value;
+      const fNews= document.getElementById('fltNews').value;
+
+      const filtered = lastTop50Rows.filter(r=>{
+        const hitQ = !q || r.name.toLowerCase().includes(q) || r.symbol.toLowerCase().includes(q);
+        const hitA = !fAct || r.action === fAct;
+        const sig = lastSignalsMap.get(r.id) || lastSignalsMap.get(r.symbol) || null;
+        const hitN = !fNews || (sig && sig.action === fNews);
+        return hitQ && hitA && hitN;
+      });
+
       const head = `
       <table id="cryptoTable"><thead><tr>
         <th>#</th><th>Nimi</th><th>Sümbol</th><th>Hind $</th><th>Hind €</th>
-        <th>1h %</th><th>24h %</th><th>7d %</th><th>30d %</th>
-        <th>MCap $</th><th>Vol 24h $</th><th>Dom %</th><th>RSI(14)</th><th>Sentiment</th><th>Soovitus</th><th>Uudiste signaal</th>
+        <th>1h %</th><th>24h %</th><th>7d %</th><th>30d %</th><th>7d graafik</th><th>Momentum</th>
+        <th>MCap $</th><th>Vol 24h $</th><th>RSI(14)</th><th>Sentiment</th><th>Soovitus</th><th>Uudiste signaal</th>
       </tr></thead><tbody>`;
-      const body = lastTop50Rows.map(r=>{
+
+      const body = filtered.map(r=>{
         const sig = lastSignalsMap.get(r.id) || lastSignalsMap.get(r.symbol) || null;
         const badgeCls = sig ? (sig.action==='Buy'?'buy':sig.action==='Sell'?'sell':'hold') : 'hold';
-        const tipReasons = sig ? `Score ${sig.score} • ${sig.confidence}\n${(sig.reasons||[]).join(', ')}` : '—';
+        const tipReasons = sig ? `News score ${sig.score} • ${sig.confidence}\n${(sig.reasons||[]).join(', ')}` : '—';
         const heads = sig ? (sig.headlines||[]).map(h=>`• ${h.title}`).join('\n') : '';
         const tooltip = sig ? `${tipReasons}\n${heads}` : 'Puudub';
         const sigHtml = sig ? `<span class="badge ${badgeCls} tt" data-full="${escapeHtml(tooltip)}">${sig.action} · ${sig.score}</span>`
                             : `<span class="badge hold tt" data-full="Puudub">—</span>`;
+        const spark = sparklineSVG(r.spark);
+        const mom = momentumChip(r.macdRes);
+
         return `
         <tr>
-          <td>${r.rank}</td><td>${r.name}</td><td class="mono">${r.symbol}</td>
+          <td>${r.rank}</td>
+          <td>${r.name}</td>
+          <td class="mono">${r.symbol}</td>
           <td class="mono">${formatMoneySplit('$', r.price_usd)}</td>
           <td class="mono">${formatMoneySplit('€', r.price_eur)}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch1,  r.price_usd, '1h tagasi')}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch24, r.price_usd, '24h tagasi')}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch7,  r.price_usd, '7d tagasi')}</td>
           <td>${fmtPctWithPastUsdTooltip(r.ch30, r.price_usd, '30d tagasi')}</td>
-          <td class="mono">${fmtInt(r.mcap)}</td><td class="mono">${fmtInt(r.vol)}</td>
-          <td>${r.dom??''}</td><td>${r.rsi??''}</td><td>${r.sentiment}</td>
+          <td>${spark}</td>
+          <td>${mom}</td>
+          <td class="mono">${fmtInt(r.mcap)}</td>
+          <td class="mono">${fmtInt(r.vol)}</td>
+          <td>${r.rsi??''}</td>
+          <td>${r.sentiment}</td>
           <td><span class="badge ${r.action==='Osta'?'buy':r.action==='Müü'?'sell':'hold'}">${r.action}</span></td>
           <td>${sigHtml}</td>
         </tr>`;
       }).join('');
+
       document.getElementById('top50').innerHTML = head + body + '</tbody></table>';
       makeSortable(document.getElementById('cryptoTable'));
     }
 
     // ---------- MOVERS ----------
-    async function loadMovers() {
+    async function loadMovers(){
       const res = await fetch(API_MOVERS, { cache: 'no-store' });
-      if (!res.ok) throw new Error('Movers API error');
       const payload = await res.json();
       const gainers = payload?.top_gainers_24h ?? [];
       const losers  = payload?.top_losers_24h ?? [];
@@ -308,14 +447,13 @@
       document.getElementById('movers').innerHTML =
         table('tblGainers','TOP 10 TÕUSJAT (24h, kogu turg)',gainers) +
         table('tblLosers','TOP 10 LANGEJAT (24h, kogu turg)',losers);
-      makeSortable(document.getElementById('tblGainers'));
-      makeSortable(document.getElementById('tblLosers'));
+      makeSortable(document.getElementById('tblGainers')); makeSortable(document.getElementById('tblLosers'));
     }
 
     // ---------- MOONSHOTID ----------
     async function loadMoon(){
       const r = await fetch(API_MOON, { cache: 'no-store' });
-      if (!r.ok) throw new Error('Moonshots API error');
+      if (!r.ok) { document.getElementById('moonshots').innerHTML = '<div class="small">Viga moonshotide laadimisel.</div>'; return; }
       const data = await r.json();
       const rows = data.items || [];
       const head = `<table id="tblMoon"><thead><tr>
@@ -375,63 +513,47 @@
       }).join('');
       document.getElementById('signals').innerHTML = head + body + '</tbody></table>';
       makeSortable(document.getElementById('tblSignals'));
+      renderTop50(); // et uudiste veerg täituks
     }
 
-    // ---------- PORTFELL (EUR) ----------
-    const LS_KEY_PF = 'pfYahooCSV_multiEUR';
-    const LS_KEY_ALERTS = 'pfAlertPrefs';
-
-    function readAlertPrefs(){
-      try { return JSON.parse(localStorage.getItem(LS_KEY_ALERTS)) || { buy:true, sell:false }; }
-      catch { return { buy:true, sell:false }; }
-    }
-    function saveAlertPrefs(p){ localStorage.setItem(LS_KEY_ALERTS, JSON.stringify(p)); }
-
+    // ---------- PORTFELL ----------
     function symbolFromYahoo(sym){
       if (!sym) return '';
       const s = String(sym).toUpperCase().trim();
-      // BTC-USD -> BTC ; ETH-USDT -> ETH ; SOL-EUR -> SOL
       const m = s.match(/^([A-Z0-9]+)[-\.]/);
       return (m ? m[1] : s);
     }
+    function readAlertPrefs(){
+      try { return JSON.parse(localStorage.getItem(LS_KEY_ALERTS)) || { buy:true, sell:false, minBuy:0.45, minSell:0.45 }; }
+      catch { return { buy:true, sell:false, minBuy:0.45, minSell:0.45 }; }
+    }
+    function saveAlertPrefs(p){ localStorage.setItem(LS_KEY_ALERTS, JSON.stringify(p)); }
+    function loadPortfolio(){ try { return JSON.parse(localStorage.getItem(LS_KEY_PF)) || []; } catch { return []; } }
+    function savePortfolio(rows){ localStorage.setItem(LS_KEY_PF, JSON.stringify(rows||[])); }
 
+    function splitCsvLine(line){
+      const out=[], n=line.length; let cur='', inQ=false;
+      for (let i=0;i<n;i++){
+        const ch=line[i];
+        if (ch === '"'){ if (inQ && line[i+1]==='"'){ cur+='"'; i++; } else { inQ=!inQ; } }
+        else if (ch===',' && !inQ){ out.push(cur); cur=''; }
+        else { cur+=ch; }
+      }
+      out.push(cur); return out.map(s=>s.replace(/^"|"$/g,''));
+    }
     function parseCSV(text){
       const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.trim()!=='');
       if (!lines.length) return [];
       const header = splitCsvLine(lines[0]);
       const rows = [];
       for (let i=1;i<lines.length;i++){
-        const cols = splitCsvLine(lines[i]);
-        const obj = {};
+        const cols = splitCsvLine(lines[i]); const obj = {};
         header.forEach((h,idx)=> obj[h]= (cols[idx]??'').trim());
         rows.push(obj);
       }
       return rows;
     }
-    function splitCsvLine(line){
-      const out=[], n=line.length;
-      let cur='', inQ=false;
-      for (let i=0;i<n;i++){
-        const ch=line[i];
-        if (ch === '"'){
-          if (inQ && line[i+1]==='"'){ cur+='"'; i++; }
-          else { inQ=!inQ; }
-        } else if (ch===',' && !inQ){ out.push(cur); cur=''; }
-        else { cur+=ch; }
-      }
-      out.push(cur);
-      return out.map(s=>s.replace(/^"|"$/g,''));
-    }
-
-    function loadPortfolio(){
-      try { return JSON.parse(localStorage.getItem(LS_KEY_PF)) || []; }
-      catch { return []; }
-    }
-    function savePortfolio(rows){
-      localStorage.setItem(LS_KEY_PF, JSON.stringify(rows||[]));
-    }
     function mergePositions(list){
-      // {symbol, qty, costAvgEur?} — merge by symbol: sum qty, recompute weighted avg cost if olemas
       const map = new Map();
       for (const r of list){
         const key = String(r.symbol).toUpperCase();
@@ -449,36 +571,41 @@
       }
       return [...map.values()];
     }
-    function isNum(x){ return x!==null && x!=='' && !isNaN(Number(x)); }
 
     async function resolvePricesForSymbolsEUR(symbols){
-      // 1) proovi Top‑50 seast; 2) kui ei leia, proovi CG search -> id -> simple/price (usd,eur)
       const out = {};
       const topMap = new Map(lastTop50Rows.map(r=>[String(r.symbol).toUpperCase(), r]));
       const miss = [];
       for (const s of symbols){
         const hit = topMap.get(s);
-        if (hit){
-          out[s] = { usd: hit.price_usd ?? null, eur: hit.price_eur ?? null, id: hit.id };
-        } else {
-          miss.push(s);
-        }
+        if (hit){ out[s] = { usd: hit.price_usd ?? null, eur: hit.price_eur ?? null, id: hit.id, spark: hit.spark }; }
+        else miss.push(s);
       }
-      // resolve unknowns via search
       for (const s of miss){
         try{
           const search = await (await fetch(`${API_CG}/search?query=${encodeURIComponent(s)}`)).json();
           const id = search?.coins?.find(c => String(c.symbol||'').toUpperCase()===s)?.id || search?.coins?.[0]?.id || null;
-          if (!id) { out[s] = { usd:null, eur:null, id:null }; continue; }
+          if (!id) { out[s] = { usd:null, eur:null, id:null, spark:null }; continue; }
           const sp = new URL(`${API_CG}/simple/price`);
-          sp.searchParams.set('ids', id);
-          sp.searchParams.set('vs_currencies','usd,eur');
-          const j = await (await fetch(sp)).json();
-          const p = j?.[id] || {};
-          out[s] = { usd: isNum(p.usd)?Number(p.usd):null, eur: isNum(p.eur)?Number(p.eur):null, id };
-        }catch{ out[s] = { usd:null, eur:null, id:null }; }
+          sp.searchParams.set('ids', id); sp.searchParams.set('vs_currencies','usd,eur');
+          const j = await (await fetch(sp)).json(); const p = j?.[id] || {};
+          out[s] = { usd: isNum(p.usd)?Number(p.usd):null, eur: isNum(p.eur)?Number(p.eur):null, id, spark:null };
+        }catch{ out[s] = { usd:null, eur:null, id:null, spark:null }; }
       }
-      return out; // {SYM:{usd,eur,id}}
+      return out;
+    }
+
+    async function fetchSparklineForId(id){
+      if (!id) return null;
+      if (sparkCache.has(id)) return sparkCache.get(id);
+      try{
+        const u = new URL(`${API_CG}/coins/${id}/market_chart`);
+        u.searchParams.set('vs_currency','usd'); u.searchParams.set('days','7'); u.searchParams.set('interval','hourly');
+        const j = await (await fetch(u)).json();
+        const arr = (j?.prices||[]).map(p=>p[1]);
+        sparkCache.set(id, arr);
+        return arr;
+      }catch{ return null; }
     }
 
     function renderPortfolioTable(){
@@ -518,22 +645,114 @@
       </tr></thead><tbody>`;
       const body = rows.map(x=>{
         const s = x.sig;
-        if (!s) {
-          return `<tr><td class="mono">${x.symbol}</td><td colspan="5" class="muted">Signaali pole (väljas Top‑50 või andmed puuduvad)</td></tr>`;
-        }
+        if (!s) return `<tr><td class="mono">${x.symbol}</td><td colspan="5" class="muted">Signaali pole (väljas Top‑50 või andmed puuduvad)</td></tr>`;
         const heads = (s.headlines||[]).map(h=>`• ${escapeHtml(h.title)}`).join('<br/>');
         return `<tr>
           <td class="mono">${x.symbol}</td>
           <td><span class="badge ${s.action==='Buy'?'buy':s.action==='Sell'?'sell':'hold'}">${s.action}</span></td>
           <td>${s.confidence}</td><td>${s.score}</td>
-          <td>${(s.reasons||[]).join(', ')}</td>
-          <td>${heads}</td>
+          <td>${(s.reasons||[]).join(', ')}</td><td>${heads}</td>
         </tr>`;
       }).join('');
       document.getElementById('pfSignals').innerHTML = head + body + '</tbody></table>';
       makeSortable(document.getElementById('tblPfSig'));
     }
 
+    async function renderPortfolioNewsOnly(){
+      const pf = loadPortfolio();
+      if (!pf.length){ document.getElementById('pfNews').innerHTML='Portfell puudub.'; return; }
+      // Saada news-signals funktsioonile ainult portfelli coins (kui id teada)
+      const coins = pf.map(p=>({ id:p.id||'', symbol:p.symbol, name:p.symbol }));
+      const anyId = coins.some(c=>c.id);
+      if (!anyId){ document.getElementById('pfNews').innerHTML='ID puudub (väljas Top‑50) — jätan uudised vahele.'; return; }
+      const r = await fetch(API_SIGNALS, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ coins })
+      });
+      if (!r.ok){ document.getElementById('pfNews').innerHTML='Uudiste päring ebaõnnestus.'; return; }
+      const data = await r.json();
+      const rows = data.signals || [];
+      const head = `<table id="tblPfNews"><thead><tr>
+        <th>Asset</th><th>News action</th><th>Score</th><th>Confidence</th><th>Pealkirjad</th>
+      </tr></thead><tbody>`;
+      const body = rows.map(x=>{
+        const heads = (x.headlines||[]).map(h=> h.link ? `<a href="${h.link}" target="_blank" rel="noopener">${escapeHtml(h.title)}</a>` : escapeHtml(h.title)).join('<br/>');
+        return `<tr>
+          <td class="mono">${x.symbol || x.asset}</td>
+          <td><span class="badge ${x.action==='Buy'?'buy':x.action==='Sell'?'sell':'hold'}">${x.action}</span></td>
+          <td>${x.score}</td><td>${x.confidence}</td>
+          <td>${heads}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('pfNews').innerHTML = head + body + '</tbody></table>';
+      makeSortable(document.getElementById('tblPfNews'));
+    }
+
+    async function renderPortfolioRadar(sortBest=false){
+      const pf = loadPortfolio();
+      if (!pf.length){ document.getElementById('pfRadar').innerHTML='Portfell puudub.'; return; }
+
+      // Ehita radariread
+      const topMap = new Map(lastTop50Rows.map(r=>[r.symbol, r]));
+      const rows = [];
+      let fetched = 0;
+
+      for (const p of pf){
+        let spark = null, rsi = null, macdRes = null, news = null, eur = p.price_eur ?? null;
+
+        const top = topMap.get(p.symbol);
+        if (top){
+          spark = top.spark; rsi = top.rsi; macdRes = top.macdRes; eur = top.price_eur ?? eur;
+          news = lastSignalsMap.get(top.id) || lastSignalsMap.get(top.symbol) || null;
+        } else {
+          // Väljas top‑50: tõmba kuni 10 tk graafikut
+          if (p.id && fetched < 10){
+            spark = await fetchSparklineForId(p.id); fetched++;
+            rsi = computeRSI14(spark||[]);
+            macdRes = computeMACD(spark||[]);
+            news = lastSignalsMap.get(p.id) || lastSignalsMap.get(p.symbol) || null;
+          }
+        }
+        const newsScore = news?.score ?? null;
+        const combo = combinedDecision(rsi, macdRes, newsScore);
+        rows.push({
+          symbol:p.symbol, price_eur: eur, rsi, macdRes, news,
+          combo, spark
+        });
+      }
+
+      if (sortBest){
+        rows.sort((a,b)=> (b.combo?.score ?? 0) - (a.combo?.score ?? 0));
+      }
+
+      const head = `<table id="tblRadar"><thead><tr>
+        <th>Sümbol</th><th>Hind €</th><th>RSI(14)</th><th>MACD</th><th>Momentum</th><th>Uudiste signaal</th><th>Kombineeritud</th><th>7d</th>
+      </tr></thead><tbody>`;
+
+      const body = rows.map(r=>{
+        const macdTxt = r.macdRes ? (r.macdRes.crossUp ? '<span class="pos">bullish crossover</span>' :
+                                      r.macdRes.crossDn ? '<span class="neg">bearish crossover</span>' :
+                                      (r.macdRes.lastHist>=0?'üles trend':'alla trend')) : '—';
+        const mom = momentumChip(r.macdRes);
+        const news = r.news ? `<span class="badge ${r.news.action==='Buy'?'buy':r.news.action==='Sell'?'sell':'hold'}">${r.news.action} · ${r.news.score}</span>` : `<span class="badge hold">—</span>`;
+        const combo = r.combo ? `<span class="badge ${r.combo.action==='Buy'?'buy':r.combo.action==='Sell'?'sell':'hold'} tt" data-full="score ${r.combo.score} • ${r.combo.confidence}"> ${r.combo.action} </span>` : '—';
+        return `<tr>
+          <td class="mono">${r.symbol}</td>
+          <td class="mono">${isNum(r.price_eur)?formatMoneySplit('€', r.price_eur):''}</td>
+          <td>${r.rsi??''}</td>
+          <td>${macdTxt}</td>
+          <td>${mom}</td>
+          <td>${news}</td>
+          <td>${combo}</td>
+          <td>${sparklineSVG(r.spark||[])}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('pfRadar').innerHTML = head + body + '</tbody></table>';
+      makeSortable(document.getElementById('tblRadar'));
+    }
+
+    // ---------- ALERTS ----------
     function maybeShowAlerts(){
       const prefs = readAlertPrefs();
       const pf = loadPortfolio();
@@ -542,15 +761,60 @@
         const s = lastSignalsMap.get(p.id) || lastSignalsMap.get(p.symbol);
         if (!s) continue;
         const levelOk = (s.confidence==='High' || s.confidence==='Med');
-        if (s.action==='Buy' && prefs.buy && levelOk) out.push({type:'Buy', s});
-        if (s.action==='Sell'&& prefs.sell&& levelOk) out.push({type:'Sell',s});
+        const minBuy = Number(prefs.minBuy ?? 0.45);
+        const minSell= Number(prefs.minSell?? 0.45);
+        if (s.action==='Buy' && prefs.buy && levelOk && (s.score>=minBuy)) out.push({type:'Buy', s});
+        if (s.action==='Sell'&& prefs.sell && levelOk && (Math.abs(s.score)>=minSell)) out.push({type:'Sell',s});
       }
       const wrap = document.getElementById('alerts');
-      if (!out.length){ wrap.innerHTML=''; return; }
       wrap.innerHTML = out.map(a => `
         <div class="alert">
           <strong>${a.type} ALERT:</strong> ${a.s.symbol || a.s.asset} — score ${a.s.score} (${a.s.confidence}). Põhjused: ${(a.s.reasons||[]).join(', ')}
         </div>`).join('');
+    }
+
+    // Hinnalävede reeglid
+    function loadTriggers(){ try { return JSON.parse(localStorage.getItem(LS_KEY_TRIGS))||[]; } catch { return []; } }
+    function saveTriggers(list){ localStorage.setItem(LS_KEY_TRIGS, JSON.stringify(list||[])); }
+    function loadTrigState(){ try { return JSON.parse(localStorage.getItem(LS_KEY_TRIGSTATE))||{}; } catch { return {}; } }
+    function saveTrigState(st){ localStorage.setItem(LS_KEY_TRIGSTATE, JSON.stringify(st||{})); }
+
+    function renderTriggers(){
+      const trs = loadTriggers();
+      if (!trs.length){ document.getElementById('trigsTable').innerHTML='Reegleid pole.'; return; }
+      const head = `<table id="tblTrigs"><thead><tr><th>Sümbol</th><th>Tingimus</th><th>Hind €</th><th></th></tr></thead><tbody>`;
+      const body = trs.map((t,i)=>`<tr>
+        <td class="mono">${t.sym}</td><td class="mono">${t.dir}</td><td class="mono">${t.px}</td>
+        <td><button data-i="${i}" class="btn btnDelTrig">Kustuta</button></td>
+      </tr>`).join('');
+      document.getElementById('trigsTable').innerHTML = head + body + '</tbody></table>';
+      document.querySelectorAll('.btnDelTrig').forEach(b=> b.addEventListener('click', ()=>{
+        const idx = Number(b.getAttribute('data-i')); const list = loadTriggers(); list.splice(idx,1); saveTriggers(list); renderTriggers();
+      }));
+      makeSortable(document.getElementById('tblTrigs'));
+    }
+
+    function evalPriceTriggers(){
+      const pf = loadPortfolio(); if (!pf.length) return;
+      const map = new Map(pf.map(r=>[String(r.symbol).toUpperCase(), r.price_eur]));
+      const trs = loadTriggers(); if (!trs.length) return;
+      const state = loadTrigState();
+      const alerts = [];
+      for (const t of trs){
+        const cur = map.get(String(t.sym).toUpperCase()); if (!isNum(cur)) continue;
+        const key = `${t.sym}|${t.dir}|${t.px}`;
+        const prevHit = !!state[key];
+        let hit = false;
+        if (t.dir === '>=') hit = cur >= Number(t.px);
+        else if (t.dir === '<=') hit = cur <= Number(t.px);
+        if (hit && !prevHit){
+          alerts.push(`<div class="alert"><strong>Hinnalävi:</strong> ${t.sym} ${t.dir} €${Number(t.px).toLocaleString('en-US')} (praegu €${Number(cur).toLocaleString('en-US')})</div>`);
+          state[key] = true;
+        }
+        if (!hit && prevHit){ state[key] = false; }
+      }
+      saveTrigState(state);
+      if (alerts.length) document.getElementById('alerts').innerHTML += alerts.join('');
     }
 
     // ---------- INIT / REFRESH ----------
@@ -558,54 +822,79 @@
       loadTop50().catch(()=>document.getElementById('top50').innerHTML='<div class="small">Viga andmete laadimisel.</div>');
       loadMovers().catch(()=>document.getElementById('movers').innerHTML='<div class="small">Viga CMC movers laadimisel.</div>');
       loadMoon().catch(()=>document.getElementById('moonshots').innerHTML='<div class="small">Viga moonshotide laadimisel.</div>');
+      // teised renderid kutsutakse loadTop50 sees
+    }
+    async function renderPortfolioViews(){
+      renderPortfolioTable();
+      renderPortfolioSignals();
+      await renderPortfolioNewsOnly();
+      await renderPortfolioRadar(false);
+      maybeShowAlerts();
+      evalPriceTriggers();
     }
     refreshAll();
     setInterval(refreshAll, 30*60*1000);
 
-    // ---------- PORTFELLI FAILIDE TÖÖTLUS ----------
-    const inputFiles = document.getElementById('csvFiles');
-    inputFiles.addEventListener('change', async (e)=>{
-      const files = [...(e.target.files||[])];
-      if (!files.length) return;
+    // --- Filtrid & eksport ---
+    document.getElementById('fltSearch').addEventListener('input', ()=>renderTop50());
+    document.getElementById('fltAction').addEventListener('change', ()=>renderTop50());
+    document.getElementById('fltNews').addEventListener('change', ()=>renderTop50());
+    document.getElementById('btnResetFilters').addEventListener('click', ()=>{
+      document.getElementById('fltSearch').value=''; document.getElementById('fltAction').value=''; document.getElementById('fltNews').value='';
+      renderTop50();
+    });
+    document.getElementById('btnExportTop50').addEventListener('click', ()=>{
+      const q = document.getElementById('fltSearch').value.trim().toLowerCase();
+      const fAct = document.getElementById('fltAction').value;
+      const fNews= document.getElementById('fltNews').value;
+      const rows = lastTop50Rows.filter(r=>{
+        const hitQ = !q || r.name.toLowerCase().includes(q) || r.symbol.toLowerCase().includes(q);
+        const hitA = !fAct || r.action === fAct;
+        const sig = lastSignalsMap.get(r.id) || lastSignalsMap.get(r.symbol) || null;
+        const hitN = !fNews || (sig && sig.action === fNews);
+        return hitQ && hitA && hitN;
+      }).map(r=>{
+        const sig = lastSignalsMap.get(r.id) || lastSignalsMap.get(r.symbol) || null;
+        return {
+          rank:r.rank, name:r.name, symbol:r.symbol,
+          price_usd:r.price_usd, price_eur:r.price_eur,
+          ch1:r.ch1, ch24:r.ch24, ch7:r.ch7, ch30:r.ch30,
+          mcap:r.mcap, vol:r.vol, rsi:r.rsi, macd_hist:r.macdRes?.lastHist ?? '',
+          news_action:sig?.action||'', news_score:sig?.score||'', news_confidence:sig?.confidence||''
+        };
+      });
+      if (!rows.length){ alert('Tabel on tühi.'); return; }
+      const header = Object.keys(rows[0]||{});
+      const csv = [header.join(',')].concat(rows.map(o=>header.map(h=>JSON.stringify(o[h]??'')).join(','))).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'}); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'top50.csv'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // --- Portfelli failid ---
+    document.getElementById('csvFiles').addEventListener('change', async (e)=>{
+      const files = [...(e.target.files||[])]; if (!files.length) return;
       const allRows = [];
       for (const f of files){
-        const text = await f.text();
-        const rows = parseCSV(text);
+        const text = await f.text(); const rows = parseCSV(text);
         for (const r of rows){
-          const raw = r.Symbol || r.symbol || r.Ticker || r.ticker || '';
-          if (!raw) continue;
+          const raw = r.Symbol || r.symbol || r.Ticker || r.ticker || ''; if (!raw) continue;
           const sym = symbolFromYahoo(raw);
-          // Filtreeri krüpto: lubame mis tahes sümboli, hiljem proovime hinnad CG-st
           const qty = r.Quantity || r.Qty || r.Shares || r.shares || '';
           const cost = r['Cost Basis'] || r.Cost || r.cost || '';
           const qtyNum = isNum(qty) ? Number(qty) : null;
-          const costNum= isNum(cost)? Number(cost): null; // Yahoo cost võib olla USD/EUR; meil on eesmärk EUR. Jätame sisendi EUR-ks (sinu portfell on EUR).
+          const costNum= isNum(cost)? Number(cost): null; // eeldame, et sinu CSV on EUR‑is
           allRows.push({ symbol:sym, qty: qtyNum??0, costAvgEur: costNum??null });
         }
       }
-      // ühenda samad sümbolid
       let merged = mergePositions(allRows);
-
-      // lae EUR hinnad (ja USD, kui vaja)
       const symbols = merged.map(x=>x.symbol);
-      const priceMap = await resolvePricesForSymbolsEUR(symbols); // {SYM:{usd,eur,id}}
-
-      // rikasta
+      const priceMap = await resolvePricesForSymbolsEUR(symbols);
       merged = merged.map(x=>{
         const p = priceMap[x.symbol] || {};
         return { ...x, id: p.id ?? null, price_eur: isNum(p.eur)?Number(p.eur):null, price_usd: isNum(p.usd)?Number(p.usd):null };
       });
-
       savePortfolio(merged);
-      renderPortfolioTable();
-      // ehita kiire minikaart signals map’i jaoks (et leiaks id/sümboli)
-      for (const m of merged){
-        if (m.id && !lastSignalsMap.has(m.id) && lastSignalsMap.has(m.symbol)){
-          // ok
-        }
-      }
-      renderPortfolioSignals();
-      maybeShowAlerts();
+      await renderPortfolioViews();
     });
 
     document.getElementById('btnDemo').addEventListener('click', async ()=>{
@@ -618,30 +907,70 @@
       const priceMap = await resolvePricesForSymbolsEUR(demo.map(d=>d.symbol));
       const withPx = demo.map(d=>({ ...d, id: priceMap[d.symbol]?.id ?? null, price_eur: priceMap[d.symbol]?.eur ?? null, price_usd: priceMap[d.symbol]?.usd ?? null }));
       savePortfolio(withPx);
-      renderPortfolioTable();
-      renderPortfolioSignals();
-      maybeShowAlerts();
+      await renderPortfolioViews();
     });
 
     document.getElementById('btnClearPf').addEventListener('click', ()=>{
       localStorage.removeItem(LS_KEY_PF);
       document.getElementById('pfTable').innerHTML='Portfell puudub.';
       document.getElementById('pfSignals').innerHTML='Portfell puudub.';
+      document.getElementById('pfRadar').innerHTML='Portfell puudub.';
+      document.getElementById('pfNews').innerHTML='Portfell puudub.';
       document.getElementById('alerts').innerHTML='';
     });
 
     // Alert eelistused
     const chkBuy  = document.getElementById('chkBuy');
     const chkSell = document.getElementById('chkSell');
-    const prefs0 = readAlertPrefs(); chkBuy.checked=!!prefs0.buy; chkSell.checked=!!prefs0.sell;
-    chkBuy.addEventListener('change', ()=>{ saveAlertPrefs({ buy:chkBuy.checked, sell:chkSell.checked }); maybeShowAlerts(); });
-    chkSell.addEventListener('change',()=>{ saveAlertPrefs({ buy:chkBuy.checked, sell:chkSell.checked }); maybeShowAlerts(); });
+    const minBuyScore  = document.getElementById('minBuyScore');
+    const minSellScore = document.getElementById('minSellScore');
+    (function initPrefs(){
+      const p = readAlertPrefs();
+      chkBuy.checked = !!p.buy; chkSell.checked = !!p.sell;
+      minBuyScore.value = p.minBuy ?? 0.45; minSellScore.value = p.minSell ?? 0.45;
+      function save(){ saveAlertPrefs({ buy:chkBuy.checked, sell:chkSell.checked, minBuy:Number(minBuyScore.value||0.45), minSell:Number(minSellScore.value||0.45) }); maybeShowAlerts(); }
+      chkBuy.addEventListener('change', save); chkSell.addEventListener('change', save);
+      minBuyScore.addEventListener('change', save); minSellScore.addEventListener('change', save);
+    })();
 
-    // Esmane render, kui storage’is juba portfell
+    // Radar sort nupp
+    document.getElementById('btnSortRadar').addEventListener('click', async ()=>{ await renderPortfolioRadar(true); });
+
+    // CSV eksport portfelli signaalid
+    document.getElementById('btnExportPfSignals').addEventListener('click', ()=>{
+      const pf = loadPortfolio(); if (!pf.length){ alert('Portfell puudub.'); return; }
+      const rows = [];
+      for (const p of pf){
+        const s = lastSignalsMap.get(p.id) || lastSignalsMap.get(p.symbol) || null;
+        rows.push({
+          symbol: p.symbol, qty: p.qty, price_eur: p.price_eur ?? '', costAvgEur: p.costAvgEur ?? '',
+          signal_action: s?.action ?? '', signal_score: s?.score ?? '', signal_confidence: s?.confidence ?? '',
+          reasons: (s?.reasons||[]).join(' | ')
+        });
+      }
+      const header = Object.keys(rows[0]||{});
+      const csv = [header.join(',')].concat(rows.map(o=>header.map(h=>JSON.stringify(o[h]??'')).join(','))).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'}); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'portfolio_signals.csv'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // Hinnalävede UI
+    function renderTriggersAndEval(){ renderTriggers(); evalPriceTriggers(); }
+    document.getElementById('btnAddTrig').addEventListener('click', ()=>{
+      const sym = document.getElementById('trSym').value.trim().toUpperCase();
+      const dir = document.getElementById('trDir').value;
+      const px  = Number(document.getElementById('trPx').value);
+      if (!sym || !isNum(px)) { alert('Täida sümbol ja hind.'); return; }
+      const list = loadTriggers(); list.push({ sym, dir, px }); saveTriggers(list);
+      renderTriggersAndEval();
+      document.getElementById('trSym').value=''; document.getElementById('trPx').value='';
+    });
+    renderTriggers();
+
+    // Esmane portfelli hinnatäide (kui storage’is on, aga hinnad puuduvad)
     (async function bootPortfolio(){
       const pf = loadPortfolio();
       if (pf.length){
-        // vajadusel täienda hindadega (kui varem oli tühi)
         const need = pf.filter(x=>x.price_eur==null).map(x=>x.symbol);
         if (need.length){
           const map = await resolvePricesForSymbolsEUR([...new Set(need)]);
@@ -654,7 +983,7 @@
           }
           savePortfolio(pf);
         }
-        renderPortfolioTable();
+        await renderPortfolioViews();
       }
     })();
   </script>
