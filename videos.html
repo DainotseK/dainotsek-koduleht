@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DainotseK Videos</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Small page-only styling so we DON'T touch your existing style.css -->
+  <style>
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      padding-top: 120px; /* matches your hero top padding feel */
+      min-height: 100vh;
+    }
+
+    .page-hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .page-hero h1 {
+      /* re-use existing h1 styling from style.css automatically */
+      margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+      /* similar vibe to your .subtitle but slightly adjusted */
+      font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+      color: rgba(255, 255, 255, 0.75);
+      letter-spacing: 1.5px;
+      margin-bottom: 2.2rem;
+    }
+
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 3rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      border: 1px solid rgba(64, 156, 255, 0.14);
+      background: rgba(10, 10, 10, 0.55);
+      backdrop-filter: blur(14px);
+      border-radius: 18px;
+      padding: 1.25rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(64, 156, 255, 0.30);
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: rgba(255,255,255,0.92);
+      letter-spacing: 0.2px;
+    }
+
+    .card p {
+      color: rgba(255,255,255,0.70);
+      line-height: 1.55;
+      margin-bottom: 1rem;
+      font-size: 0.98rem;
+    }
+
+    .card .btn {
+      padding: 0.9rem 1.6rem;
+      font-size: 1rem;
+    }
+
+    .embed-wrap {
+      margin-top: 1rem;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(64, 156, 255, 0.14);
+      background: rgba(0,0,0,0.35);
+    }
+
+    .embed-placeholder {
+      padding: 1.2rem;
+      color: rgba(255,255,255,0.72);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .footer-mini {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 2.5rem;
+      color: rgba(255,255,255,0.55);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(64, 156, 255, 0.10);
+    }
+
+    .footer-mini a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+    }
+
+    .footer-mini a:hover {
+      color: #ffffff;
+    }
+
+    /* Active nav link look (page-only, doesn't change your CSS file) */
+    .nav-links a.is-active {
+      color: #ffffff;
+      background: rgba(64, 156, 255, 0.18);
+      transform: translateY(-2px);
+    }
+    .nav-links a.is-active::before {
+      width: 80%;
+    }
+
+    @media (max-width: 900px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <nav>
+    <div class="nav-container">
+      <a href="index.html" class="logo">DainotseK</a>
+      <ul class="nav-links">
+        <li><a href="videos.html" class="is-active">DainotseK Videos</a></li>
+        <li><a href="music.html">DainotseK Music</a></li>
+        <li><a href="future.html">Future</a></li>
+        <li><a href="https://buymeacoffee.com/dainotsek" target="_blank" rel="noopener">Buy me a coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page-wrap">
+    <section class="page-hero">
+      <h1>DainotseK</h1>
+      <p class="page-subtitle">VIDEOS — BUILDS • TIMELAPSE • GAMING HIGHLIGHTS</p>
+
+      <div class="cta-buttons">
+        <!-- Replace # with your real channel / playlist links later -->
+        <a href="#" class="btn btn-primary">Open YouTube Channel</a>
+        <a href="#latest" class="btn btn-secondary">See Latest</a>
+      </div>
+
+      <div class="scroll-indicator" aria-hidden="true"></div>
+    </section>
+
+    <section class="section" id="latest">
+      <div class="cards">
+        <article class="card">
+          <h3>Latest Upload</h3>
+          <p>
+            Siia saad panna kõige uuema video embed’i või linki. Kui annad mulle su YouTube kanali URL-i,
+            panen kohe õigeks.
+          </p>
+          <a class="btn btn-secondary" href="#">Add latest video link</a>
+        </article>
+
+        <article class="card">
+          <h3>Minecraft Builds</h3>
+          <p>
+            “House Build” seeria, Town Hall, timelapse’d — siia sobib playlist või eraldi leht tulevikus.
+          </p>
+          <a class="btn btn-secondary" href="#">Open builds playlist</a>
+        </article>
+
+        <article class="card">
+          <h3>Highlights / Shorts</h3>
+          <p>
+            EAFC, BeamNG, muud klipid. Võid teha eraldi playlisti ja linkida siia.
+          </p>
+          <a class="btn btn-secondary" href="#">Open shorts playlist</a>
+        </article>
+      </div>
+
+      <div class="embed-wrap" style="margin-top: 1.25rem;">
+        <div class="embed-placeholder">
+          <strong>YouTube embed (valikuline):</strong><br/>
+          Kui tahad päris embed’i, siis anna mulle 1 video link või channel ID – ma panen siia iframe’i õigete mõõtudega.
+          (Praegu hoian “placeholderi”, et saaksid rahulikult oma stiili ja sisu otsustada.)
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="series">
+      <div class="cards">
+        <article class="card">
+          <h3>Featured Series</h3>
+          <p>Vali üks sari, mida esile tõsta (nt “House Build #1–#9”).</p>
+          <a class="btn btn-primary" href="#">Set featured series</a>
+        </article>
+
+        <article class="card">
+          <h3>Community / Links</h3>
+          <p>Discord, Instagram, TikTok, Facebook — lingid kõik ühes kohas.</p>
+          <a class="btn btn-secondary" href="#">Add social links</a>
+        </article>
+
+        <article class="card">
+          <h3>Support</h3>
+          <p>Kui keegi tahab toetada, suuna siit BuyMeACoffee lehele.</p>
+          <a class="btn btn-primary" href="https://buymeacoffee.com/dainotsek" target="_blank" rel="noopener">Buy me a coffee</a>
+        </article>
+      </div>
+    </section>
+
+    <div class="footer-mini">
+      <div>© <span id="year"></span> DainotseK</div>
+      <div style="display:flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="index.html">Home</a>
+        <a href="#latest">Latest</a>
+        <a href="#series">Series</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById("year").textContent = String(new Date().getFullYear());
+  </script>
+</body>
+</html>
