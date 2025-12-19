@@ -1,136 +1,78 @@
-:root{
-  --bg:#000000;
-  --accent:#1E90FF; /* helesinine/tumesinine vahe */
-  --accent-dark:#0b66b2;
-  --muted:#9aa4b2;
-  --container:1100px;
-  --radius:10px;
-  --glass: rgba(255,255,255,0.03);
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+/* Üldised seaded, et eemaldada vaikimisi ääred */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family:var(--font-sans);
-  background:var(--bg);
-  color:#e6eef8;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  line-height:1.5;
+body {
+    /* Väga tume hall (peaaegu must) on silmale moodsam ja pehmem kui puhas #000000 */
+    background-color: #121212; 
+    font-family: 'Inter', sans-serif;
+    color: #ffffff;
+    overflow-x: hidden; /* Väldib horisontaalset kerimist */
 }
 
-/* Layout */
-.container{
-  max-width:var(--container);
-  margin:0 auto;
-  padding:0 20px;
+/* Navigatsiooniriba stiil */
+header {
+    position: fixed; /* Hoiab riba kerides üleval */
+    width: 100%;
+    top: 0;
+    z-index: 100;
+    padding: 1.5rem 2rem;
+    background: rgba(18, 18, 18, 0.8); /* Kergelt läbipaistev taust */
+    backdrop-filter: blur(10px); /* Moodne "klaasist" efekt */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Header */
-.site-header{
-  position:sticky;
-  top:0;
-  z-index:50;
-  backdrop-filter: blur(6px);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-bottom:1px solid rgba(255,255,255,0.03);
-}
-.header-inner{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-  padding:14px 0;
-}
-.brand .logo{
-  font-weight:800;
-  font-size:20px;
-  color:var(--accent);
-  text-decoration:none;
-  letter-spacing:0.6px;
-}
-.main-nav{
-  display:flex;
-  gap:18px;
-  align-items:center;
-}
-.main-nav a{
-  color: #cfe9ff;
-  text-decoration:none;
-  padding:8px 12px;
-  border-radius:8px;
-  transition:all .18s ease;
-  font-weight:600;
-  font-size:14px;
-}
-.main-nav a:hover{ background: rgba(255,255,255,0.02); transform:translateY(-2px); }
-.main-nav a.cta{
-  background: linear-gradient(90deg,var(--accent),var(--accent-dark));
-  color:#00121a;
-  box-shadow: 0 6px 18px rgba(30,144,255,0.12);
+nav {
+    display: flex;
+    justify-content: center; /* Lingid keskele */
+    gap: 3rem; /* Vahe linkide vahel */
+    flex-wrap: wrap;
 }
 
-/* Mobile toggle */
-.nav-toggle{ display:none; background:none; border:0; cursor:pointer; }
-.nav-toggle span{ display:block; width:22px; height:2px; background:#cfe9ff; margin:4px 0; border-radius:2px; }
-
-/* Hero */
-.hero{
-  min-height:70vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:80px 0;
-  background: radial-gradient(800px 400px at 10% 20%, rgba(30,144,255,0.06), transparent 8%),
-              radial-gradient(600px 300px at 90% 80%, rgba(11,102,178,0.04), transparent 8%);
-}
-.hero-title{
-  font-size:clamp(48px, 10vw, 120px);
-  margin:0;
-  color:var(--accent);
-  font-weight:900;
-  letter-spacing: -1px;
-  text-shadow: 0 6px 30px rgba(30,144,255,0.08);
-}
-.hero-sub{
-  color:var(--muted);
-  margin-top:12px;
-  font-size:18px;
-}
-.hero-actions{ margin-top:22px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-.btn{
-  display:inline-block;
-  padding:12px 18px;
-  border-radius:12px;
-  background:linear-gradient(90deg,var(--accent),var(--accent-dark));
-  color:#00121a;
-  text-decoration:none;
-  font-weight:700;
-  box-shadow: 0 8px 30px rgba(30,144,255,0.12);
-}
-.btn.ghost{
-  background:transparent;
-  border:1px solid rgba(255,255,255,0.06);
-  color:#dbeeff;
+nav a {
+    text-decoration: none;
+    color: #b3b3b3; /* Veidi tuhm valge */
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
 }
 
-/* Sections */
-.section{
-  padding:64px 0;
-  border-top:1px solid rgba(255,255,255,0.02);
+nav a:hover {
+    color: #ffffff; /* Hiirega peale minnes valgeks */
 }
-.section h2{ color:#eaf6ff; margin:0 0 12px 0; font-size:28px; }
-.section p{ color:var(--muted); margin:0; }
 
-/* Footer */
-.site-footer{ padding:28px 0; border-top:1px solid rgba(255,255,255,0.02); color:var(--muted); text-align:center; }
+/* Buymeacoffee link eraldi värviga esile toomiseks (valikuline) */
+.bmc-link {
+    color: #FFDD00 !important; /* Kuldne värv */
+}
+.bmc-link:hover {
+    text-shadow: 0 0 10px rgba(255, 221, 0, 0.5);
+}
 
-/* Responsive */
-@media (max-width:900px){
-  .main-nav{ display:none; position:absolute; right:20px; top:64px; background:rgba(255,255,255,0.02); padding:12px; border-radius:10px; flex-direction:column; min-width:180px; }
-  .nav-toggle{ display:block; }
-  .main-nav.show{ display:flex; }
+
+/* Suure pealkirja sektsioon (Hero) */
+.hero-section {
+    height: 100vh; /* Terve ekraani kõrgus */
+    display: flex;
+    justify-content: center; /* Horisontaalselt keskele */
+    align-items: center; /* Vertikaalselt keskele */
+    text-align: center;
+}
+
+/* Pealkirja stiil */
+.hero-section h1 {
+    font-size: clamp(4rem, 10vw, 8rem); /* Skaleeruv suurus: mobiilis väiksem, suurel ekraanil hiiglaslik */
+    font-weight: 900;
+    
+    /* Sinu soovitud "helesinise ja tumesinise vahepealne" värv */
+    color: #3a86ff; 
+    
+    /* Lisame moodsa helendava efekti */
+    text-shadow: 0 0 30px rgba(58, 134, 255, 0.4);
+    letter-spacing: -2px;
 }
