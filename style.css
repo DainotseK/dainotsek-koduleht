@@ -27,8 +27,8 @@ body {
     position: absolute;
     border-radius: 50%;
     filter: blur(80px);
-    animation: float 20s infinite ease-in-out;
-    opacity: 0.4;
+    animation: float 25s infinite ease-in-out;
+    opacity: 0.5;
 }
 
 .orb-1 {
@@ -37,6 +37,7 @@ body {
     background: linear-gradient(45deg, #409CFF, #1E5A9E);
     top: -200px;
     right: -200px;
+    animation: float 25s infinite ease-in-out;
     animation-delay: 0s;
 }
 
@@ -46,7 +47,8 @@ body {
     background: linear-gradient(135deg, #1E5A9E, #409CFF);
     bottom: -150px;
     left: -150px;
-    animation-delay: -10s;
+    animation: float 30s infinite ease-in-out reverse;
+    animation-delay: 0s;
 }
 
 .orb-3 {
@@ -55,18 +57,25 @@ body {
     background: linear-gradient(225deg, #409CFF, #0066CC);
     top: 50%;
     left: 50%;
-    animation-delay: -5s;
+    animation: float 35s infinite ease-in-out;
+    animation-delay: 0s;
 }
 
 @keyframes float {
-    0%, 100% {
-        transform: translate(0, 0) scale(1);
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
     }
-    33% {
-        transform: translate(50px, -50px) scale(1.1);
+    25% {
+        transform: translate(100px, -100px) scale(1.2) rotate(90deg);
     }
-    66% {
-        transform: translate(-50px, 50px) scale(0.9);
+    50% {
+        transform: translate(200px, 50px) scale(0.9) rotate(180deg);
+    }
+    75% {
+        transform: translate(-100px, 100px) scale(1.1) rotate(270deg);
+    }
+    100% {
+        transform: translate(0, 0) scale(1) rotate(360deg);
     }
 }
 
