@@ -1,219 +1,10 @@
 <!DOCTYPE html>
-<html lang="et">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DainotseK</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #000000;
-            color: #ffffff;
-            min-height: 100vh;
-        }
-
-        /* Navigatsiooni riba */
-        nav {
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(64, 156, 255, 0.2);
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #409CFF;
-            text-decoration: none;
-            letter-spacing: 1px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-            flex-wrap: wrap;
-        }
-
-        .nav-links a {
-            color: #ffffff;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            position: relative;
-        }
-
-        .nav-links a:hover {
-            color: #409CFF;
-            background: rgba(64, 156, 255, 0.1);
-        }
-
-        /* Peamine sisu */
-        .hero {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 8rem 2rem;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: clamp(3rem, 10vw, 7rem);
-            font-weight: 900;
-            background: linear-gradient(135deg, #409CFF 0%, #1E5A9E 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 2rem;
-            letter-spacing: -2px;
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .subtitle {
-            font-size: 1.5rem;
-            color: #8ab4e5;
-            margin-bottom: 3rem;
-            animation: fadeInUp 0.8s ease-out 0.2s both;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            animation: fadeInUp 0.8s ease-out 0.4s both;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #409CFF 0%, #1E5A9E 100%);
-            color: white;
-            box-shadow: 0 8px 24px rgba(64, 156, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(64, 156, 255, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(64, 156, 255, 0.1);
-            color: #409CFF;
-            border: 2px solid #409CFF;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(64, 156, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        /* Animatsioonid */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsiivne disain */
-        @media (max-width: 768px) {
-            .nav-container {
-                justify-content: center;
-            }
-
-            .nav-links {
-                justify-content: center;
-                gap: 1rem;
-            }
-
-            .hero {
-                padding: 4rem 1rem;
-            }
-
-            h1 {
-                font-size: 3rem;
-            }
-
-            .subtitle {
-                font-size: 1.2rem;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .btn {
-                width: 100%;
-                max-width: 300px;
-            }
-        }
-
-        /* Dekoratiivne taust */
-        .background-decoration {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(64, 156, 255, 0.1) 0%, transparent 70%);
-        }
-
-        .circle:nth-child(1) {
-            width: 500px;
-            height: 500px;
-            top: -250px;
-            right: -250px;
-        }
-
-        .circle:nth-child(2) {
-            width: 400px;
-            height: 400px;
-            bottom: -200px;
-            left: -200px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="background-decoration">
@@ -223,11 +14,11 @@
 
     <nav>
         <div class="nav-container">
-            <a href="#" class="logo">DainotseK</a>
+            <a href="index.html" class="logo">DainotseK</a>
             <ul class="nav-links">
-                <li><a href="#videos">DainotseK Videos</a></li>
-                <li><a href="#music">DainotseK Music</a></li>
-                <li><a href="#future">Future</a></li>
+                <li><a href="videos.html">DainotseK Videos</a></li>
+                <li><a href="music.html">DainotseK Music</a></li>
+                <li><a href="future.html">Future</a></li>
                 <li><a href="https://buymeacoffee.com/dainotsek" target="_blank">Buy me a coffee</a></li>
             </ul>
         </div>
@@ -236,10 +27,10 @@
     <main>
         <section class="hero">
             <h1>DainotseK</h1>
-            <p class="subtitle">Tere tulemast minu digitaalsesse maailma</p>
+            <p class="subtitle">Welcome to my digital world</p>
             <div class="cta-buttons">
-                <a href="#videos" class="btn btn-primary">Vaata videoid</a>
-                <a href="#music" class="btn btn-secondary">Kuula muusikat</a>
+                <a href="videos.html" class="btn btn-primary">Watch Videos</a>
+                <a href="music.html" class="btn btn-secondary">Listen to Music</a>
             </div>
         </section>
     </main>
