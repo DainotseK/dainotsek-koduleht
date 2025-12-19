@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="et">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DainotseK</title>
+    <meta name="description" content="DainotseK — Videos, Music, Future, BuyMeACoffee" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Liigu sisuni</a>
+
+    <header class="topbar">
+      <div class="container topbar__inner">
+        <a class="brand" href="#home" aria-label="DainotseK avaleht">
+          <span class="brand__dot" aria-hidden="true"></span>
+          <span class="brand__name">DainotseK</span>
+        </a>
+
+        <nav class="nav" aria-label="Põhinavigatsioon">
+          <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navLinks">
+            <span class="nav__toggle-lines" aria-hidden="true"></span>
+            <span class="sr-only">Ava menüü</span>
+          </button>
+
+          <div id="navLinks" class="nav__links">
+            <a href="#videos">DainotseK Videos</a>
+            <a href="#music">DainotseK Music</a>
+            <a href="#future">Future</a>
+            <a href="#coffee" class="nav__cta">BuyMeACoffee</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="home" class="hero">
+        <div class="container hero__inner">
+          <div class="hero__glow" aria-hidden="true"></div>
+
+          <h1 class="hero__title">
+            <span class="hero__title-gradient">DainotseK</span>
+          </h1>
+
+          <p class="hero__subtitle">
+            Modernne musta taustaga kodu sinu videotele, muusikale ja tulevastele projektidele.
+          </p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#videos">Vaata videosid</a>
+            <a class="btn btn--ghost" href="#music">Kuula muusikat</a>
+          </div>
+
+          <div class="hero__chips" aria-label="Kiirlingid">
+            <a class="chip" href="#videos">🎬 Videos</a>
+            <a class="chip" href="#music">🎵 Music</a>
+            <a class="chip" href="#future">🚀 Future</a>
+            <a class="chip" href="#coffee">☕ Support</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="videos" class="section">
+        <div class="container">
+          <div class="section__head">
+            <h2>DainotseK Videos</h2>
+            <p>Minecraft, timelapse, gaming highlights ja muud projektid — siia saad hiljem lisada embed’id.</p>
+          </div>
+
+          <div class="grid">
+            <article class="card">
+              <h3>Featured video</h3>
+              <p>Lisa siia YouTube embed või link.</p>
+              <a class="card__link" href="#" aria-label="Ava featured video link">Ava link →</a>
+            </article>
+
+            <article class="card">
+              <h3>Latest uploads</h3>
+              <p>Hiljutised videod, playlistid, shorts.</p>
+              <a class="card__link" href="#" aria-label="Ava latest uploads link">Ava link →</a>
+            </article>
+
+            <article class="card">
+              <h3>Build series</h3>
+              <p>House Build #1–#… ja muu sari.</p>
+              <a class="card__link" href="#" aria-label="Ava build series link">Ava link →</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="music" class="section section--alt">
+        <div class="container">
+          <div class="section__head">
+            <h2>DainotseK Music</h2>
+            <p>AI-assisted originaallugu + videod. Siia saad panna Spotify/YouTube Music lingid.</p>
+          </div>
+
+          <div class="grid">
+            <article class="card">
+              <h3>New single</h3>
+              <p>Kirjeldus + link (YouTube / Spotify / jne).</p>
+              <a class="card__link" href="#" aria-label="Ava new single link">Ava link →</a>
+            </article>
+
+            <article class="card">
+              <h3>Playlists</h3>
+              <p>Koonda lood, albumid ja playlistid.</p>
+              <a class="card__link" href="#" aria-label="Ava playlists link">Ava link →</a>
+            </article>
+
+            <article class="card">
+              <h3>Behind the scenes</h3>
+              <p>Making-of, promptid, töövoog.</p>
+              <a class="card__link" href="#" aria-label="Ava BTS link">Ava link →</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="future" class="section">
+        <div class="container">
+          <div class="section__head">
+            <h2>Future</h2>
+            <p>Koht, kuhu lisada roadmap, tulevased videod/lood, merch või muud ideed.</p>
+          </div>
+
+          <div class="grid grid--2">
+            <article class="card">
+              <h3>Roadmap</h3>
+              <ul class="list">
+                <li>Uus kodulehe versioon (sections + embed’id)</li>
+                <li>Videos + Music eraldi lehed</li>
+                <li>Newsletter / kontakt</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <h3>Kontakt / koostöö</h3>
+              <p>Lisa siia email, sotsiaalid, vorm vms.</p>
+              <button class="btn btn--ghost" type="button" id="copyEmailBtn">
+                Kopeeri kontakt (demo)
+              </button>
+              <p class="hint" id="copyHint" role="status" aria-live="polite"></p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="coffee" class="section section--alt">
+        <div class="container">
+          <div class="section__head">
+            <h2>BuyMeACoffee</h2>
+            <p>Kui tahad toetada DainotseK’i, lisa siia oma BuyMeACoffee link ja tierid.</p>
+          </div>
+
+          <div class="cta">
+            <div class="cta__left">
+              <h3>Support the journey</h3>
+              <p>Early access, eksklusiivsed postitused ja credits videotes.</p>
+            </div>
+            <div class="cta__right">
+              <a class="btn btn--primary" href="#" target="_blank" rel="noopener">Ava BuyMeACoffee →</a>
+              <span class="hint">Pane päris link hiljem siia.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <p>© <span id="year"></span> DainotseK</p>
+        <div class="footer__links">
+          <a href="#home">Üles</a>
+          <a href="#videos">Videos</a>
+          <a href="#music">Music</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
